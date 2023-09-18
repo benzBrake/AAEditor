@@ -1,0 +1,14 @@
+.idea\*
+.idea
+.git\*
+.git
+.gitignore
+LICENSE
+node_modules\*
+node_modules
+pack
+pack\*
+tools\*
+tools
+cache
+cache\*
