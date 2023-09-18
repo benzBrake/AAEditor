@@ -1,0 +1,34 @@
+.x-photos {
+  br {
+    display: none;
+  }
+
+  &.google {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 4px;
+    margin: -8px;
+
+    &::after {
+      content: '';
+      flex-grow: 999999999;
+    }
+
+    > a, > .photo {
+      margin: 4px;
+      position: relative;
+      transition: width .2s, height .2s;
+
+      > i {
+        display: block;
+      }
+
+      > img {
+        position: absolute;
+        top: 0;
+        width: 100%;
+        vertical-align: bottom;
+      }
+    }
+  }
+}
