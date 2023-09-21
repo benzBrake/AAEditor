@@ -90,7 +90,8 @@ class Util
         if (Util::pluginOption('XMathJaxSupport', 'on') === 'on') {
             // 引入 MathJax
             ?>
-            <script id="MathJax-script" async src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'); ?>"></script>
+            <script id="MathJax-script" async
+                    src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'); ?>"></script>
             <script>
                 // 配置 MathJax
                 MathJax = {
@@ -120,7 +121,8 @@ class Util
         $filename = Util::pluginOption('XHljs', 'off');
         if ($filename !== "off" && array_key_exists($filename, $cssFiles)) {
             ?>
-            <script src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.8.0/build/highlight.min.js') ?>"></script>
+            <script
+                src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.8.0/build/highlight.min.js') ?>"></script>
             <link rel="stylesheet"
                   href="<?php echo Common::url(preg_replace("/(?<!\.min)\.css$/", ".min.css", $filename), Util::parseJSD('https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.8.0/build/styles/')) ?>">
             <script>
@@ -164,9 +166,12 @@ class Util
             <script src="<?php $options->adminStaticUrl('js', 'paste.js'); ?>"></script>
             <script src="<?php $options->adminStaticUrl('js', 'purify.js'); ?>"></script>
             <script src="<?php echo Util::pluginStatic('js', 'previewUtils.js'); ?>"></script>
-            <script src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/html-to-md@0.8.3/dist/index.min.js'); ?>"></script>
-            <link rel="stylesheet" type="text/css" href="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css'); ?>">
-            <script type="text/javascript" src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/toastify-js'); ?>"></script>
+            <script
+                src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/html-to-md@0.8.3/dist/index.min.js'); ?>"></script>
+            <link rel="stylesheet" type="text/css"
+                  href="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css'); ?>">
+            <script type="text/javascript"
+                    src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/toastify-js'); ?>"></script>
             <script>
                 $(document).ready(function () {
                     // 伪工具栏处理
@@ -491,7 +496,8 @@ class Util
             <?php
             if (Util::pluginOption('XMathJaxSupport', 'on') === 'on') {
                 ?>
-                <script id="MathJax-script" async src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'); ?>"></script>
+                <script id="MathJax-script" async
+                        src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'); ?>"></script>
                 <script>
                     // 配置 MathJax
                     MathJax = {
