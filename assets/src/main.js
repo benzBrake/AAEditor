@@ -317,43 +317,75 @@ class XEditor {
         const {textarea} = this;
         const selectedText = textarea.getSelectedText();
         const currentPos = textarea.getSelection();
-
         if (selectedText) {
-            if (selectedText.startsWith(prefix) && selectedText.endsWith(postfix)) {
-                // 去除 prefix/postfix
-                const newText = selectedText.slice(prefix.length, -postfix.length);
-                textarea.executeAndAddUndoStack('replaceSelection', newText);
-            } else if (
-                textarea.getTextInRange(currentPos.start - prefix.length, currentPos.start) === prefix &&
-                textarea.getTextInRange(currentPos.end, currentPos.end + postfix.length) === postfix
-            ) {
-                // 光标前后已经有 prefix 和 postfix，直接替换选中文本
-                textarea.setSelection(currentPos.start - prefix.length, currentPos.end + prefix.length);
-                textarea.executeAndAddUndoStack('replaceSelection', selectedText);
-                textarea.setSelection(currentPos.start - prefix.length, currentPos.end - prefix.length - postfix.length + 1);
+            let prefixPos = selectedText.indexOf(prefix);
+            let postfixPos = selectedText.lastIndexOf(postfix);
+            let insertNewText = false;
+            if (prefixPos !== -1 && postfixPos !== -1) {
+                // 前后缀都存在
+                if (prefixPos < postfixPos) {
+                    // 防止手抖，强制选中正确的位置
+                    currentPos.start = currentPos.start + prefixPos;
+                    currentPos.end = currentPos.start + postfixPos + postfix.length;
+                } else {
+                    insertNewText = true;
+                }
             } else {
-                // 添加 prefix 和 postfix 并替换选中文本
-                const newText = prefix + selectedText + postfix;
-                textarea.executeAndAddUndoStack('replaceSelection', newText);
-                const lastSelection = textarea.getSelection();
-                textarea.setSelection(lastSelection.start + prefix.length, lastSelection.end - postfix.length);
+                // 在选中文本前方搜索 prefix
+                if (prefixPos === -1) {
+                    let textBefore = textarea.getTextInRange(0, currentPos.start);
+                    // 从后往前找 postfix
+                    let lastPostfixPos = textBefore.lastIndexOf(postfix);
+                    if (lastPostfixPos > -1) {
+                        // 如果前边存在后缀，截取最后后一个后缀后边的文本
+                        textBefore = textBefore.slice(lastPostfixPos + postfix.length, textBefore.length);
+                    }
+                    prefixPos = textBefore.indexOf(prefix);
+                    if (prefixPos > -1) {
+                        currentPos.start = currentPos.start - textBefore.length + prefixPos;
+                    }
+                }
+                // 在选中文本后方搜索 postfix
+                if (postfixPos === -1) {
+                    let textAfter = textarea.getTextInRange(currentPos.end, textarea.getContent().length);
+                    // 从前往后找 prefix
+                    let firstPrefixPos = textAfter.indexOf(prefix);
+                    if (firstPrefixPos > -1) {
+                        textAfter = textAfter.slice(0, firstPrefixPos);
+                    }
+                    postfixPos = textAfter.indexOf(postfix);
+                    if (postfixPos !== -1) {
+                        currentPos.end = currentPos.end + postfixPos + postfix.length;
+                    }
+                }
+                if (prefixPos === -1 && postfixPos === -1) {
+                    insertNewText = true;
+                }
+            }
+            if (insertNewText) {
+                const newText = prefix + textarea.getSelectedText() + postfix;
+                textarea.executeAndAddUndoStack('replaceSelectionText', newText);
+                textarea.setSelection(currentPos.start + prefix.length, currentPos.start + newText.length - postfix.length);
+            } else {
+                textarea.setSelection(currentPos.start, currentPos.end);
+                let newText = textarea.getSelectedText();
+                if (newText.startsWith(prefix)) {
+                    newText = newText.slice(prefix.length);
+                }
+                if (newText.endsWith(postfix)) {
+                    newText = newText.slice(0, newText.length - postfix.length);
+                }
+                textarea.executeAndAddUndoStack('replaceSelectionText', newText);
+                textarea.setSelection(currentPos.start, currentPos.start + newText.length);
             }
         } else {
-            if (
-                textarea.getTextInRange(currentPos.start - prefix.length, currentPos.start) === prefix &&
-                textarea.getTextInRange(currentPos.end, currentPos.end + postfix.length) === postfix
-            ) {
-                // 光标前后已经有 prefix 和 postfix，直接删除它们
-                textarea.setSelection(currentPos.start - prefix.length, currentPos.end + prefix.length);
-                textarea.executeAndAddUndoStack('replaceSelection');
-                textarea.setSelection(currentPos.start - prefix.length, currentPos.start - prefix.length);
-            } else {
-                // 插入带有 prefix 和 postfix 的默认文本
-                const newText = prefix + defaultText + postfix;
-                textarea.executeAndAddUndoStack('insertText', newText);
-                const start = textarea.getSelection().start;
-                textarea.setSelection(start - newText.length + prefix.length, start - postfix.length);
-            }
+            // 插入带有 prefix 和 postfix 的默认文本
+            const newPrefix = textarea.isAtLineStart() ? prefix : '\n' + prefix;
+            const newPostfix = textarea.isAtLineEnd() ? postfix : postfix + '\n';
+            const newText = newPrefix + defaultText + newPostfix;
+            textarea.executeAndAddUndoStack('insertText', newText);
+            const start = textarea.getSelection().start;
+            textarea.setSelection(start - newText.length + newPrefix.length, start - newPostfix.length);
         }
     }
 
