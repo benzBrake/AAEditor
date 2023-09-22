@@ -175,14 +175,14 @@ class ModuleButton implements Module
             $icon = sprintf('<span class="x-btn-icon"><i class="fa %s"></i></span>', $icon);
         }
         $href = trim($attrs['href'] ?? '#');
-        $radius  = intval(trim($attrs['radius'] ?? '0'));
+        $radius = intval(trim($attrs['radius'] ?? '0'));
         if ($radius < 0) {
             $radius = 0;
         }
         if ($radius > 16) {
             $radius = 16;
         }
-        $radiusHTML = $radius ? `border-radius: {$radius}px;`: '';
+        $radiusHTML = $radius ? "border-radius: {$radius}px;" : '';
         $content = $attrs['content'] ?? _t("点此查看");
         $attributeType = $attrs['type'] ?? 'primary';
         if (preg_match('/^(primary|secondary|success|danger|warning|info|light|dark|weibo|weixin|alipay|youku|toutiao|youtube|twitter|facebook|bilibili|ins|tumblr)$/', $attributeType)) {
