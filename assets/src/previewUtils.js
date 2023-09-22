@@ -2,8 +2,11 @@ window.XPreviewUtils = {
     htmlProcessors: [],
     init() {
         this.previewArea = document.getElementById('wmd-preview');
-        $('body').on('XEditorAddHtmlProcessor', (event, processor) => {
-            this.htmlProcessors.push(processor);
+        $('body').on('XEditorAddHtmlProcessor', (event, processor, priority = 99) => {
+            this.htmlProcessors.push({
+                priority,
+                processor
+            });
         });
 
         window.hljs = require("highlight.js/lib/common");
@@ -19,9 +22,13 @@ window.XPreviewUtils = {
      * @returns string
      */
     processHtml(html) {
+        this.htmlProcessors = this.htmlProcessors.sort(
+            (a, b) => {
+                return a.priority - b.priority;
+            });
         html = html.replace(/\[x]/g, '<input type="checkbox" class="x-checkbox" checked disabled/>');
         html = html.replace(/\[ ]/g, '<input type="checkbox" class="x-checkbox" disabled />');
-        this.htmlProcessors.forEach(processor => {
+        this.htmlProcessors.forEach(({processor, priority}) => {
             let _html = processor.call(this, html);
             if (typeof _html === "undefined") {
                 console.error(processor.toString() + ' return undefined');
