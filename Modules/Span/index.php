@@ -86,9 +86,7 @@ class ModuleSpan implements Module
 `,
                         handle(modal) {
                             let selectedText = this.getSelectedText();
-                            localStorage.setItem('editor-lastSelection', false);
                             if (selectedText) {
-                                localStorage.setItem('editor-lastSelection', JSON.parse(lastSelection));
                                 const regex = /\[\/*x-span[^\]]*]/gm;
                                 $('input[name="text"]', modal).val(selectedText.replace(regex, ''));
                                 refreshPreview();
