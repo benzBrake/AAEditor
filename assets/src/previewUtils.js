@@ -7,6 +7,10 @@ window.XPreviewUtils = {
                 priority,
                 processor
             });
+            this.htmlProcessors = this.htmlProcessors.sort(
+                (a, b) => {
+                    return a.priority - b.priority;
+                });
         });
 
         window.hljs = require("highlight.js/lib/common");
@@ -22,10 +26,7 @@ window.XPreviewUtils = {
      * @returns string
      */
     processHtml(html) {
-        this.htmlProcessors = this.htmlProcessors.sort(
-            (a, b) => {
-                return a.priority - b.priority;
-            });
+
         html = html.replace(/\[x]/g, '<input type="checkbox" class="x-checkbox" checked disabled/>');
         html = html.replace(/\[ ]/g, '<input type="checkbox" class="x-checkbox" disabled />');
         this.htmlProcessors.forEach(({processor, priority}) => {

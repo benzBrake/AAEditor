@@ -122,7 +122,19 @@ class ModuleSpan implements Module
             }]).trigger('XEditorAddHtmlProcessor', [
                 function (html) {
                     if (html.indexOf("[x-span")) {
-                        html = html.replace(this.getShortCodeRegex("x-span"), `<span class="x-span"$3>$5</span>`);
+                        html = html.replace(this.getShortCodeRegex("x-span"), function (...m) {
+                            // m[3] 正则 class="xxx";
+                            const regex = /class="[^"]*text-([^ "]+)"/gm;
+                            let m1 = regex.exec(m[3]);
+                            if (Array.isArray(m1) && m1) {
+                                let type = "primary";
+                                if (/^(primary|secondary|success|danger|warning|info|light|dark)/.test(m1[1])) {
+                                    type = m1[1];
+                                }
+                                return `<span class="x-span" type="${type}"${m[3].replace(regex, "")}>${m[5]}</span>`;
+                            }
+                            return '<span class="x-span"' + m[3] + '>' + m[5] + '</span>'
+                        });
                     }
                     return html;
                 }
