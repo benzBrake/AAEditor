@@ -8,7 +8,6 @@ use Typecho\Plugin\Exception;
 use Typecho\Plugin\PluginInterface;
 use Typecho\Widget;
 use Typecho\Widget\Helper\Form;
-use Typecho\Widget\Helper\Layout;
 use Utils\Helper;
 
 if (!defined('__TYPECHO_ROOT_DIR__')) exit;
@@ -18,7 +17,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
  *
  * @package AAEditor
  * @author Ryan
- * @version 0.4.0
+ * @version 0.4.1
  * @link https://doufu.ru
  *
  */

@@ -15,6 +15,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
 class Util
 {
+    static $manifest;
     private static $contentParsers;
     private static $excerptParsers;
     private static $archiveStatics;
@@ -72,6 +73,15 @@ class Util
      */
     public static function archiveFooter($archive)
     {
+        $manifestPath = self::pluginDir('assets/dist/mix-manifest.json');
+        $manifest = [];
+        if (is_file($manifestPath)) {
+            try {
+                $manifest = json_decode(file_get_contents($manifestPath), true);
+            } catch (Exception $e) {
+            }
+        }
+        self::$manifest = $manifest;
         if (Util::pluginOption('XEditorContentStyle', 'off') === 'on') {
             // 引入字体图标
             ?>
@@ -158,6 +168,15 @@ class Util
     public static function richEditor($content)
     {
         $options = Helper::options();
+        $manifestPath = self::pluginDir('assets/dist/mix-manifest.json');
+        $manifest = [];
+        if (is_file($manifestPath)) {
+            try {
+                $manifest = json_decode(file_get_contents($manifestPath), true);
+            } catch (Exception $e) {
+            }
+        }
+        self::$manifest = $manifest;
         if (Util::pluginOption('XEditorEnabled', 'on') === 'on') {
             ?>
             <link rel="stylesheet" href="<?php echo Util::pluginStatic('css', 'main.css'); ?>"/>
@@ -885,7 +904,11 @@ class Util
      */
     public static function pluginStatic(string $type, string $path): string
     {
-        return self::pluginUrl(Common::url($path, Common::url($type, 'assets/dist')));
+        $uri = '/' . Common::url($path, $type);
+        if (array_key_exists($uri, self::$manifest ?? [])) {
+            $uri = self::$manifest[$uri];
+        }
+        return self::pluginUrl('assets/dist/' . $uri);
     }
 
     /**
