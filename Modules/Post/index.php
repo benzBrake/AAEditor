@@ -81,7 +81,7 @@ class ModulePost implements Module
     {
         ?>
         <link rel="stylesheet"
-              href="<?php echo Util::pluginUrl('Modules/Post/index.css'); ?>">
+              href="<?php echo Util::moduleUrl('Post', 'index.css'); ?>">
         <?php
     }
 
@@ -117,7 +117,7 @@ class ModulePost implements Module
             '<div class="title"><a href="{permalink}">{title}</a></div>' .
             '<div class="content">{abstract}</div>' .
             '<div class="meta">' .
-            '<div class="meta-item meta-item-date">{dateFormated}</div>'.
+            '<div class="meta-item meta-item-date">{dateFormated}</div>' .
             '<div class="meta-item meta-item-comment">{commentsNum}</div>' .
             '</div></div>' .
             '<div class="media-content"><a href="{permalink}" title="{title}"><img class="no-parse" alt="{title}" src="{thumb}"/></a></div></div>';

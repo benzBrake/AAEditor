@@ -60,7 +60,7 @@ class ModuleTitle implements Module
     {
         ?>
         <link rel="stylesheet"
-              href="<?php echo Util::pluginUrl('Modules/Title/index.css'); ?>">
+              href="<?php echo Util::moduleUrl('Title', 'index.css'); ?>">
         <?php
     }
 

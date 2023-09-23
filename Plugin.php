@@ -17,7 +17,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
  *
  * @package AAEditor
  * @author Ryan
- * @version 0.4.1
+ * @version 0.4.2
  * @link https://doufu.ru
  *
  */
@@ -114,7 +114,9 @@ class Plugin implements PluginInterface
         $errorMessage = [];
         if (!$pluginData_backup) {
             $errorMessage[] = _t('检测到设置备份不存在，<a href="%s">点此</a>备份设置', Common::url('/options-plugin.php?config=AAEditor&type=backup', Helper::options()->adminUrl));
-        } ?>
+        }
+        Util::collectManifest();
+        ?>
         <link rel="stylesheet" href="<?php echo Util::pluginStatic('css', 'config.css'); ?>">
         <script>window.XEditorModules = JSON.parse('<?php echo json_encode(Util::listModules()) ?>');</script>
         <script src="<?php echo Util::pluginStatic('js', 'config.js'); ?>"></script>

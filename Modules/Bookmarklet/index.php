@@ -94,7 +94,7 @@ class ModuleBookmarklet implements Module
     {
         ?>
         <link rel="stylesheet"
-              href="<?php echo Util::pluginUrl('Modules/Bookmarklet/index.css'); ?>">
+              href="<?php echo Util::moduleUrl('Bookmarklet', 'index.css'); ?>">
         <?php
     }
 

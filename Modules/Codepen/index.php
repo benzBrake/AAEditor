@@ -92,7 +92,7 @@ class ModuleCodepen implements Module
     {
         ?>
         <link rel="stylesheet"
-              href="<?php echo Util::pluginUrl('Modules/Codepen/index.css'); ?>">
+              href="<?php echo Util::moduleUrl('Codepen', 'index.css'); ?>">
         <?php
     }
 
