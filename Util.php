@@ -73,15 +73,7 @@ class Util
      */
     public static function archiveFooter($archive)
     {
-        $manifestPath = self::pluginDir('assets/dist/mix-manifest.json');
-        $manifest = [];
-        if (is_file($manifestPath)) {
-            try {
-                $manifest = json_decode(file_get_contents($manifestPath), true);
-            } catch (Exception $e) {
-            }
-        }
-        self::$manifest = $manifest;
+        self::collectManifest();
         if (Util::pluginOption('XEditorContentStyle', 'off') === 'on') {
             // 引入字体图标
             ?>
@@ -168,15 +160,7 @@ class Util
     public static function richEditor($content)
     {
         $options = Helper::options();
-        $manifestPath = self::pluginDir('assets/dist/mix-manifest.json');
-        $manifest = [];
-        if (is_file($manifestPath)) {
-            try {
-                $manifest = json_decode(file_get_contents($manifestPath), true);
-            } catch (Exception $e) {
-            }
-        }
-        self::$manifest = $manifest;
+        Util::collectManifest();
         if (Util::pluginOption('XEditorEnabled', 'on') === 'on') {
             ?>
             <link rel="stylesheet" href="<?php echo Util::pluginStatic('css', 'main.css'); ?>"/>
@@ -893,6 +877,41 @@ class Util
     public static function pluginUrl(string $uri = ""): string
     {
         return Common::url($uri, Helper::options()->pluginUrl . '/AAEditor');
+    }
+
+    /**
+     * 获取模块资源 URL
+     *
+     * @param string $moduleName 模块目录名
+     * @param string $uri 资源相对路径
+     * @return string
+     */
+    public static function moduleUrl(string $moduleName, string $uri = ''): string
+    {
+        $relative_path = Common::url(Common::url($uri, $moduleName), 'Modules');
+        $absolute_path = Common::url($relative_path, dirname(__FILE__));
+        if (is_file($absolute_path)) {
+            return self::pluginUrl($relative_path . '?h=' . md5($absolute_path));
+        }
+        return self::pluginUrl($relative_path);
+    }
+
+    /**
+     * 收集 Manifest 数据
+     *
+     * @return void
+     */
+    public static function collectManifest()
+    {
+        $manifestPath = self::pluginDir('assets/dist/mix-manifest.json');
+        $manifest = [];
+        if (is_file($manifestPath)) {
+            try {
+                $manifest = json_decode(file_get_contents($manifestPath), true);
+            } catch (Exception $e) {
+            }
+        }
+        self::$manifest = $manifest;
     }
 
     /**

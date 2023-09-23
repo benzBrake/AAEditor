@@ -94,7 +94,7 @@ class ModuleScode implements Module
     {
         ?>
         <link rel="stylesheet"
-              href="<?php echo Util::pluginUrl('Modules/Scode/index.css'); ?>">
+              href="<?php echo Util::moduleUrl('Scode', 'index.css'); ?>">
         <?php
     }
 

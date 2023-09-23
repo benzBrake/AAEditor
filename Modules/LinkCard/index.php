@@ -80,7 +80,7 @@ class ModuleLinkCard implements Module
     {
         ?>
         <link rel="stylesheet"
-              href="<?php echo Util::pluginUrl('Modules/LinkCard/index.css'); ?>">
+              href="<?php echo Util::moduleUrl('LinkCard', 'index.css'); ?>">
         <script>
             customElements.define(
                 'x-link',

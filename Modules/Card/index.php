@@ -103,7 +103,7 @@ class ModuleCard implements Module
     {
         ?>
         <link rel="stylesheet"
-              href="<?php echo Util::pluginUrl('Modules/Card/index.css'); ?>">
+              href="<?php echo Util::moduleUrl('Card', 'index.css'); ?>">
         <script>
             customElements.define(
                 'x-cards',

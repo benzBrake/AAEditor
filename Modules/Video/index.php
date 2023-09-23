@@ -148,7 +148,7 @@ class ModuleVideo implements Module
     {
         ?>
         <link rel="stylesheet"
-              href="<?php echo Util::pluginUrl('Modules/Video/index.css'); ?>">
+              href="<?php echo Util::moduleUrl('Video', 'index.css'); ?>">
         <script>
             function initVideo() {
                 Array.from(document.querySelectorAll('.x-video:not([loaded])')).forEach(function (el) {
@@ -193,7 +193,7 @@ class ModuleVideo implements Module
                 $attr = htmlspecialchars_decode($matches[3]);
                 $attrs = Util::shortcode_parse_atts($attr);
                 if (isset($attrs['id']) || isset($attrs['bvid'])) {
-                    $vid = $attrs['id']  ?? $attrs['bvid'];
+                    $vid = $attrs['id'] ?? $attrs['bvid'];
                     $idType = (strpos($vid, 'BV') === 0) ? 'bvid' : 'aid';
                     $page = $attrs['page'] ?? '1';
                     $autoplay = ($attrs['autoplay'] ?? 'off') === 'on';

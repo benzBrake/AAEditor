@@ -1,6 +1,7 @@
 <?php
 
 use TypechoPlugin\AAEditor\Module;
+use TypechoPlugin\AAEditor\Util;
 
 /**
  * 自动给图片排版成相册模式（仿谷歌）
@@ -73,7 +74,7 @@ class ModulePhotos implements Module
     {
         ?>
         <link rel="stylesheet"
-              href="<?php echo \TypechoPlugin\AAEditor\Util::pluginUrl('Modules/Photos/index.css'); ?>">
+              href="<?php echo Util::moduleUrl('Photos', 'index.css'); ?>">
         <script>
             function initPhotos() {
                 Array.from(document.querySelectorAll(".x-photos.google")).forEach(el => {

@@ -142,7 +142,7 @@ class ModuleButton implements Module
     {
         ?>
         <link rel="stylesheet"
-              href="<?php echo Util::pluginUrl('Modules/Button/index.css'); ?>">
+              href="<?php echo Util::moduleUrl('Button', 'index.css'); ?>">
         <?php
     }
 

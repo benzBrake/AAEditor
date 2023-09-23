@@ -74,7 +74,7 @@ class ModuleGithubCard implements Module
     {
         ?>
         <link rel="stylesheet"
-              href="<?php echo Util::pluginUrl('Modules/GithubCard/index.css'); ?>">
+              href="<?php echo Util::moduleUrl('GithubCard', 'index.css'); ?>">
         <script>
             customElements.define(
                 'x-github',

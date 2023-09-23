@@ -303,7 +303,7 @@ class ModuleTabs implements Module
     {
         ?>
         <link rel="stylesheet"
-              href="<?php echo Util::pluginUrl('Modules/Tabs/index.css'); ?>">
+              href="<?php echo Util::moduleUrl('Tabs', 'index.css'); ?>">
         <script>
             customElements.define(
                 'x-tabs',

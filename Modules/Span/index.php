@@ -164,7 +164,7 @@ class ModuleSpan implements Module
     {
         ?>
         <link rel="stylesheet"
-              href="<?php echo Util::pluginUrl('Modules/Span/index.css'); ?>">
+              href="<?php echo Util::moduleUrl('Span', 'index.css'); ?>">
         <?php
     }
 

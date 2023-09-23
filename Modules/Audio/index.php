@@ -99,7 +99,7 @@ class ModuleAudio implements Module
         <script src="https://jsd.onmicrosoft.cn/npm/aplayer@1.10.1/dist/APlayer.min.js "></script>
         <link href="https://jsd.onmicrosoft.cn/npm/aplayer@1.10.1/dist/APlayer.min.css " rel="stylesheet">
         <link rel="stylesheet"
-              href="<?php echo Util::pluginUrl('Modules/Audio/index.css'); ?>">
+              href="<?php echo Util::moduleUrl('Audio', 'index.css'); ?>">
         <script>
             <?php if (defined("__TYPECHO_ADMIN__") && __TYPECHO_ADMIN__): ?>
             $('body').on('XEditorPreviewEnd', function () {
@@ -158,14 +158,14 @@ class ModuleAudio implements Module
                 if (audioList.length) {
                     new APlayer({
                         container: el,
-                            preload: 'auto',
-                            autoplay: autoplay,
-                            loop: loop,
-                            order: order,
-                            listFolded: audioList.length < 2,
-                            listMaxHeight: 300,
-                            volume: 0.7,
-                            audio: audioList
+                        preload: 'auto',
+                        autoplay: autoplay,
+                        loop: loop,
+                        order: order,
+                        listFolded: audioList.length < 2,
+                        listMaxHeight: 300,
+                        volume: 0.7,
+                        audio: audioList
                     });
                 } else {
                     el.innerHTML = errorHTML("<?php _e("播放列表是空的！") ?>");
@@ -173,7 +173,7 @@ class ModuleAudio implements Module
             }
 
             function parseAudioElementToSource(el) {
-                let url = el.getAttribute("url") ||  el.getAttribute("src");
+                let url = el.getAttribute("url") || el.getAttribute("src");
                 if (url) {
                     return {
                         name: el.getAttribute('name') || decodeURIComponent(getFileNameFromUrl(url)),
