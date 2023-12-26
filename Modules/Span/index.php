@@ -199,6 +199,8 @@ class ModuleSpan implements Module
         $attrs = Util::shortcode_parse_atts(htmlspecialchars_decode($m[3]));
         if (array_key_exists('class', $attrs)) {
             $attrs['class'] .= ' x-span';
+        } else {
+            $attrs['class'] .= 'x-span';
         }
         $attrs_text = '';
         foreach ($attrs as $key => $value) {
