@@ -200,7 +200,7 @@ class ModuleSpan implements Module
         if (array_key_exists('class', $attrs)) {
             $attrs['class'] .= ' x-span';
         } else {
-            $attrs['class'] .= 'x-span';
+            $attrs['class'] = 'x-span';
         }
         $attrs_text = '';
         foreach ($attrs as $key => $value) {
