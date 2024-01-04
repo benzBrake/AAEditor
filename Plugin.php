@@ -6,9 +6,12 @@ use Typecho\Common;
 use Typecho\Db;
 use Typecho\Plugin\Exception;
 use Typecho\Plugin\PluginInterface;
-use Typecho\Widget;
+use Typecho\Request;
+use Typecho\Response;
 use Typecho\Widget\Helper\Form;
 use Utils\Helper;
+use Widget\Archive;
+use Widget\Notice;
 
 if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
@@ -67,10 +70,9 @@ class Plugin implements PluginInterface
     public static function config(Form $form)
     {
         $db = Db::get();
-        $notice = Widget::widget('Widget_Notice');
-        $archive = Widget::widget('Widget_Archive');
-        $request = $archive->request;
-        $response = $archive->response;
+        $notice = Notice::alloc();
+        $request = Request::getInstance();
+        $response = Response::getInstance();
         $plugin = "AAEditor";
         $pluginDataRow = $db->fetchRow($db->select()->from('table.options')->where('name = ?', "plugin:{$plugin}"));
         $pluginData_backupRow = $db->fetchRow($db->select()->from('table.options')->where('name = ?', "plugin:{$plugin}Backup"));
