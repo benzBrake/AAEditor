@@ -3,6 +3,7 @@
 namespace TypechoPlugin\AAEditor;
 
 use Typecho\Common;
+use Typecho\Config;
 use Typecho\Db;
 use Typecho\Plugin\Exception;
 use Typecho\Plugin\PluginInterface;
@@ -73,7 +74,7 @@ class Plugin implements PluginInterface
         $request = new \Typecho\Widget\Request(Request::getInstance(), isset($request) ? new Config($request) : null);
         $response = new \Typecho\Widget\Response(Request::getInstance(), Response::getInstance());
         $plugin = "AAEditor";
-        $pluginDataRow = $db->fetchRow($db->select()->from('table.options')->where('name = ?', "plugin:{$plugin}"));
+        $pluginDataRow = $db->fetchRow($db->select()->from('table.options')->where('name = ?', "plugin:$plugin"));
         $pluginData_backupRow = $db->fetchRow($db->select()->from('table.options')->where('name = ?', "plugin:{$plugin}Backup"));
         $pluginData = empty($pluginDataRow) ? null : $pluginDataRow['value'];
         $pluginData_backup = empty($pluginData_backupRow) ? null : $pluginData_backupRow['value'];
@@ -94,7 +95,7 @@ class Plugin implements PluginInterface
                 }
             } elseif ($request->type == 'restore') {
                 if ($pluginData_backup) {
-                    $updateQuery = $db->update('table.options')->rows(array('value' => $pluginData_backup))->where('name = ?', "plugin:{$plugin}");
+                    $updateQuery = $db->update('table.options')->rows(array('value' => $pluginData_backup))->where('name = ?', "plugin:$plugin");
                     $db->query($updateQuery);
                     $notice->set(_t('检测到模板备份数据，恢复完成'), 'success');
                 } else {
@@ -212,7 +213,6 @@ class Plugin implements PluginInterface
         $edit->setAttribute('class', 'x-item x-basic');
         $form->addInput($edit);
 
-        $cssFiles = Util::listHljsCss();
         $edit = new Form\Element\Select(
             'XHljs',
             ['off' => "关闭（默认）"] + Util::listHljsCss(), 'off',
