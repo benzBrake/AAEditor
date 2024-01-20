@@ -608,19 +608,19 @@ class Util
                 Util::$contentParsers[] = [
                     'priority' => ($className::$priority ?? 99),
                     'parser' => $className . '::parseContent'
-                ];;
+                ];
             }
             if (method_exists($className, 'parseExcerpt')) {
                 Util::$excerptParsers[] = [
                     'priority' => ($className::$priority ?? 99),
                     'parser' => $className . '::parseExcerpt'
-                ];;
+                ];
             }
             if (method_exists($className, 'archiveStatic')) {
                 Util::$archiveStatics[] = [
                     'priority' => ($className::$priority ?? 99),
                     'parser' => $className . '::archiveStatic'
-                ];;
+                ];
             }
         }
     }
@@ -631,7 +631,9 @@ class Util
      * @param $archive
      * @param $last
      * @return string
-     * @throws Exception
+     * @throws \Typecho\Db\Exception
+     * @throws \Typecho\Plugin\Exception
+     * @throws \Typecho\Widget\Exception
      */
     public
     static function contentEx($text, $archive, $last): string
@@ -1256,7 +1258,6 @@ class Util
      * @param bool $parse 是否转换
      * @param string $template 转换模板
      * @return mixed
-     * @throws \Typecho\Exception
      */
     public static function thumbs($archive, int $quantity = 3, bool $return = false, bool $parse = false, string $template = '<img alt="" src="%s" />')
     {
