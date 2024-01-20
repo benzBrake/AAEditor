@@ -1,7 +1,7 @@
 {
   "name": "aaeditor",
   "version": "1.0.0",
-  "description": "An Ehanced Editor for Typecho ",
+  "description": "An Enhanced Editor for Typecho ",
   "main": "index.js",
   "private": "true",
   "scripts": {

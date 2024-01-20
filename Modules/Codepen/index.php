@@ -116,13 +116,13 @@ class ModuleCodepen implements Module
                 // 构建 iframe URL
                 $username = $match[1];
                 $penId = $match[2];
-                $iframeUrl = "https://codepen.io/{$username}/embed/{$penId}?default-tab=result";
+                $iframeUrl = "https://codepen.io/$username/embed/$penId?default-tab=result";
 
                 // 如果无法匹配，则返回空字符串
                 if (empty($match)) {
                     return '';
                 }
-                return "<iframe class=\"x-codepen\" src=\"{$iframeUrl}\" frameborder=\"0\"></iframe>";
+                return "<iframe class=\"x-codepen\" src=\"$iframeUrl\" frameborder=\"0\"></iframe>";
             } else {
                 return '';
             }

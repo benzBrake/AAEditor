@@ -1,6 +1,8 @@
 <?php
 namespace TypechoPlugin\AAEditor;
-class Label extends \Typecho\Widget\Helper\Layout
+use Typecho\Widget\Helper\Layout;
+
+class Label extends Layout
 {
     public function __construct($html)
     {

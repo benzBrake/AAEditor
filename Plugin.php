@@ -20,7 +20,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
  *
  * @package AAEditor
  * @author Ryan
- * @version 0.4.3
+ * @version 0.4.4
  * @link https://doufu.ru
  *
  */
