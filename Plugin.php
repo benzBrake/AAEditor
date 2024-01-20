@@ -10,7 +10,6 @@ use Typecho\Request;
 use Typecho\Response;
 use Typecho\Widget\Helper\Form;
 use Utils\Helper;
-use Widget\Archive;
 use Widget\Notice;
 
 if (!defined('__TYPECHO_ROOT_DIR__')) exit;
@@ -71,8 +70,8 @@ class Plugin implements PluginInterface
     {
         $db = Db::get();
         $notice = Notice::alloc();
-        $request = Request::getInstance();
-        $response = Response::getInstance();
+        $request = new \Typecho\Widget\Request(Request::getInstance(), isset($request) ? new Config($request) : null);
+        $response = new \Typecho\Widget\Response(Request::getInstance(), Response::getInstance());
         $plugin = "AAEditor";
         $pluginDataRow = $db->fetchRow($db->select()->from('table.options')->where('name = ?', "plugin:{$plugin}"));
         $pluginData_backupRow = $db->fetchRow($db->select()->from('table.options')->where('name = ?', "plugin:{$plugin}Backup"));
