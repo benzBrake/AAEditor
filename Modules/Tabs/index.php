@@ -40,7 +40,7 @@ class ModuleTabs implements Module
                                     let tabTitle = $('input[name="title"]', content),
                                         tabContent = $('textarea[name="content"]', content),
                                         isDefault = $('input[name="is-default"]', content)[0].checked;
-                                    items.push(`[tab name="${tabTitle.val()}"${isDefault ? ' active="true"' : ''}]${tabContent.val()}[/tab]`);
+                                    items.push(`[tab name="${tabTitle.val()}"${isDefault ? ' active="true"' : ''}]\n${tabContent.val()}\n[/tab]`);
                                 }
                             });
                             if (items.length) {
