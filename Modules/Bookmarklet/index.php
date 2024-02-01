@@ -44,7 +44,7 @@ class ModuleBookmarklet implements Module
                                 url = $('textarea[name="url"]', modal).val(),
                                 description = $('textarea[name="description"]', modal).val();
 
-                            let targetText = `[boorkmarklet url="${url}"${name ? ' name="' + name + '"' : ''}${description ? ' description="' + description + '"' : ''}]`;
+                            let targetText = `[bookmarklet url="${url}"${name ? ' name="' + name + '"' : ''}${description ? ' description="' + description + '"' : ''} /]`;
                             this.replaceSelection(targetText);
                             return true;
                         }
