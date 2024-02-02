@@ -105,103 +105,80 @@ class ModuleCard implements Module
         <link rel="stylesheet"
               href="<?php echo Util::moduleUrl('Card', 'index.css'); ?>">
         <script>
-            customElements.define(
-                'x-cards',
-                class xCards extends HTMLElement {
-                    constructor() {
-                        super();
-                        let collapsesWrapper = this;
-                        Array.from(this.childNodes).forEach((el, index) => {
-                            if (el.tagName.toLowerCase() === "div" && el.classList.contains("x-card")) {
-                                el.className = 'x-card fold';
-                                el.setAttribute("data-index", index);
-                                if (el.hasAttribute('fold')) {
-                                    if (!(el.getAttribute('fold') === 'on')) {
-                                        el.classList.remove('fold');
-                                    }
-                                    el.removeAttribute('fold');
-                                }
-                                if (el.hasAttribute('status')) {
-                                    if (el.getAttribute('status') === "true") {
-                                        el.classList.remove('fold');
-                                    }
-                                    el.removeAttribute('status');
-                                }
-                                let title = el.getAttribute("title") || "<?php _e("无题"); ?>";
-                                el.innerHTML = `<div class="x-card-title">${title}<span class="x-card-icon"></span></div><div class="x-card-content">${el.innerHTML}</div>`;
-                                el.querySelector('.x-card-title').addEventListener('click', (e) => {
-                                    el.classList.toggle('fold');
+            function xCardInit() {
+                const xCards = document.querySelectorAll('.x-cards-wrapper:not([x-card-inited])');
+                for (let i = 0; i < xCards.length; i++) {
+                    xCards[i].setAttribute("x-card-inited", "true");
+                    xCards[i].querySelectorAll(":scope>br").forEach(br => br.parentNode.removeChild(br));
+                    xCards[i].querySelectorAll(":scope>.x-card").forEach((card) => {
+                        card.firstElementChild.addEventListener('click', (e) => {
+                            let wrapper = e.currentTarget.closest(".x-cards-wrapper");
+                            let currentCard = e.currentTarget.closest(".x-card");
+                            let isFold = currentCard.classList.contains("fold");
+                            if (wrapper.getAttribute("type") === "blinds") {
+                                wrapper.querySelectorAll(".x-card").forEach((card) => {
+                                    card.classList.add("fold");
                                 });
+                            }
+                            if (isFold) {
+                                currentCard.classList.remove("fold");
                             } else {
-                                el.parentNode.removeChild(el);
+                                currentCard.classList.add("fold");
                             }
                         });
-                    }
+                    })
                 }
-            );
-            customElements.define(
-                'x-card',
-                class xCard extends HTMLElement {
-                    constructor() {
-                        super();
-                        let id = "x-card-" + Math.floor((Math.random() * 10000) + 1);
-                        while (document.querySelector("#" + id)) {
-                            id = "x-card-" + Math.floor((Math.random() * 10000) + 1);
-                        }
-                        this.options = {
-                            title: this.getAttribute('title'),
-                            content: this.innerHTML,
-                            id: id,
-                        };
+            }
 
-                        if (this.hasAttribute('fold')) {
-                            this.options.fold = this.getAttribute('fold') === "on";
-                        } else if (this.hasAttribute('status')) {
-                            this.options.fold = !(this.getAttribute('status') === "true");
-                        }
-
-                        this.outerHTML = `
-				<div class="x-card ${this.options.fold ? ' fold' : ''}" id="${this.options.id}">
-				    <div class="x-card-title">${this.options.title || "<?php _e("无题"); ?>"}<span class="x-card-icon"></span></div>
-				    <div class="x-card-content">${this.options.content}</div>
-				</div>
-			`;
-                        let el = document.getElementById(id),
-                            text = el.querySelector('.x-card-content');
-                        if (text.firstElementChild?.tagName === 'BR') {
-                            text.removeChild(text.firstElementChild);
-                        }
-                        el.querySelector('.x-card-title').addEventListener('click', function (e) {
-                            let card = document.getElementById(e.target.parentElement.id);
-                            if (card.classList.contains('fold'))
-                                card.classList.remove('fold');
-                            else
-                                card.classList.add('fold');
-                        });
-                    }
-                }
-            );
+            document.addEventListener('DOMContentLoaded', xCardInit);
+            document.addEventListener('pjax:success', xCardInit);
         </script>
         <?php
     }
 
     public static function parseContent($text, $archive): string
     {
-        if (strpos($text, '[x-cards') !== false) {
-            $patternWrapper = Util::get_shortcode_regex(['x-cards']);
+        if (strpos($text, '[x-cards') !== false || strpos($text, '[collapses') !== false) {
+            $patternWrapper = Util::get_shortcode_regex(['x-cards', 'collapses']);
             $text = preg_replace_callback("/$patternWrapper/", function ($m) {
                 // Allow [[foo]] syntax for escaping a tag.
                 if ('[' === $m[1] && ']' === $m[6]) {
                     return substr($m[0], 1, -1);
                 }
                 $pattern = Util::get_shortcode_regex(['x-card', 'collapse']);
-                $content = preg_replace("/$pattern/", '<div class="x-card"$3>$5</div>', $m[5]);
-                return '<div class="x-cards-wrapper"><x-cards' . $m[3] . '>' . $content . '</x-cards></div>';
+                $index = 1;
+                $content = preg_replace_callback("/$pattern/", function ($matches) use (&$index) {
+                    $attrs = Util::shortcode_parse_atts(htmlspecialchars_decode($matches[3]));
+                    $classList = ['x-card'];
+                    if (array_key_exists("fold", $attrs) && $attrs['fold'] === "on") {
+                        array_push($classList, "fold");
+                    }
+                    $title = _t("标题 %s", $index);
+                    if (array_key_exists("title", $attrs)) {
+                        $title = $attrs['title'];
+                    }
+                    $html = sprintf('<div class="%s" data-index="%d"><div class="x-card-title">%s<span class="x-card-icon"></span></div><div class="x-card-content">%s</div></div>', implode(" ", $classList), $index, $title, $matches[5]);
+                    $index++;
+                    return $html;
+                }, $m[5]);
+                return '<div class="x-cards-wrapper"' . $m[3] . '>' . $content . '</div>';
             }, $text);
         }
+
         if (strpos($text, '[collapse') !== false || strpos($text, '[x-card') !== false) { //提高效率，避免每篇文章都要解析
             $pattern = Util::get_shortcode_regex(['collapse', 'x-card']);
-            $text = preg_replace("/$pattern/", '<div class="x-card-wrapper"><x-card$3>$5</x-card></div>', $text);
+            $text = preg_replace_callback("/$pattern/", function ($matches) {
+                $attrs = Util::shortcode_parse_atts(htmlspecialchars_decode($matches[3]));
+                $classList = ['x-card'];
+                if (array_key_exists("fold", $attrs) && $attrs['fold'] === "on") {
+                    array_push($classList, "fold");
+                }
+                $title = _t("标题");
+                if (array_key_exists("title", $attrs)) {
+                    $title = $attrs['title'];
+                }
+                return sprintf('<div class="x-cards-wrapper"><div class="%s"><div class="x-card-title">%s<span class="x-card-icon"></span></div><div class="x-card-content">%s</div></div></div>', implode(" ", $classList), $title, $matches[5]);
+            }, $text);
         }
         return $text;
     }
