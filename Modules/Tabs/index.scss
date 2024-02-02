@@ -127,7 +127,7 @@
     background-color: #e0e7ff;
 
     &-item {
-      padding: 0 8px;
+      padding: 0 12px;
       cursor: pointer;
       box-sizing: border-box;
       background-color: transparent;
@@ -180,7 +180,7 @@
       position: absolute;
       inset: 0;
       z-index: -1;
-      padding: 8px;
+      padding: 12px;
       transition: all .3s;
       opacity: 0;
       transform: translateY(-100%);
