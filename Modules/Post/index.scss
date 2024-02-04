@@ -7,8 +7,13 @@
   padding: 10px;
   border-radius: 5px;
   position: relative;
+  margin-bottom: .5em;
   @media (min-width: 960px) {
     padding: 15px;
+  }
+
+  &:last-child {
+    margin-bottom: 0;
   }
 
   &.fake {
@@ -103,7 +108,7 @@
           width: 16px;
           height: 16px;
           background-size: 16px;
-          margin-top: 4px;
+          margin-top: 1px;
         }
 
         &-date {

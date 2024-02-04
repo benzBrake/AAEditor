@@ -397,8 +397,10 @@ class XEditor {
     blockPrefix(prefix, defaultText) {
         const {textarea} = this;
         let realSelectionText = textarea.getSelectedText();
+        defaultText || (defaultText = "");
         if (realSelectionText.length) {
             let realSelectionArr = realSelectionText.split('\n');
+            console.log(realSelectionArr);
             let newText = realSelectionArr.map((line, i) => {
                 return prefix.replace("%n", i + 1) + line;
             }).join("\n");
@@ -406,7 +408,7 @@ class XEditor {
             if (!textarea.isAtLineStart()) {
                 newText = "\n" + newText;
             }
-            textarea.executeAndAddUndoStack('replaceSelection', newText + "\n");
+            textarea.executeAndAddUndoStack('replaceSelectionText', newText + "\n");
         } else {
             let newPrefix = prefix.replace("%n", 1),
                 newText = newPrefix + defaultText + "\n",
