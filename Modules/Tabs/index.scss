@@ -118,6 +118,14 @@
   overflow: hidden;
   border: 1px solid #ccc;
 
+  &-wrapper {
+    margin-bottom: .5em;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
   &-nav {
     display: flex;
     overflow-y: auto;
@@ -192,7 +200,12 @@
         transform: translateY(0);
       }
 
-      br:first-child {
+      br:first-child,
+      br:last-child{
+        display: none;
+      }
+
+      .line:first-child + br {
         display: none;
       }
 

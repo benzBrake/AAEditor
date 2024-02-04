@@ -46,6 +46,11 @@
   &[type="light"],
   &.text-light {
     color: #f8f9fa;
+    background-color: var(--background, #212529);
+    
+    @media (prefers-color-scheme: dark) {
+      background-color: var(--background, transparent);
+    }
   }
 
   &[type="dark"],

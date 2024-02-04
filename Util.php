@@ -655,8 +655,8 @@ class Util
             // Markdown 增强
             if (strpos($text, '[x]') !== false || strpos($text, '[ ]') !== false) {
                 $text = strtr($text, array(
-                    "[x]" => '<input type="checkbox" class="x-checkbox" checked disabled />',
-                    "[ ]" => '<input type="checkbox" class="x-checkbox" disabled />'
+                    "[x]" => '<input type="checkbox" class="x-checkbox" checked disabled /><label class="x-checkbox-label"></label>',
+                    "[ ]" => '<input type="checkbox" class="x-checkbox" disabled /><label class="x-checkbox-label"></label>'
                 ));
             }
 

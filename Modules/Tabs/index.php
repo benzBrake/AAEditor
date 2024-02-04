@@ -342,6 +342,12 @@ class ModuleTabs implements Module
                                         tabContentItem.appendChild(tab.previousSibling);
                                     }
                                 }
+                                if (tabContentItem.firstElementChild && tabContentItem.firstElementChild.tagName.toString() === "P" && tabContentItem.firstElementChild.innerHTML == "") {
+                                    tabContentItem.removeChild(tabContentItem.firstElementChild);
+                                }
+                                if (tabContentItem.lastElementChild && tabContentItem.lastElementChild.tagName.toString() === "P" && tabContentItem.lastElementChild.innerHTML == "") {
+                                    tabContentItem.removeChild(tabContentItem.lastElementChild);
+                                }
                                 tabContent.appendChild(tabContentItem);
                                 this.removeChild(tab);
                             }

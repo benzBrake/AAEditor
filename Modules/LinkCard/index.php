@@ -90,7 +90,7 @@ class ModuleLinkCard implements Module
                         this.options = {
                             title: this.getAttribute("title") || this.getAttribute("url") || "",
                             url: this.getAttribute("url"),
-                            icon: this.getAttribute("icon") || "https://favicon.yandex.net/favicon/v2/" + this.getAttribute("url"),
+                            icon: this.getAttribute("icon") || "<?php \Utils\Helper::options()->pluginUrl('AAEditor/favicon/index.php?url='); ?>" + this.getAttribute("url"),
                         }
                         if (this.options.url) {
                             this.outerHTML = `
@@ -98,7 +98,7 @@ class ModuleLinkCard implements Module
                     <div class="x-link-backdrop"></div>
                     <div class="x-link-content">
                         <span class="x-link-title">${this.options.title}</span>
-                        <span class="x-link-icon"><img src="https://favicon.yandex.net/favicon/v2/${this.options.url}" /></span>
+                        <span class="x-link-icon"><img src="${this.options.icon}" /></span>
                     </div>
                 </a>
             `;
