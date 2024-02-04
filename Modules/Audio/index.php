@@ -118,6 +118,7 @@ class ModuleAudio implements Module
                 Array.from(document.querySelectorAll('.x-audio:not([loaded])')).forEach(el => {
                     el.setAttribute('loaded', '');
                     let obj = parseAudioElementToSource(el);
+                    console.log(obj);
                     if (obj) {
                         new APlayer({
                             container: el,
@@ -176,8 +177,8 @@ class ModuleAudio implements Module
                 let url = el.getAttribute("url") || el.getAttribute("src");
                 if (url) {
                     return {
-                        name: el.getAttribute('name') || decodeURIComponent(getFileNameFromUrl(url)),
-                        url: url,
+                        name: el.getAttribute('name') || getFileNameFromUrl(decodeURIComponent(url)),
+                        url: decodeURIComponent(url),
                         artist: el.getAttribute('artist') || '<?php _e("未知艺术家"); ?>',
                         cover: el.getAttribute('cover') || "https://cdn-us.imgs.moe/2023/09/08/64fb20d21209f.png",
                         lrc: el.getAttribute('lrc')
