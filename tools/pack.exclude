@@ -12,3 +12,5 @@ tools\*
 tools
 cache
 cache\*
+favicon\cache
+favicon\cache\*
