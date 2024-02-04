@@ -128,18 +128,133 @@ class Util
             <link rel="stylesheet"
                   href="<?php echo Common::url(preg_replace("/(?<!\.min)\.css$/", ".min.css", $filename), Util::parseJSD('https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.8.0/build/styles/')) ?>">
             <script>
-                document.querySelectorAll("pre code").forEach(el => {
-                    hljs.highlightElement(el);
-                })
+                (function () {
+                    const copyIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><path d="M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z"></path></svg>';
+                    const okIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 26 26"><path d="M22.566406 4.730469L20.773438 3.511719C20.277344 3.175781 19.597656 3.304688 19.265625 3.796875L10.476563 16.757813L6.4375 12.71875C6.015625 12.296875 5.328125 12.296875 4.90625 12.71875L3.371094 14.253906C2.949219 14.675781 2.949219 15.363281 3.371094 15.789063L9.582031 22C9.929688 22.347656 10.476563 22.613281 10.96875 22.613281C11.460938 22.613281 11.957031 22.304688 12.277344 21.839844L22.855469 6.234375C23.191406 5.742188 23.0625 5.066406 22.566406 4.730469Z" fill="currentColor" /></svg>';
+
+                    function initHighlighting() {
+                        document.querySelectorAll("pre:not(.styled) code").forEach(el => {
+                            const copy = document.createElement('span');
+                            var div = document.createElement('div');
+                            div.innerHTML = el.innerHTML;
+                            copy.dataset.text = div.innerText;
+                            copy.classList.add('copy');
+                            Object.assign(copy.style, {
+                                display: "flex",
+                                alignItems: "center",
+                                gap: ".25em",
+                            });
+                            if (!window.isSecureContext) {
+                                Object.assign(copy.style, {
+                                    cursor: "not-allowed",
+                                });
+                            }
+                            copy.innerHTML = copyIcon;
+                            copy.setAttribute('title', window.isSecureContext ? '<?php _e("点击复制"); ?>' : '<?php _e("非 HTTPS 不支持复制"); ?>')
+                            copy.addEventListener('click', function () {
+                                if (copy.hasAttribute("not-allowd")) return;
+                                if (window.isSecureContext) {
+                                    copy.setAttribute("not-allowd", "");
+                                    navigator.clipboard.writeText(this.dataset.text);
+                                    copy.innerHTML = okIcon;
+                                    setTimeout(function () {
+                                        copy.innerHTML = copyIcon;
+                                        copy.removeAttribute("not-allowd");
+                                    }, 1000);
+                                }
+                            });
+                            el.after(copy);
+                            hljs.highlightElement(el);
+                            el.parentNode.classList.add('styled');
+                        })
+                    }
+
+                    document.addEventListener("DOMContentLoaded", initHighlighting);
+                    document.addEventListener("pjax:success", initHighlighting);
+                })()
+
             </script>
             <?php
         }
         $enableParse = $archive->fields->EnableShortCodeParse;
         if (Util::pluginOption('XShortCodeParse', 'on') === 'on' || $archive->is("single") && isset($enableParse)) {
-            foreach (Util::$archiveStatics as $method) {
-                call_user_func($method['parser'], $archive);
+            if (Util::pluginOption('XCombileModuleCss', 'off') === "on") {
+                $cached = ob_get_clean();
+                ob_start();
+                foreach (Util::$archiveStatics as $method) {
+                    call_user_func($method['parser'], $archive);
+                }
+                $static_html = ob_get_clean();
+                $static_html = self::combineStyle($static_html);
+                print $cached;
+                print $static_html;
+            } else {
+                foreach (Util::$archiveStatics as $method) {
+                    call_user_func($method['parser'], $archive);
+                }
             }
         }
+    }
+
+    private static function combineStyle($input): string
+    {
+        // 构建标签的正则表达式
+        $pattern = '/<link\s+rel="stylesheet"[^>]*\s+href="([^"]+)"[^>]*>/is';
+        $cssFiles = [];
+        $output = preg_replace_callback($pattern, function ($matches) use (&$cssFiles) {
+            if (isset($matches[1])) {
+                if (strpos($matches[1], Helper::options()->pluginUrl . '/AAEditor') !== false) {
+                    $uri = str_replace(Helper::options()->pluginUrl . '/AAEditor', '', $matches[1]);
+                    $arr = explode('?h=', $uri);
+                    array_push($cssFiles, [
+                        'file' => Util::pluginDir($arr[0]),
+                        'hash' => $arr[1]
+                    ]);
+                    return '';
+                }
+            }
+            return $matches[0];
+        }, $input);
+        $hash = '';
+        foreach ($cssFiles as $file) {
+            $hash .= $file['hash'];
+        }
+        $hash = md5($hash);
+        if (file_exists(Util::pluginDir('cache/minify.css'))) {
+            $url = Util::pluginUrl('cache/minify.css') . "?h=" . md5_file(Util::pluginDir('cache/minify.css'));
+            // 拼接已合并的 CSS 文件
+            $output = '<link rel="stylesheet" href="' . $url . '">' . $output;
+        } else {
+            // 合并 CSS 文件
+            $cssContent = '';
+            foreach ($cssFiles as $file) {
+                $cssContent .= file_get_contents($file['file']);
+            }
+            $url = self::minifyJs($cssContent);
+            if ($url) {
+                // 拼接合并后的 CSS 文件
+                $output = '<link rel="stylesheet" href="' . $url . '">' . '</head>' . $output;
+            } else {
+                $output = $input;
+            }
+        }
+        return $output;
+    }
+
+    private static function minifyJs($input)
+    {
+        if (!is_dir(Util::pluginDir('cache'))) {
+            try {
+                mkdir(Util::pluginDir('cache'), 0755, true);
+            } catch (Exception $e) {
+            }
+        }
+        try {
+            file_put_contents(Util::pluginDir('cache/minify.css'), $input);
+            return Util::pluginUrl('/cache/minify.css') . "?h=" . md5_file(Util::pluginDir('cache/minify.css'));
+        } catch (\Exception $exception) {
+        }
+        return false;
     }
 
     /**
@@ -245,6 +360,12 @@ class Util
                         converter.enableLine(true);
                         reloadScroll = scrollableEditor(textarea, preview);
 
+                        let additionalTags = ["x-tabs"];
+
+                        converter.blockHtmlTags = additionalTags.length ?
+                            converter.blockHtmlTags.concat("|" + additionalTags.join("|")) :
+                            converter.blockHtmlTags;
+
                         // 修正白名单
                         converter.hook('makeHtml', function (html) {
                             // 不处理 pre/code
@@ -283,8 +404,7 @@ class Util
 
                             // 还原 pre/code
                             html = html.replace(/<pre>__BLOCK__<\/pre>/g, function () {
-                                let block = blocks.shift();
-                                return block;
+                                return blocks.shift();
                             });
 
                             // 不注释塞不了 HTML
@@ -377,13 +497,13 @@ class Util
                         // 拖拽实时改变大小
                         let resizeBtn = $('.edit-area .resize'),
                             btnPress = false;
-                        resizeBtn.on('mousedown', (e) => {
+                        resizeBtn.on('mousedown', () => {
                             document.addEventListener('mousemove', mouseMove);
                             document.addEventListener('mouseup', mouseUp);
                             btnPress = true;
                             previewArea.css("opacity", 0.25);
 
-                            function mouseMove(e) {
+                            function mouseMove() {
                                 if (btnPress) {
                                     previewArea.css('height', (parseInt(textarea.outerHeight()) + 'px'));
                                 }
@@ -707,8 +827,8 @@ class Util
         // Markdown 增强
         if (strpos($text, '[x]') !== false || strpos($text, '[ ]') !== false) {
             $text = strtr($text, array(
-                "[x]" => '【已经成】',
-                "[ ]" => '【未经成】'
+                "[x]" => '【已完成】',
+                "[ ]" => '【未完成】'
             ));
         }
 
@@ -928,6 +1048,11 @@ class Util
         $uri = '/' . Common::url($path, $type);
         if (array_key_exists($uri, self::$manifest ?? [])) {
             $uri = self::$manifest[$uri];
+        } else {
+            $absolutePath = Util::pluginDir('assets/dist' . $uri);
+            if (is_file($absolutePath)) {
+                $uri .= '?h=' . md5_file($absolutePath);
+            }
         }
         return self::pluginUrl('assets/dist/' . $uri);
     }

@@ -354,7 +354,13 @@ class ModuleTabs implements Module
                             this.appendChild(tabNav);
                             this.appendChild(tabContent);
 
-                            Array.from(this.querySelectorAll(':scope>span.line')).forEach(span => this.appendChild(span));
+                            Array.from(this.querySelectorAll(':scope>span.line')).forEach(span => {
+                                if (span.nextElementSibling && span.nextElementSibling.classList.contains('x-tabs-content-item')) {
+                                    span.nextElementSibling.insertBefore(span, span.nextElementSibling.firstElementChild);
+                                } else {
+                                    span.parentNode.removeChild(span);
+                                }
+                            });
 
                             if (!this.hasAttribute("active") && tabNav.childElementCount) {
                                 this.setAttribute('active', 1);

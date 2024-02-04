@@ -105,7 +105,7 @@
         insertBefore: '#wmd-spacer2',
         command() {
             const markdownReg = /\[(?!.*?\]\().*?\]\((.*?)\)/ig; // Markdown 链接正则
-            const httpLinkReg = /https?:\/\/[^\s]+/ig; // HTTP链接正则
+            const httpLinkReg = /https?:\/\/\S+/ig; // HTTP链接正则
             const {textarea} = this;
             let lastSelection = textarea.getSelection();
             let selectedText = textarea.getSelectedText(),
@@ -378,7 +378,7 @@
                     if (typeof hljs === "object" && "highlightElement" in hljs) {
                         const copy = document.createElement('span');
                         // 还原编码
-                        var div = document.createElement('div');
+                        let div = document.createElement('div');
                         div.innerHTML = el.innerHTML;
                         copy.dataset.text = div.innerText;
 

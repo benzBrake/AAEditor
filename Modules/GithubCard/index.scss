@@ -20,6 +20,10 @@
       margin-right: .25em;
       text-decoration: none;
     }
+
+    > a:hover {
+      text-decoration: underline;
+    }
   }
 
   &-content {

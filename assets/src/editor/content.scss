@@ -239,12 +239,20 @@ pre {
   .copy {
     position: absolute;
     display: flex;
-    top: 8px;
-    right: 8px;
+    top: 4px;
+    right: 4px;
     width: 16px;
     height: 16px;
     cursor: pointer;
     fill: currentColor;
+    padding: 4px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    transition: all .2s;
+
+    &:hover {
+      border-color: currentColor;
+    }
   }
 }
 
@@ -253,6 +261,7 @@ table {
   font-size: 14px;
   text-align: left;
   color: #64748b;
+  border-collapse: collapse;
   @media (prefers-color-scheme: dark) {
     color: #94a3b8;
   }
@@ -293,12 +302,14 @@ table {
         border-color: #334155;
         background-color: #1e293b;
       }
+
       &tr:nth-of-type(2n+1) {
         background-color: #e2e8f0;
         @media (prefers-color-scheme: dark) {
           background-color: #475569;
         }
       }
+
       > th {
         padding: 12px 16px;
         font-weight: 500;

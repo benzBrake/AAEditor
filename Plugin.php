@@ -215,7 +215,7 @@ class Plugin implements PluginInterface
 
         $edit = new Form\Element\Select(
             'XHljs',
-            ['off' => "关闭（默认）"] + Util::listHljsCss(), 'off',
+            ['off' => _t("关闭（默认）")] + Util::listHljsCss(), 'off',
             _t('前台载入 Highlight.js 代码高亮库'),
             _t('说明：关闭后需要自行渲染代码块'));
         $edit->setAttribute('class', 'x-item x-basic');
@@ -249,6 +249,14 @@ class Plugin implements PluginInterface
         $edit = new Form\Element\Text('XModules', null, '', _t('选择需要启用的模块'), _t(""));
         $edit->setAttribute('class', 'x-item x-basic');
         $form->addInput($edit->multiMode());
+
+        $edit = new Form\Element\Select(
+            'XCombileModuleCss',
+            ['off' => _t("关闭（默认）"), 'on' => _t("开启")], 'off',
+            _t('合并模块的 CSS 文件'),
+            _t('说明：修改 CSS 后需要手动清理缓存<code>插件目录/cache/minify.css</code>'));
+        $edit->setAttribute('class', 'x-item x-basic');
+        $form->addInput($edit);
 
         $edit = new Form\Element\Text('XDisableAttachAutoInsert', null, null, _t('附件上传后禁止自动插入到正文'), _t('填写后缀，格式：后缀|后缀'));
         $edit->setAttribute('class', 'x-item x-basic');

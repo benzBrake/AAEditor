@@ -36,7 +36,7 @@ class ModuleLinkCard implements Module
     <input type="text" required="required" placeholder="<?php _e("请输入链接地址"); ?>" name="url">
 </div>
 <div class="form-item">
-    <label for="url" class="required"><?php _e("图标链接"); ?></label>
+    <label for="url"><?php _e("图标链接"); ?></label>
     <input type="text" placeholder="<?php _e("留空自动获取"); ?>" name="icon">
 </div>`,
                         confirm(modal) {
@@ -90,7 +90,7 @@ class ModuleLinkCard implements Module
                         this.options = {
                             title: this.getAttribute("title") || this.getAttribute("url") || "",
                             url: this.getAttribute("url"),
-                            icon: this.getAttribute("icon") || "<?php \Utils\Helper::options()->pluginUrl('AAEditor/favicon/index.php?url='); ?>" + this.getAttribute("url"),
+                            icon: this.getAttribute("icon") || "<?php \Utils\Helper::options()->pluginUrl('AAEditor/index.php?url='); ?>" + this.getAttribute("url"),
                         }
                         if (this.options.url) {
                             this.outerHTML = `

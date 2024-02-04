@@ -3,5 +3,5 @@ pack.cmd
 pack/*
 /pack.cmd
 /node_modules
-favicon/cache/
-favicon/cache/*
+/cache
+/cache/*
