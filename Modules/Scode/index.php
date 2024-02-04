@@ -46,11 +46,16 @@ class ModuleScode implements Module
         <option value=""><?php _e("默认"); ?></option>
         <option value="small"><?php _e("迷你"); ?></option>
     </select>
+</div>
+<div class="form-item">
+    <label for="content"><?php _e("提示内容"); ?></label>
+    <textarea rows="3" autocomplete="off" name="content" placeholder="<?php _e("请输入提示内容"); ?>"></textarea>
 </div>`,
                         confirm(modal) {
                             let type = $('[name="type"]', modal).val(),
-                                size = $('[name="size"]', modal).val();
-                            this.replaceSelection(`[x-alert type="${type}"${size ? ' size="' + size + '"' : ""}]<?php _e("这里编辑高亮内容"); ?>[/x-alert]`);
+                                size = $('[name="size"]', modal).val(),
+                                content = $('[name="content"]', modal).val() || "<?php _e("这里编辑高亮内容"); ?>";
+                            this.replaceSelection(`[x-alert type="${type}"${size ? ' size="' + size + '"' : ""}]` + content + '[/x-alert]');
                             return true;
                         }
                     });

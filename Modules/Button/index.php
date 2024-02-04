@@ -179,8 +179,9 @@ class ModuleButton implements Module
         if ($radius < 0) {
             $radius = 0;
         }
-        if ($radius > 16) {
-            $radius = 16;
+        // 圆角半径超过15就显示为药丸按钮
+        if ($radius > 15) {
+            $radius = 9999;
         }
         $radiusHTML = $radius ? "border-radius: {$radius}px;" : '';
         $content = $attrs['content'] ?? _t("点此查看");
