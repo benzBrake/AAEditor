@@ -27,7 +27,7 @@ class Util
     public static function activate(): string
     {
         // 添加公共内容
-        Plugin::factory('Widget_Archive')->footer = [__CLASS__, 'archiveFooter'];
+        Plugin::factory('\Widget\Archive')->footer = [__CLASS__, 'archiveFooter'];
 
         // 添加文章编辑选项
         Plugin::factory('admin/write-post.php')->richEditor = [__CLASS__, 'richEditor'];
@@ -39,11 +39,11 @@ class Util
 
         // 短代码
         Plugin::factory('admin/common.php')->begin = [__CLASS__, 'shortCodeInit'];
-        Plugin::factory('Widget_Archive')->handleInit = [__CLASS__, 'shortCodeInit'];
+        Plugin::factory('\Widget\Archive')->handleInit = [__CLASS__, 'shortCodeInit'];
 
         // 内容替换处理
-        Plugin::factory('Widget_Abstract_Contents')->contentEx = [__CLASS__, 'contentEx'];
-        Plugin::factory('Widget_Abstract_Contents')->excerptEx = [__CLASS__, 'excerptEx'];
+        Plugin::factory('\Widget\Base\Contents')->contentEx = [__CLASS__, 'contentEx'];
+        Plugin::factory('\Widget\Base\Contents')->excerptEx = [__CLASS__, 'excerptEx'];
         return _t('插件已启用，请进入插件设置启用你需要的模块！');
     }
 
@@ -725,19 +725,19 @@ class Util
     {
         if (class_exists($className)) {
             if (method_exists($className, 'parseContent')) {
-                Util::$contentParsers[] = [
+                self::$contentParsers[] = [
                     'priority' => ($className::$priority ?? 99),
                     'parser' => $className . '::parseContent'
                 ];
             }
             if (method_exists($className, 'parseExcerpt')) {
-                Util::$excerptParsers[] = [
+                self::$excerptParsers[] = [
                     'priority' => ($className::$priority ?? 99),
                     'parser' => $className . '::parseExcerpt'
                 ];
             }
             if (method_exists($className, 'archiveStatic')) {
-                Util::$archiveStatics[] = [
+                self::$archiveStatics[] = [
                     'priority' => ($className::$priority ?? 99),
                     'parser' => $className . '::archiveStatic'
                 ];
