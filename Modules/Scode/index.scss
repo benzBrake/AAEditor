@@ -1,9 +1,17 @@
 .x-alert {
   position: relative;
   padding: .5em .75em;
-  margin-bottom: .5em;
+  margin: .5em 0;
   border: 1px solid transparent;
   border-radius: .25rem;
+
+  &:first-child {
+    margin-top: 0;
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
 
   & + br {
     display: none;
@@ -21,10 +29,6 @@
 
   &[size="small"] {
     padding: .25em .375em;
-  }
-
-  &:last-child {
-    margin-bottom: 0;
   }
 
   &[type="primary"] {
