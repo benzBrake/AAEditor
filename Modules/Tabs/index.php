@@ -334,6 +334,12 @@ class ModuleTabs implements Module
                                 tabNav.appendChild(tabNavItem);
                                 tabContentItem.className = 'x-tabs-content-item';
                                 tabContentItem.setAttribute('tabindex', i + 1);
+                                if (tab.firstElementChild && tab.firstElementChild.tagName === "BR") {
+                                    tab.removeChild(tab.firstElementChild);
+                                }
+                                if (tab.lastElementChild && tab.lastElementChild.tagName === "BR") {
+                                    tab.removeChild(tab.lastElementChild);
+                                }
                                 tabContentItem.innerHTML = tab.innerHTML;
                                 if (tab.previousSibling && tab.previousSibling.tagName === "SPAN" && tab.previousSibling.className === 'line') {
                                     if (tabContentItem.firstElementChild) {
