@@ -191,7 +191,7 @@ class ModuleButton implements Module
         } else {
             $type = 'primary';
         }
-        return sprintf('<a class="x-btn x-btn-%s" href="%s" target="_blank" rel="noopener noreferrer nofollow" style="%s">%s<span class="x-btn-content">%s</span></a>'
+        return sprintf('<a class="reset x-btn x-btn-%s" href="%s" target="_blank" rel="noopener noreferrer nofollow" style="%s">%s<span class="x-btn-content">%s</span></a>'
             , $type, $href, $radiusHTML, $icon, $content);
     }
 

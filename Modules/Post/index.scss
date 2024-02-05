@@ -7,9 +7,13 @@
   padding: 10px;
   border-radius: 5px;
   position: relative;
-  margin-bottom: .5em;
+  margin: .5em 0;
   @media (min-width: 960px) {
     padding: 15px;
+  }
+
+  &:first-child {
+    margin-top: 0;
   }
 
   &:last-child {
