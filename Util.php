@@ -170,7 +170,7 @@ class Util
                     }
 
                     document.addEventListener("DOMContentLoaded", initHighlighting);
-                    document.addEventListener("pjax:success", initHighlighting);
+                    document.addEventListener("pjax:complete", initHighlighting);
                 })()
 
             </script>
