@@ -327,7 +327,9 @@ class ModuleTabs implements Module
                                 }
                                 tabNavItem.className = 'x-tabs-nav-item';
                                 tabNavItem.setAttribute('tabindex', i + 1);
-                                tabNavItem.innerHTML = '<span>' + (tab.getAttribute('name') || tab.getAttribute('title') || '<?php _e("标签") ?>'.replace("%d", i + 1)) + '<span>';
+                                let name = tab.getAttribute('name');
+                                let title =  tab.getAttribute('title');
+                                tabNavItem.innerHTML = '<span>' + (name ? name : (title ? title : '<?php _e("标签") ?>'.replace("%d", i + 1))) + '<span>';
                                 tabNavItem.addEventListener('click', () => {
                                     this.setAttribute('active', tabNavItem.getAttribute('tabindex'));
                                 })

@@ -762,7 +762,6 @@ class Util
 
         $enableParse = $archive->fields->EnableShortCodeParse;
         if (Util::pluginOption('XShortCodeParse', 'on') === 'on' || $archive->is("single") && isset($enableParse)) {
-
             // 隐藏代码块
             $blocks = [];
             $codeHolder = "<pre>__BLOCK__</pre>";
