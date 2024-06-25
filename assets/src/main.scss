@@ -104,7 +104,7 @@ body:not(.fullscreen) {
       border-radius: .5em;
       overflow: hidden;
       margin-top: -30px;
-      transition: all .3s ease-in-out;
+      transition: margin-top .3s ease-in-out, opacity .3s ease-in-out;
 
       &.collapse-custom {
         width: 900px;
