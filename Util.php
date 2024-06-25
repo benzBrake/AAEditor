@@ -759,7 +759,6 @@ class Util
     static function contentEx($text, $archive, $last): string
     {
         if ($last) $text = $last;
-
         $enableParse = $archive->fields->EnableShortCodeParse;
         if (Util::pluginOption('XShortCodeParse', 'on') === 'on' || $archive->is("single") && isset($enableParse)) {
             // 隐藏代码块
@@ -1402,8 +1401,9 @@ class Util
                 }
             }
 
+            $content = $archive->markdown($archive->text);
             // 然后是正文匹配
-            preg_match_all("/<img(?<images>[^>]*?)>/i", $archive->content, $matches);
+            preg_match_all("/<img(?<images>[^>]*?)>/i", $content, $matches);
             $text = implode("\n", $matches["images"]);
             foreach ($matches['images'] as $value) {
                 if ($quantity <= 0) {
