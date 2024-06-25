@@ -70,6 +70,12 @@
       overflow: hidden;
     }
   }
+
+  &-static {
+    .x-card-title {
+      cursor: default;
+    }
+  }
 }
 
 .x-cards-wrapper {
