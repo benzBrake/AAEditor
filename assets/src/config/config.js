@@ -112,25 +112,32 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Load the log
-    fetch('https://api.vvhan.com/api/qqsc?key=95aa93d32e571b1579cfb15134b57dbd')
-        .then(response => response.json())
-        .then(json => {
-            const serverVersion = json.title.substr(0, 5);
-            const xNotice = querySelector('.x-notice', xConfig);
-            const title = querySelector('.title', xConfig);
+    if (typeof window.XEditorUpldateURL === 'string' && window.XEditorUpldateURL.startsWith('http')) {
+        fetch(window.XEditorUpldateURL)
+            .then(response => response.text())
+            .then(text => {
+                const fragment = document.createElement('div');
+                fragment.innerHTML = text;
+                text = fragment.querySelector('.post-content,.entry-content')?.innerHTML;
+                let firstNode = fragment.querySelector('h2, h3');
 
-            querySelector('.loading', title).remove();
-            querySelector('.latest.version', title).innerHTML = json.title;
-            querySelector('.message', xNotice).innerHTML = json.content;
-            querySelector('.latest.version', title).classList.add('active');
+                const serverVersion =  firstNode.innerText.substring(0, 5);
+                const xNotice = querySelector('.x-notice', xConfig);
+                const title = querySelector('.title', xConfig);
 
-            if (compareVersions(serverVersion, title.dataset.version) > 0) {
-                querySelector('.latest.found', title).classList.add('active');
-            } else {
-                querySelector('.latest', title).classList.add('active');
-            }
-        })
-        .catch(err => console.log('Request Failed', err));
+                querySelector('.loading', title).remove();
+                querySelector('.latest.version', title).innerHTML = firstNode.innerText;
+                querySelector('.message', xNotice).innerHTML = text;
+                querySelector('.latest.version', title).classList.add('active');
+
+                if (compareVersions(serverVersion, title.dataset.version) > 0) {
+                    querySelector('.latest.found', title).classList.add('active');
+                } else {
+                    querySelector('.latest', title).classList.add('active');
+                }
+            })
+            .catch(err => console.log('Request Failed', err));
+    }
 
     if (location.hash) {
         // 跳转到相应 Tab
@@ -174,7 +181,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // 增加全选和全不选按钮
-        let btnAllChecked =  document.createElement('button');
+        let btnAllChecked = document.createElement('button');
         btnAllChecked.innerText = '全选';
         btnAllChecked.type = 'button';
         btnAllChecked.addEventListener('click', () => {
@@ -184,7 +191,7 @@ document.addEventListener('DOMContentLoaded', function () {
             })
         });
 
-        let btnAllUnchecked =  document.createElement('button');
+        let btnAllUnchecked = document.createElement('button');
         btnAllUnchecked.innerText = '全不选';
         btnAllUnchecked.type = 'button';
         btnAllUnchecked.addEventListener('click', () => {
