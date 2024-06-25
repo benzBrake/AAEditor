@@ -52,7 +52,6 @@ class ModuleCard implements Module
                             if (fold === "frozen") {
                                 this.replaceSelection(`[card title="${title}"]${text}[/card]`);
                             } else {
-                                // Adjust the code snippet based on your requirements
                                 this.replaceSelection(`[x-card title="${title}" fold="${fold}"]${text}[/x-card]`);
                             }
                             return true;
