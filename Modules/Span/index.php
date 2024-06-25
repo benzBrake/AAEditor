@@ -47,6 +47,9 @@ class ModuleSpan implements Module
                 icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="20" height="20"><path d="m16,2.6875c-7.34095,0 -13.3125,5.97155 -13.3125,13.3125c0,7.34095 5.97155,13.3125 13.3125,13.3125c7.34095,0 13.3125,-5.97155 13.3125,-13.3125c0,-7.34095 -5.97155,-13.3125 -13.3125,-13.3125zm0,2.21875c6.14057,0 11.09375,4.95318 11.09375,11.09375c0,6.14057 -4.95318,11.09375 -11.09375,11.09375c-6.14057,0 -11.09375,-4.95318 -11.09375,-11.09375c0,-6.14057 4.95318,-11.09375 11.09375,-11.09375zm-0.83203,5.54688l-0.27734,0.72803l-3.25879,8.875l-0.06934,0.17334l0,1.31738l2.21875,0l0,-0.90137l0.48535,-1.31738l3.4668,0l0.48535,1.31738l0,0.90137l2.21875,0l0,-1.31738l-0.06934,-0.17334l-3.25879,-8.875l-0.27734,-0.72803l-1.66406,0zm0.83203,4.12549l0.93604,2.53076l-1.87207,0l0.93604,-2.53076z"></path></svg>',
                 insertAfter: '#wmd-spacer3',
                 command() {
+                    const {textarea} = this;
+                    let lastSelection = textarea.getSelection();
+                    let selectedText = textarea.getSelectedText();
                     this.openModal({
                         title: '<?php _e("多彩文字")  ?>',
                         innerHTML: `<div class="form-item">
@@ -85,7 +88,6 @@ class ModuleSpan implements Module
 </div>
 `,
                         handle(modal) {
-                            let selectedText = this.getSelectedText();
                             if (selectedText) {
                                 const regex = /\[\/*x-span[^\]]*]/gm;
                                 $('input[name="text"]', modal).val(selectedText.replace(regex, ''));
@@ -112,9 +114,12 @@ class ModuleSpan implements Module
                             }
                         },
                         confirm(modal) {
+                            let val = $('input[name="text"]', modal).val();
                             let text = '[x-span ' + generateAttrs(modal) + ']' +
-                                $('input[name="text"]', modal).val() + '[/x-span]';
-                            this.replaceSelection(text);
+                                 val + '[/x-span]';
+                            this.textarea.setSelection(lastSelection.start, lastSelection.end);
+                            this.textarea.executeAndAddUndoStack('replaceSelectionText', text);
+                            this.textarea.setSelection(lastSelection.start + text.length - 9 - val.length, lastSelection.start + text.length - 9);
                             return true;
                         }
                     })
