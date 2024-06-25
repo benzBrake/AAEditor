@@ -310,9 +310,9 @@
         remove: true,
     }, {
         id: 'wmd-olist-button',
-        name: '<?php _e("数字列表 <ol> Ctrl+O"); ?>',
+        name: '<?php _e("数字列表 <ol>"); ?>',
         icon: '<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path d="M341.333 170.667H896V256H341.333v-85.333zm-128-42.667v128H256v42.667H128V256h42.667v-85.333H128V128h85.333zM128 597.333V490.667h85.333v-21.334H128v-42.666h128v106.666h-85.333v21.334H256v42.666H128zM213.333 832H128v-42.667h85.333V768H128v-42.667h128V896H128v-42.667h85.333V832zm128-362.667H896v85.334H341.333v-85.334zm0 298.667H896v85.333H341.333V768z"></path></svg>',
-        insertAfter: "#wmd-table-button",
+        insertAfter: '#wmd-table-button',
         command: function () {
             this.blockPrefix("%n. ");
         }
