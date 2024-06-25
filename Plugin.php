@@ -120,7 +120,7 @@ class Plugin implements PluginInterface
         Util::collectManifest();
         ?>
         <link rel="stylesheet" href="<?php echo Util::pluginStatic('css', 'config.css'); ?>">
-        <script>window.XEditorModules = JSON.parse('<?php echo json_encode(Util::listModules()) ?>');</script>
+        <script>window.XEditorModules = JSON.parse('<?php echo json_encode(Util::listModules()) ?>'); window.XEditorUpldateURL = 'https://xiamp.net/archives/aaeditor-update-log.html';</script>
         <script src="<?php echo Util::pluginStatic('js', 'config.js'); ?>"></script>
         <div class="x-config">
             <?php if (count($errorMessage)): ?>
