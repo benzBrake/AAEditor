@@ -25,6 +25,9 @@ class ModuleScode implements Module
                 icon: '<svg class="icon" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path d="M193.024 795.99c0 17.692 14.222 32.028 31.972 32.028h574.008a31.972 31.972 0 0 0 31.972-32.029V562.972a318.976 318.976 0 1 0-637.952 0V795.99zm71.964-233.018a247.012 247.012 0 0 1 494.024 0v193.024H404.025V584.988a10.012 10.012 0 0 0-10.013-10.012H349.98a10.012 10.012 0 0 0-9.955 10.012v171.008h-75.037V562.972zM216.918 310.5l39.594-39.595a8.021 8.021 0 0 0 0-11.321l-67.925-67.868a8.021 8.021 0 0 0-11.264 0l-39.595 39.594a8.021 8.021 0 0 0 0 11.264l67.868 67.926a8.021 8.021 0 0 0 11.321 0zM886.5 231.31l-39.595-39.594a8.021 8.021 0 0 0-11.321 0l-67.868 67.868a8.021 8.021 0 0 0 0 11.32L807.31 310.5a8.021 8.021 0 0 0 11.264 0l67.926-67.926a8.021 8.021 0 0 0 0-11.264zM832 892.018H192a31.972 31.972 0 0 0-32.028 31.971v24.007c0 4.38 3.64 7.965 8.02 7.965h688.015c4.38 0 7.965-3.584 7.965-7.965V923.99A31.972 31.972 0 0 0 832 892.018zM484.01 179.996h55.98a7.951 7.951 0 0 0 7.964-7.964V75.947a8.021 8.021 0 0 0-7.965-7.965h-55.978a8.021 8.021 0 0 0-7.965 7.965v95.971c0 4.438 3.527 8.022 7.965 8.022z"></path></svg>',
                 insertAfter: '#wmd-spacer3',
                 command() {
+                    const {textarea} = this;
+                    let lastSelection = textarea.getSelection();
+                    let selectedText = textarea.getSelectedText();
                     this.openModal({
                         title: '<?php _e("插入高亮引用"); ?>',
                         innerHTML: `<div class="form-item">
@@ -49,13 +52,18 @@ class ModuleScode implements Module
 </div>
 <div class="form-item">
     <label for="content"><?php _e("提示内容"); ?></label>
-    <textarea rows="3" autocomplete="off" name="content" placeholder="<?php _e("请输入提示内容"); ?>"></textarea>
+    <textarea rows="3" autocomplete="off" name="content" placeholder="<?php _e("请输入提示内容"); ?>">${selectedText}</textarea>
 </div>`,
                         confirm(modal) {
                             let type = $('[name="type"]', modal).val(),
                                 size = $('[name="size"]', modal).val(),
                                 content = $('[name="content"]', modal).val() || "<?php _e("这里编辑高亮内容"); ?>";
-                            this.replaceSelection(`[x-alert type="${type}"${size ? ' size="' + size + '"' : ""}]` + content + '[/x-alert]');
+                            let prefix = `[x-alert type="${type}"${size ? ' size="' + size + '"' : ""}]`;
+                            let postfix = `[/x-alert]`;
+                            this.textarea.setSelection(lastSelection.start, lastSelection.end);
+                            textarea.executeAndAddUndoStack('replaceSelectionText', prefix + content + postfix);
+                            if (selectedText)
+                                this.textarea.setSelection(lastSelection.start + prefix.length, lastSelection.start + prefix.length + content.length);
                             return true;
                         }
                     });
