@@ -1,9 +1,7 @@
 <?php
 
-use Typecho\Config;
 use TypechoPlugin\AAEditor\Module;
 use TypechoPlugin\AAEditor\Util;
-use Utils\Helper;
 
 /**
  * 以折叠卡片形式排版正文
@@ -36,6 +34,7 @@ class ModuleCard implements Module
             <select name="fold">
                 <option value="on"><?php _e("折叠"); ?></option>
                 <option value="off"><?php _e("展开"); ?></option>
+                <option value="frozen"><?php _e("固定") ?></option>
             </select>
         </div>
         <div class="form-item">
@@ -50,9 +49,12 @@ class ModuleCard implements Module
                             let text = $('[name="text"]', modal).val() || "<?php _e("折叠卡片内容") ?>";
                             let fold = $('[name="fold"]', modal).val() || "on";
                             let title = $('[name="title"]', modal).val() || "<?php _e("折叠卡片标题") ?>";
-
-                            // Adjust the code snippet based on your requirements
-                            this.replaceSelection(`[x-card title="${title}" fold="${fold}"]${text}[/x-card]`);
+                            if (fold === "frozen") {
+                                this.replaceSelection(`[card title="${title}"]${text}[/card]`);
+                            } else {
+                                // Adjust the code snippet based on your requirements
+                                this.replaceSelection(`[x-card title="${title}" fold="${fold}"]${text}[/x-card]`);
+                            }
                             return true;
                         }
                     });
@@ -74,8 +76,17 @@ class ModuleCard implements Module
                         html = html.replace(this.getShortCodeRegex("collapse"), `<div class="x-card-wrapper"><x-card$3>$5</x-card></div>`);
                     }
                     if (html.indexOf("[x-card")) {
-                        return html.replace(this.getShortCodeRegex("x-card"), `<div class="x-card-wrapper"><x-card$3>$5</x-card></div>`);
+                        html = html.replace(this.getShortCodeRegex("x-card"), `<div class="x-card-wrapper"><x-card$3>$5</x-card></div>`);
                     }
+                    if (html.indexOf("[card")) {
+                        html = html.replace(this.getShortCodeRegex("card"), (...matches) => {
+                            let div = document.createElement('div');
+                            div.innerHTML = `<div class="x-card-wrapper"${matches[3]}></div>`;
+                            let title = div.firstElementChild.getAttribute('title') ?? '<?php _e("无标题") ?>';
+                            return `<div class="x-card-static"><div class="x-card-title">${title}</div><div class="x-card-content">${matches[5]}</div><div>`;
+                        });
+                    }
+                    return html;
                 }
             ]);
         </script>
@@ -178,6 +189,18 @@ class ModuleCard implements Module
                     $title = $attrs['title'];
                 }
                 return sprintf('<div class="x-cards-wrapper"><div class="%s"><div class="x-card-title">%s<span class="x-card-icon"></span></div><div class="x-card-content">%s</div></div></div>', implode(" ", $classList), $title, $matches[5]);
+            }, $text);
+        }
+
+        if (strpos($text, '[card') !== false) {
+            $pattern = Util::get_shortcode_regex(['card']);
+            $text = preg_replace_callback("/$pattern/", function ($matches) {
+                $attrs = Util::shortcode_parse_atts(htmlspecialchars_decode($matches[3]));
+                $title = _t("无标题");
+                if (array_key_exists("title", $attrs)) {
+                    $title = $attrs['title'];
+                }
+                return sprintf('<div class="x-card-static"><div class="x-card-title">%s</div><div class="x-card-content">%s</div><div>', $title, $matches[5]);
             }, $text);
         }
         return $text;
