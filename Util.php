@@ -627,6 +627,12 @@ class Util
                             text = fragment.querySelector('.post-content,.entry-content')?.innerHTML;
                             let firstNode = fragment.querySelector('h2, h3');
                             let upldateLog = firstNode.nextElementSibling;
+                            let updateLinkNode = firstNode.previousElementSibling.querySelector('a[href^="https://"]');
+                            let updateLinkText = firstNode.previousElementSibling.innerHTML;
+                            let updateLink = 'https://xiamp.net/archives/aaeditor-is-another-typecho-editor-plugin.html';
+                            if (updateLinkText.indexOf('<?php _e("最新版下载") ?>') && updateLinkNode) {
+                                updateLink = updateLinkNode.href;
+                            }
                             const serverVersion = firstNode.innerText.substring(0, 5);
                             const delay_notice_version = getCookie('aaeditor_delay_notice_version');
                             if (delay_notice_version && compareVersions(delay_notice_version, serverVersion) >= 0) {
@@ -635,7 +641,7 @@ class Util
                             if (compareVersions(serverVersion, '<?php echo \TypechoPlugin\AAEditor\Plugin::version() ?>') > 0) {
                                 let div = document.createElement('div');
                                 div.className = 'aaeditor-update-log';
-                                div.innerHTML = `<div class="update-log-title"><strong><?php _e("AAEditor 有更新！"); ?></strong><small class="delay-no-more">一周不再提醒</small></div><div class="update-log-content">${upldateLog.outerHTML}</div><div class="progress-bar"></div>`;
+                                div.innerHTML = `<div class="update-log-title"><strong><?php _e("AAEditor 有更新！"); ?>(<span style="color: red">${serverVersion}</span>)</strong><small class="delay-no-more">一周不再提醒</small></div><div class="update-log-content">${upldateLog.outerHTML}<a class="btn-download" href="${updateLink}" target="_blank"><?php _e("下载最新版") ?></a></div><div class="progress-bar"></div>`;
                                 document.body.appendChild(div);
                                 div.querySelector('.delay-no-more').addEventListener('click', function () {
                                     removeElWithFadeOut(div, serverVersion);
@@ -669,13 +675,14 @@ class Util
                     function getCookie(name) {
                         const nameEQ = name + "=";
                         const ca = document.cookie.split(';');
-                        for(let i = 0; i < ca.length; i++) {
+                        for (let i = 0; i < ca.length; i++) {
                             let c = ca[i];
                             while (c.charAt(0) === ' ') c = c.substring(1, c.length);
                             if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
                         }
                         return null;
                     }
+
                     function compareVersions(serverVersion, currentVersion) {
                         const serverVersionArray = serverVersion.split('.');
                         const currentVersionArray = currentVersion.split('.');
@@ -724,26 +731,61 @@ class Util
                 .aaeditor-update-log .update-log-title {
                     display: flex;
                     align-items: center;
-                    padding: 0.5em 0.75em;
+                    padding: 0.25em 0.75em;
                     color: rgba(33, 37, 41, 0.75);
                     background-color: rgba(255, 255, 255, 0.85);
                     background-clip: padding-box;
                 }
+
                 .aaeditor-update-log .update-log-title .delay-no-more {
                     margin-inline-start: auto;
                     transition: color .2s;
                     cursor: pointer;
                 }
+
                 .aaeditor-update-log .update-log-title .delay-no-more:hover {
                     color: #0d6efd;
                 }
+
                 .aaeditor-update-log .update-log-content {
                     padding: 0.5em 0.75em;
                 }
+
                 .aaeditor-update-log .update-log-content ol {
                     margin: 0;
                     padding-left: 20px;
                 }
+
+                .aaeditor-update-log .update-log-content .btn-download {
+                    margin-block-start: .5em;
+                    padding: .25em .5em;
+                    font-size: .875em;
+                    color: #fff;
+                    background-color: #0d6efd;
+                    border-radius: .25em;
+                    display: inline-flex;
+                    align-items: center;
+                    border: 1px solid #0d6efd;
+                    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15),0 1px 1px rgba(0, 0, 0, 0.075);
+                    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+                }
+
+                .aaeditor-update-log .update-log-content .btn-download:hover {
+                    background-color: #0b5ed7;
+                    border-color: #0a58ca;
+                    text-decoration: none;
+                }
+
+                .aaeditor-update-log .update-log-content .btn-download:focus {
+                    box-shadow: 0 0 0 0.25rem rgba(49, 132, 253, .5);
+                }
+
+                .aaeditor-update-log .update-log-content .btn-download:active {
+                    box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+                    border-color: #0a53be;
+                    background-color: #0a58ca;
+                }
+
                 @keyframes progress-bar-stripes {
                     to {
                         transform: translateX(-100%);
