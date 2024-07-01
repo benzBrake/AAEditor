@@ -69,6 +69,10 @@
       text-overflow: ellipsis;
       text-decoration: none;
       white-space: nowrap;
+      line-height: 40px;
+      @media (min-width: 960px) {
+        font-size: 24px;
+      }
     }
 
     .content {
@@ -77,6 +81,7 @@
       text-overflow: ellipsis;
       line-height: 1.2;
       font-size: 14px;
+      margin-top: 20px;
 
       * {
         padding-top: 0;
@@ -98,7 +103,7 @@
       font-size: 13px;
       margin-top: auto;
       display: flex;
-      gap: 12px;
+      gap: 20px;
 
       &-item {
         display: flex;
@@ -135,7 +140,7 @@
           background-color: #6366f1;
           border-radius: 50%;
           position: absolute;
-          right: -8px;
+          right: -12px;
         }
 
         &:last-child:after {

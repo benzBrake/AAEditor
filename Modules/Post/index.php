@@ -112,7 +112,7 @@ class ModulePost implements Module
         }
         $attr = htmlspecialchars_decode($m[3]);
         $attrs = Util::shortcode_parse_atts($attr);
-        $template = '<div class="x-post">' .
+        $template = '<div class="x-post" style="overflow: hidden; max-height: 240px">' .
             '<div class="text-content">' .
             '<div class="title"><a href="{permalink}">{title}</a></div>' .
             '<div class="content">{abstract}</div>' .
