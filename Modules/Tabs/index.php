@@ -291,7 +291,7 @@ class ModuleTabs implements Module
      */
     public static function archiveStatic($archive): void
     {
-        self::commonStatic();
+//        self::commonStatic();
     }
 
     /**
@@ -329,7 +329,7 @@ class ModuleTabs implements Module
                                 tabNavItem.setAttribute('tabindex', i + 1);
                                 let name = tab.getAttribute('name');
                                 let title =  tab.getAttribute('title');
-                                tabNavItem.innerHTML = '<span>' + (name ? name : (title ? title : '<?php _e("标签") ?>'.replace("%d", i + 1))) + '<span>';
+                                tabNavItem.innerHTML = '<span>' + (name ? name : (title ? title : '<?php _e("标签") ?>'.replace("%d", i + 1))) + '/<span>';
                                 tabNavItem.addEventListener('click', () => {
                                     this.setAttribute('active', tabNavItem.getAttribute('tabindex'));
                                 })
@@ -409,9 +409,32 @@ class ModuleTabs implements Module
     public static function parseContent($text, $archive): string
     {
         $patternTabs = Util::get_shortcode_regex(['tabs', 'x-tabs']);
-        $text = preg_replace("/$patternTabs/", '<div class="x-tabs-wrapper"><x-tabs$3>$5</x-tabs></div>', $text);
         $patternTab = Util::get_shortcode_regex(['tab', 'x-tab']);
-        return preg_replace("/$patternTab/", '<div class="x-tab"$3>$5</div>', $text);
+        $regex_useless = '/^\<br>|\<br>$/';
+        return preg_replace_callback("/$patternTabs/", function ($m) use($patternTab, $regex_useless) {
+            // Allow [[foo]] syntax for escaping a tag.
+            if ('[' === $m[1] && ']' === $m[6]) {
+                return substr($m[0], 1, -1);
+            }
+            $attr = htmlspecialchars_decode($m[3]);
+            $attrs = Util::shortcode_parse_atts($attr);
+            $active = is_array($attrs) && array_key_exists('active', $attrs) ? $attrs['active'] : 0;
+            preg_match_all("/$patternTab/", $m[5], $matches);
+            $tabs_html = [];
+            for ($i = 0; $i < count($matches[0]); $i++) {
+                $a = htmlspecialchars_decode($matches[3][$i]);
+                $attrs = Util::shortcode_parse_atts($a);
+                if (!is_array($attrs)) $attrs = [];
+                $title = $attrs['name'] ?? $attrs['title'] ?? _t("标签 %d", $i + 1);
+                if ($attrs['active'] ?? '' === "true") $active = $i + 1;
+                $t = trim($matches[5][$i]);
+                $t = preg_replace($regex_useless, '' , $t);
+                $tabs_html[$i] = "<div title='{$title}' class='x-tab'>{$t}</div>";
+            }
+            if ($active < 1) $active = 1;
+            $content = implode('', $tabs_html);
+            return "<div class='x-tabs-wrapper'><x-tabs active='{$active}' style='display: block'>{$content}</x-tabs></div>";
+        }, $text);
     }
 
 

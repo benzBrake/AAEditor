@@ -187,7 +187,7 @@ class ModuleCard implements Module
                 if (array_key_exists("title", $attrs)) {
                     $title = $attrs['title'];
                 }
-                return sprintf('<div class="x-cards-wrapper"><div class="%s"><div class="x-card-title">%s<span class="x-card-icon"></span></div><div class="x-card-content">%s</div></div></div>', implode(" ", $classList), $title, $matches[5]);
+                return sprintf('<div class="x-cards-wrapper" style="overflow: hidden"><div class="%s"><div class="x-card-title">%s<span class="x-card-icon"></span></div><div class="x-card-content">%s</div></div></div>', implode(" ", $classList), $title, $matches[5]);
             }, $text);
         }
 
@@ -199,7 +199,7 @@ class ModuleCard implements Module
                 if (array_key_exists("title", $attrs)) {
                     $title = $attrs['title'];
                 }
-                return sprintf('<div class="x-card-static"><div class="x-card-title">%s</div><div class="x-card-content">%s</div><div>', $title, $matches[5]);
+                return sprintf('<div class="x-card-static" style="overflow: hidden"><div class="x-card-title">%s</div><div class="x-card-content">%s</div><div>', $title, $matches[5]);
             }, $text);
         }
         return $text;
