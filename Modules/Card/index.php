@@ -212,8 +212,8 @@ class ModuleCard implements Module
             $pattern = Util::get_shortcode_regex(['x-cards']);
             $text = preg_replace("/$pattern/", '$5', $text);
         }
-        if (strpos($text, '[collapse') !== false || strpos($text, '[x-card') !== false) { //提高效率，避免每篇文章都要解析
-            $pattern = Util::get_shortcode_regex(['collapse', 'x-card']);
+        if (strpos($text, '[collapse') !== false || strpos($text, '[x-card') !== false || strpos($text, '[card') !== false) { //提高效率，避免每篇文章都要解析
+            $pattern = Util::get_shortcode_regex(['collapse', 'x-card', 'card']);
             $text = preg_replace_callback(/**
              * @throws \Typecho\Exception
              */ "/$pattern/", function ($m) {
