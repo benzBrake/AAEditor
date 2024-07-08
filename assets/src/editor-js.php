@@ -312,13 +312,21 @@
         id: 'wmd-olist-button',
         name: '<?php _e("数字列表 <ol>"); ?>',
         icon: '<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path d="M341.333 170.667H896V256H341.333v-85.333zm-128-42.667v128H256v42.667H128V256h42.667v-85.333H128V128h85.333zM128 597.333V490.667h85.333v-21.334H128v-42.666h128v106.666h-85.333v21.334H256v42.666H128zM213.333 832H128v-42.667h85.333V768H128v-42.667h128V896H128v-42.667h85.333V832zm128-362.667H896v85.334H341.333v-85.334zm0 298.667H896v85.333H341.333V768z"></path></svg>',
-        insertAfter: '#wmd-table-button',
+        insertBefore: '#wmd-hr-button',
         command: function () {
             this.blockPrefix("%n. ");
         }
     }, {
         id: 'wmd-ulist-button',
+        remove: true,
+    }, {
+        id: 'wmd-ulist-button',
+        name: '<?php _e("无序列表 <ol>"); ?>',
         icon: '<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path d="M132.608 204.288m-66.56 0a66.56 66.56 0 1 0 133.12 0 66.56 66.56 0 1 0-133.12 0Z"></path><path d="M962.01728 158.80192l-680.68352 0.3584-0.04096 84.44928 680.7552-0.3584-0.03072-84.44928z"></path><path d="M132.608 512m-66.56 0a66.56 66.56 0 1 0 133.12 0 66.56 66.56 0 1 0-133.12 0Z"></path><path d="M281.33376 466.87232l-0.04096 84.44928 680.7552-0.3584-0.03072-84.44928-680.68352 0.3584z"></path><path d="M132.608 819.712m-66.56 0a66.56 66.56 0 1 0 133.12 0 66.56 66.56 0 1 0-133.12 0Z"></path><path d="M281.33376 775.59808l-0.04096 84.44928 680.7552-0.3584-0.03072-84.44928-680.68352 0.3584z"></path></svg>',
+        insertBefore: '#wmd-hr-button',
+        command: function () {
+            this.blockPrefix("- ");
+        }
     }, {
         id: 'wmd-task-button',
         name: '<?php _e("任务 - 未完成"); ?>',
