@@ -461,7 +461,7 @@
     });
     $('body').trigger('XEditorAddHtmlProcessor', [function (html) {
         if (html.indexOf("[hide") === -1) return html;
-        const regex = /\[hide](.*?)\[\/hide]/ism;
+        const regex = /\[hide](.*?)\[\/hide]/gi;
         return html.replace(regex, `<div class="x-hide fake blur">
     <span class="x-hide-icon" title="<?php _e("显示/隐藏"); ?>" onclick="this.parentNode.classList.toggle('blur');">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20"><path d="M23.986328 9C12.666705 9 2.6928719 16.845918 0.046875 27.126953 A 1.5002454 1.5002454 0 0 0 2.953125 27.873047C5.2331281 19.014082 14.065951 12 23.986328 12C33.906705 12 42.767507 19.01655 45.046875 27.873047 A 1.5002454 1.5002454 0 0 0 47.953125 27.126953C45.306493 16.84345 35.305951 9 23.986328 9 z M 24.001953 17C18.681885 17 14.337891 21.343999 14.337891 26.664062C14.337891 31.984127 18.681885 36.330078 24.001953 36.330078C29.322021 36.330078 33.667969 31.984126 33.667969 26.664062C33.667969 21.343999 29.322021 17 24.001953 17 z"></path></svg>
