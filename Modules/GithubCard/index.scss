@@ -10,10 +10,14 @@
     border-bottom: 1px solid #ccc;
     border-radius: .25em .25em 0 0;
 
+    .icon {
+      display: flex;
+      align-items: center;
+    }
+
     svg {
-      margin-top: 3px;
-      width: 1em;
-      height: 1em;
+      width: 16px;
+      height: 16px;
     }
 
     > a, span {
