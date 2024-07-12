@@ -20,7 +20,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
  *
  * @package AAEditor
  * @author Ryan
- * @version 0.5.0
+ * @version 0.5.1
  * @link https://doufu.ru
  *
  */
@@ -120,7 +120,8 @@ class Plugin implements PluginInterface
         Util::collectManifest();
         ?>
         <link rel="stylesheet" href="<?php echo Util::pluginStatic('css', 'config.css'); ?>">
-        <script>window.XEditorModules = JSON.parse('<?php echo json_encode(Util::listModules()) ?>'); window.XEditorUpldateURL = 'https://xiamp.net/archives/aaeditor-update-log.html';</script>
+        <script>window.XEditorModules = JSON.parse('<?php echo json_encode(Util::listModules()) ?>');
+            window.XEditorUpldateURL = 'https://xiamp.net/archives/aaeditor-update-log.html';</script>
         <script src="<?php echo Util::pluginStatic('js', 'config.js'); ?>"></script>
         <div class="x-config">
             <?php if (count($errorMessage)): ?>
@@ -234,15 +235,18 @@ class Plugin implements PluginInterface
 
         $edit = new Form\Element\Select('XJsdelivrMirror',
             [
-                'https://jsd.onmicrosoft.cn' => _t('渺软公益 CDN（默认）'),
-                'https://cdn.bili33.top' => _t('哔哩 CDN'),
+                'https://cdn.jsdmirror.com' => _t('JSDMirror（默认）'),
+                'https://jsd.onmicrosoft.cn' => _t('渺软公益 CDN'),
                 'https://jsd.cdn.zzko.cn' => _t('jsdelivr 镜像站'),
                 'https://jsd.proxy.aks.moe' => _t('晓白云公益 CDN'),
                 'https://jsd.lihaoyu.cn' => _t('Xiao Yu\'s CDN'),
+                'https://cdn.bili33.top' => _t('哔哩 CDN（不推荐）'),
+                'https://cdn.jsdelivr.net' => _t('jsDelivr 官方（不推荐）'),
+                'https://gcore.jsdelivr.net' => _t('jsDelivr 官方（GCore 节点，不推荐）')
             ],
-            'https://jsd.onmicrosoft.cn',
+            'https://cdn.jsdmirror.com',
             _t('jsDelivr 镜像'),
-            _t('说明：因为jsDelivr的CDN在国内访问不稳定，使用 jsDelivr 的镜像可以提高访问速度，默认为为<a href="https://cdn.onmicrosoft.cn" target="_blank"/>渺软公益 CDN</a>'));
+            _t('说明：因为jsDelivr的CDN在国内访问不稳定，使用 jsDelivr 的镜像可以提高访问速度，默认为为<a href="https://cdn.jsdmirror.com" target="_blank"/>JSDMirror</a>'));
         $edit->setAttribute('class', 'x-item x-basic');
         $form->addInput($edit->multiMode());
 
