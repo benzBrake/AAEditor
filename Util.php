@@ -1001,6 +1001,7 @@ class Util
      */
     public static function excerptEx($text, $archive, $last): string
     {
+        if ($last) $text = $last;
         // 隐藏代码块
         $blocks = [];
         $codeHolder = "<pre>__BLOCK__</pre>";
