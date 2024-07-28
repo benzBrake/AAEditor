@@ -1019,11 +1019,10 @@ class Util
                 "[ ]" => '【未完成】'
             ));
         }
-
         foreach (Util::$excerptParsers as $parserItem) {
             if (array_key_exists('parser', $parserItem)) {
                 $newText = call_user_func($parserItem['parser'], $text, $archive);
-                if ($newText) {
+                if (is_string($newText)) {
                     $text = $newText;
                 }
             }
