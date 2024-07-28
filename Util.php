@@ -767,7 +767,7 @@ class Util
                     display: inline-flex;
                     align-items: center;
                     border: 1px solid #0d6efd;
-                    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15),0 1px 1px rgba(0, 0, 0, 0.075);
+                    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 1px 1px rgba(0, 0, 0, 0.075);
                     transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
                 }
 
@@ -1020,11 +1020,11 @@ class Util
             ));
         }
         foreach (Util::$excerptParsers as $parserItem) {
-            if (array_key_exists('parser', $parserItem)) {
-                $newText = call_user_func($parserItem['parser'], $text, $archive);
-                if (is_string($newText)) {
-                    $text = $newText;
-                }
+            $pos = stripos($parserItem['parser'], '::');
+            $class = substr($parserItem['parser'], 0, $pos);
+            $method = substr($parserItem['parser'], $pos + 2);
+            if (array_key_exists('parser', $parserItem) && method_exists($class, $method)) {
+                $text = call_user_func([$class, $method], $text, $archive);
             }
         }
 
