@@ -641,6 +641,7 @@ class Util
                             if (compareVersions(serverVersion, '<?php echo \TypechoPlugin\AAEditor\Plugin::version() ?>') > 0) {
                                 let div = document.createElement('div');
                                 div.className = 'aaeditor-update-log';
+                                div.style.backgroundColor = '#fff';
                                 div.innerHTML = `<div class="update-log-title"><strong><?php _e("AAEditor 有更新！"); ?>(<span style="color: red">${serverVersion}</span>)</strong><small class="delay-no-more">一周不再提醒</small></div><div class="update-log-content">${upldateLog.outerHTML}<a class="btn-download" href="${updateLink}" target="_blank"><?php _e("下载最新版") ?></a></div><div class="progress-bar"></div>`;
                                 document.body.appendChild(div);
                                 div.querySelector('.delay-no-more').addEventListener('click', function () {
