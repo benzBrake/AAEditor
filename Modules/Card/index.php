@@ -205,7 +205,6 @@ class ModuleCard implements Module
         return $text;
     }
 
-
     public static function parseExcerpt($text, $archive): string
     {
         if (strpos($text, '[x-cards') !== false) {
