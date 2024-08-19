@@ -36,7 +36,7 @@
     "css-loader": "^5.2.6",
     "expose-loader": "^3.0.0",
     "file-loader": "^6.2.0",
-    "highlight.js": "^11.0.1",
+    "highlight.js": "^11.10.0",
     "laravel-mix": "^6.0.27",
     "laravel-mix-clean": "^0.1.0",
     "laravel-mix-obfuscator": "^1.0.0",

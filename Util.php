@@ -20,6 +20,19 @@ class Util
     private static $excerptParsers;
     private static $archiveStatics;
 
+    private static $staticMap = [
+        'https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css' => 'css/font-awesome.min.css',
+        'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js' => 'js/tex-mml-chtml.js',
+        'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js' => 'js/highlight.min.js',
+        'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/' => 'css/highlight.js',
+        'https://cdn.jsdelivr.net/npm/html-to-md@0.8.5/dist/index.min.js' => 'js/html-to-md.min.js',
+        'https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css' => 'css/toastify.min.css',
+        'https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.js' => 'js/toastify.min.js',
+        'https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/src/toastify.min.js' => 'js/toastify.min.js',
+        'https://cdn.jsdelivr.net/npm/aplayer@1/dist/APlayer.min.js' => 'js/APlayer.min.js',
+        'https://cdn.jsdelivr.net/npm/aplayer@1/dist/APlayer.min.css' => 'css/APlayer.min.css',
+    ];
+
     /**
      * 激活插件
      * @return string
@@ -127,9 +140,9 @@ class Util
         if ($filename !== "off" && array_key_exists($filename, $cssFiles)) {
             ?>
             <script
-                src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.8.0/build/highlight.min.js') ?>"></script>
+                    src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js') ?>"></script>
             <link rel="stylesheet"
-                  href="<?php echo Common::url(preg_replace("/(?<!\.min)\.css$/", ".min.css", $filename), Util::parseJSD('https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.8.0/build/styles/')) ?>">
+                  href="<?php echo Common::url(preg_replace("/(?<!\.min)\.css$/", ".min.css", $filename), Util::parseJSD('https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/')) ?>">
             <link rel="stylesheet" href="<?php echo Util::pluginStatic('css', 'hljs.css') ?>"/>
             <script>
                 (function () {
@@ -289,11 +302,11 @@ class Util
             <script src="<?php $options->adminStaticUrl('js', 'purify.js'); ?>"></script>
             <script src="<?php echo Util::pluginStatic('js', 'previewUtils.js'); ?>"></script>
             <script
-                src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/html-to-md@0.8.3/dist/index.min.js'); ?>"></script>
+                    src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/html-to-md@0.8.5/dist/index.min.js'); ?>"></script>
             <link rel="stylesheet" type="text/css"
                   href="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css'); ?>">
             <script type="text/javascript"
-                    src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/toastify-js'); ?>"></script>
+                    src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/src/toastify.min.js'); ?>"></script>
             <script>
                 $(document).ready(function () {
                     // 伪工具栏处理
@@ -727,6 +740,7 @@ class Util
                     border: 1px solid rgba(0, 0, 0, 0.175);
                     overflow: hidden;
                     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+                    background-color: #fff;
                 }
 
                 .aaeditor-update-log .update-log-title {
@@ -1245,6 +1259,18 @@ class Util
     }
 
     /**
+     * 获取本地镜像路径
+     *
+     * @Date 2024/8/19
+     * @param string $uri 相对路径
+     * @return string
+     */
+    public static function pluginMirror(string $uri): string
+    {
+        return Common::url($uri, self::pluginUrl('assets/mirror/'));
+    }
+
+    /**
      * 获取插件资源文件具体路径
      * @param string $uri 相对于插件目录的资源相对路径
      * @return string 资源绝对路径
@@ -1273,11 +1299,24 @@ class Util
     /**
      * 获取 JSD 资源链接
      *
-     * @throws Exception
+     * @param string $url 资源链接
+     * @return string
      */
-    public static function parseJSD($url): string
+    public static function parseJSD(string $url): string
     {
-        return preg_replace("/((https?:)?)\/\/cdn\.jsdelivr\.net/", self::pluginOption('XJsdelivrMirror', 'https://jsd.onmicrosoft.cn'), $url);
+        try {
+            $mirror = self::pluginOption('XJsdelivrMirror', 'local');
+        } catch (Exception $e) {
+            $mirror = 'local';
+        }
+
+        if ($mirror === 'local') {
+            if (array_key_exists($url, self::$staticMap)) {
+                return self::pluginMirror(self::$staticMap[$url]);
+            }
+        } else {
+            return preg_replace("/((https?:)?)\/\/cdn\.jsdelivr\.net/", $mirror, $url);
+        }
     }
 
     /**
@@ -1314,7 +1353,7 @@ class Util
      */
     public static function listHljsCss(): array
     {
-        $cssPath = Util::pluginDir('assets/dist/css/highlight.js');
+        $cssPath = Util::pluginDir('assets/mirror/css/highlight.js');
         if (DIRECTORY_SEPARATOR === "\\") {
             $cssPath = str_replace("/", "\\", $cssPath);
         } else {

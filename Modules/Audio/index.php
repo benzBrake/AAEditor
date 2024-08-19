@@ -96,8 +96,8 @@ class ModuleAudio implements Module
     public static function commonStatic(): void
     {
         ?>
-        <script src="https://jsd.onmicrosoft.cn/npm/aplayer@1.10.1/dist/APlayer.min.js "></script>
-        <link href="https://jsd.onmicrosoft.cn/npm/aplayer@1.10.1/dist/APlayer.min.css " rel="stylesheet">
+        <script src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/aplayer@1/dist/APlayer.min.js'); ?>"></script>
+        <link href="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/aplayer@1/dist/APlayer.min.css'); ?>" rel="stylesheet">
         <link rel="stylesheet"
               href="<?php echo Util::moduleUrl('Audio', 'index.css'); ?>">
         <script>
