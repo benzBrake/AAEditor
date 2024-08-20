@@ -50,6 +50,36 @@ window.XPreviewUtils = {
     getShortCodeRegex(tag) {
         return new RegExp('\\[(\\[?)(' + tag + ')(?![\\w-])([^\\]\\/]*(?:\\/(?!\\])[^\\]\\/]*)*?)(?:(\\/)\\]|\\](?:([^\\[]*(?:\\[(?!\\/\\2\\])[^\\[]*)*)(\\[\\/\\2\\]))?)(\\]?)', 'g');
     },
+
+    parseShortCodeAttrs(text) {
+        var named = {},
+            numeric = [],
+            pattern, match;
+
+        pattern = /([\w-]+)\s*=\s*"([^"]*)"(?:\s|$)|([\w-]+)\s*=\s*'([^']*)'(?:\s|$)|([\w-]+)\s*=\s*([^\s'"]+)(?:\s|$)|"([^"]*)"(?:\s|$)|'([^']*)'(?:\s|$)|(\S+)(?:\s|$)/g;
+        text = text.replace(/[\u00a0\u200b]/g, ' ');
+        // Match and normalize attributes.
+        while ((match = pattern.exec(text))) {
+            if (match[1]) {
+                named[match[1].toLowerCase()] = match[2];
+            } else if (match[3]) {
+                named[match[3].toLowerCase()] = match[4];
+            } else if (match[5]) {
+                named[match[5].toLowerCase()] = match[6];
+            } else if (match[7]) {
+                numeric.push(match[7]);
+            } else if (match[8]) {
+                numeric.push(match[8]);
+            } else if (match[9]) {
+                numeric.push(match[9]);
+            }
+        }
+
+        return {
+            named: named,
+            numeric: numeric
+        };
+    }
 }
 
 window.XPreviewUtils.init();

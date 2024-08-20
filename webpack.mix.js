@@ -27,7 +27,7 @@ mix.sass("assets/src/main.scss", "assets/dist/css")
     .sass("assets/src/content.scss", "assets/dist/css")
     .sass("assets/src/config/config.scss", "assets/dist/css")
     .copy("assets/src/editor-js.php", "assets/dist/js")
-    .copy("node_modules/highlight.js/styles", "assets/mirror/css/highlight.js")
+    .copy("node_modules/highlight.js/styles", "assets/dist/css/highlight.js")
 
 if (mix.inProduction()) {
     mix.sourceMaps();

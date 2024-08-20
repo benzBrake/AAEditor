@@ -31,6 +31,8 @@ class Util
         'https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/src/toastify.min.js' => 'js/toastify.min.js',
         'https://cdn.jsdelivr.net/npm/aplayer@1/dist/APlayer.min.js' => 'js/APlayer.min.js',
         'https://cdn.jsdelivr.net/npm/aplayer@1/dist/APlayer.min.css' => 'css/APlayer.min.css',
+        'https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js' => 'js/clipboard.min.js'
+
     ];
 
     /**
@@ -57,6 +59,9 @@ class Util
         // 内容替换处理
         Plugin::factory('\Widget\Base\Contents')->contentEx_99 = [__CLASS__, 'contentEx'];
         Plugin::factory('\Widget\Base\Contents')->excerptEx_99 = [__CLASS__, 'excerptEx'];
+
+        // 增加路由
+        Helper::addAction('editor', __NAMESPACE__ . '\Action');
         return _t('插件已启用，请进入插件设置启用你需要的模块！');
     }
 
@@ -280,7 +285,18 @@ class Util
      */
     public static function editorFooter()
     {
-
+        $admin_dir = Common::url(trim(defined('__TYPECHO_ADMIN_DIR__') ? __TYPECHO_ADMIN_DIR__ : '/admin/', '/'), __TYPECHO_ROOT_DIR__);
+        $css_path = Common::url('css/style.css', $admin_dir);
+        if (is_file($css_path)): ?>
+            <script>
+                (function () {
+                    let link = document.querySelector('link[href="<?php Helper::options()->adminStaticUrl('css', 'style.css') ?>"]');
+                    if (link) link.parentNode.removeChild(link);
+                })();
+            </script>
+            <link rel="stylesheet" href="<?php Helper::options()->index('action/editor?admin_style_css'); ?>">
+        <?php
+        endif;
     }
 
     /**
@@ -307,6 +323,8 @@ class Util
                   href="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css'); ?>">
             <script type="text/javascript"
                     src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/src/toastify.min.js'); ?>"></script>
+            <script type="text/javascript"
+                    src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js'); ?>"></script>
             <script>
                 $(document).ready(function () {
                     // 伪工具栏处理
@@ -1356,7 +1374,7 @@ class Util
      */
     public static function listHljsCss(): array
     {
-        $cssPath = Util::pluginDir('assets/mirror/css/highlight.js');
+        $cssPath = Util::pluginDir('assets/dist/css/highlight.js');
         if (DIRECTORY_SEPARATOR === "\\") {
             $cssPath = str_replace("/", "\\", $cssPath);
         } else {
@@ -1613,7 +1631,7 @@ class Util
      * @param string $template 转换模板
      * @return mixed
      */
-    public static function thumbs($archive, int $quantity = 3, bool $return = false, bool $parse = false, string $template = /** @lang text */'<img alt="" src="%s" />')
+    public static function thumbs($archive, int $quantity = 3, bool $return = false, bool $parse = false, string $template = /** @lang text */ '<img alt="" src="%s" />')
     {
         $thumbs = [];
         if (isset($archive)) {
