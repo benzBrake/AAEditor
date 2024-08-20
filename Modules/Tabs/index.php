@@ -289,7 +289,7 @@ class ModuleTabs implements Module
      */
     public static function archiveStatic($archive): void
     {
-//        self::commonStatic();
+        self::commonStatic();
     }
 
     /**
