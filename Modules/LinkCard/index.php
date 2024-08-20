@@ -98,7 +98,7 @@ class ModuleLinkCard implements Module
                     <div class="x-link-backdrop"></div>
                     <div class="x-link-content">
                         <span class="x-link-title">${this.options.title}</span>
-                        <span class="x-link-icon"><img src="${this.options.icon}" /></span>
+                        <span class="x-link-icon" style="background-image: url(${this.options.icon})"></span>
                     </div>
                 </a>
             `;

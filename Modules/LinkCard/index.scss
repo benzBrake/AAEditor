@@ -48,16 +48,9 @@
       border-radius: 4px;
       flex-shrink: 0;
       display: block;
-
-      img {
-        background-color: #e0e7ff;
-        display: block;
-        height: 48px;
-        width: 48px;
-        object-fit: cover;
-        max-width: revert;
-        bottom: 0;
-      }
+      height: 48px;
+      width: 48px;
+      background-size: cover;
     }
   }
 }
