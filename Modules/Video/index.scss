@@ -55,12 +55,6 @@
 .x-bilibili {
   &-wrapper {
     position: relative;
-
-    &:before {
-      content: "";
-      display: block;
-      padding-top: 62.15%;
-    }
   }
 
   position: absolute;

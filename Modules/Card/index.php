@@ -101,7 +101,10 @@ class ModuleCard implements Module
                         if (named['title']) {
                             title = named['title'];
                         }
-                        return `<div class="x-cards-wrapper" style="overflow: hidden"><div class="${classList.join(" ")}"${attr}><div class="x-card-title">${title}<span class="x-card-icon"></span></div><div class="x-card-content">${content}</div></div></div>`;
+                        if (named['fold'] === 'true' || named['fold'] === 'on' || named['fold'] === '1') {
+                            classList.push('fold');
+                        }
+                        return `<div class="x-cards-wrapper" style="overflow: hidden"><div class="${classList.join(" ")}"><div class="x-card-title">${title}<span class="x-card-icon"></span></div><div class="x-card-content">${content}</div></div></div>`;
                     }
                     return html;
                 }
