@@ -115,7 +115,7 @@ class Plugin implements PluginInterface
         }
         $errorMessage = [];
         if (!$pluginData_backup) {
-            $errorMessage[] = _t('检测到设置备份不存在，<a href="%s">点此</a>备份设置', Common::url('/options-plugin.php?config=AAEditor&type=backup', Helper::options()->adminUrl));
+            $errorMessage[] = _t(/** @lang text */'检测到设置备份不存在，<a href="%s">点此</a>备份设置', Common::url('/options-plugin.php?config=AAEditor&type=backup', Helper::options()->adminUrl));
         }
         Util::collectManifest();
         ?>
