@@ -1,9 +1,7 @@
 <?php
 
-use Typecho\Config;
 use TypechoPlugin\AAEditor\Module;
 use TypechoPlugin\AAEditor\Util;
-use Utils\Helper;
 
 /**
  * 以多标签形式排版正文
@@ -328,8 +326,8 @@ class ModuleTabs implements Module
                                 tabNavItem.className = 'x-tabs-nav-item';
                                 tabNavItem.setAttribute('tabindex', i + 1);
                                 let name = tab.getAttribute('name');
-                                let title =  tab.getAttribute('title');
-                                tabNavItem.innerHTML = '<span>' + (name ? name : (title ? title : '<?php _e("标签") ?>'.replace("%d", i + 1))) + '/<span>';
+                                let title = tab.getAttribute('title');
+                                tabNavItem.innerHTML = '<span>' + (name ? name : (title ? title : '<?php _e("标签") ?>'.replace("%d", i + 1))) + '<span>';
                                 tabNavItem.addEventListener('click', () => {
                                     this.setAttribute('active', tabNavItem.getAttribute('tabindex'));
                                 })
@@ -355,6 +353,11 @@ class ModuleTabs implements Module
                                 }
                                 if (tabContentItem.lastElementChild && tabContentItem.lastElementChild.tagName.toString() === "P" && tabContentItem.lastElementChild.innerHTML == "") {
                                     tabContentItem.removeChild(tabContentItem.lastElementChild);
+                                }
+                                let {children: chlren} = tabContentItem;
+                                let chl = chlren.length;
+                                if (chl > 2 && chlren[chl - 2].matches('br') && chlren[chl - 1].matches('span.line[data-start]')) {
+                                    chlren[chl - 2].remove();
                                 }
                                 tabContent.appendChild(tabContentItem);
                                 this.removeChild(tab);
@@ -411,7 +414,7 @@ class ModuleTabs implements Module
         $patternTabs = Util::get_shortcode_regex(['tabs', 'x-tabs']);
         $patternTab = Util::get_shortcode_regex(['tab', 'x-tab']);
         $regex_useless = '/^\<br>|\<br>$/';
-        return preg_replace_callback("/$patternTabs/", function ($m) use($patternTab, $regex_useless) {
+        return preg_replace_callback("/$patternTabs/", function ($m) use ($patternTab, $regex_useless) {
             // Allow [[foo]] syntax for escaping a tag.
             if ('[' === $m[1] && ']' === $m[6]) {
                 return substr($m[0], 1, -1);
@@ -428,7 +431,7 @@ class ModuleTabs implements Module
                 $title = $attrs['name'] ?? $attrs['title'] ?? _t("标签 %d", $i + 1);
                 if ($attrs['active'] ?? '' === "true") $active = $i + 1;
                 $t = trim($matches[5][$i]);
-                $t = preg_replace($regex_useless, '' , $t);
+                $t = preg_replace($regex_useless, '', $t);
                 $tabs_html[$i] = "<div title='{$title}' class='x-tab'>{$t}</div>";
             }
             if ($active < 1) $active = 1;
