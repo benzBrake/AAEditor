@@ -8,6 +8,7 @@
   border-radius: 5px;
   position: relative;
   margin: .5em 0;
+  font-family: SF Pro SC,SF Pro Text,SF Pro Icons,PingFang SC,Lantinghei SC,Microsoft Yahei,Hiragino Sans GB,Microsoft Sans Serif,WenQuanYi Micro Hei,sans-serif;
   @media (min-width: 960px) {
     padding: 15px;
   }
@@ -81,7 +82,6 @@
       text-overflow: ellipsis;
       line-height: 1.2;
       font-size: 14px;
-      margin-top: 20px;
 
       * {
         padding-top: 0;
@@ -92,10 +92,11 @@
         display: block;
         display: -webkit-box;
         -webkit-box-orient: vertical;
+        margin-top: 8px;
       }
 
       @media (min-width: 1400px) {
-        -webkit-line-clamp: 3;
+        -webkit-line-clamp: 2;
       }
     }
 
