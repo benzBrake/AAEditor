@@ -1643,7 +1643,7 @@ class Util
                     $fieldThumbs = explode("\n", $fields['thumb']);
                     foreach ($fieldThumbs as $thumb) {
                         if ($quantity > 0 && !empty(trim($thumb))) {
-                            $thumbs[] = $thumb;
+                            $thumbs[] = preg_replace('/\|\d+x\d+\s*$/i', '', $thumb);
                             $quantity -= 1;
                         }
                     }
