@@ -60,22 +60,28 @@ class ModuleCard implements Module
                 }
             }]).trigger('XEditorAddHtmlProcessor', [
                 function (html) {
+                    let fn = createCardCallback.bind(this);
                     if (html.indexOf("[x-cards")) {
                         html = html.replace(this.getShortCodeRegex("x-cards"), (...matches) => {
                             let content = matches[5];
-                            content = content.replace(this.getShortCodeRegex("x-card"), '<div class="x-card"$3>$5</div>');
-                            content = content.replace(this.getShortCodeRegex("collapse"), '<div class="x-card"$3>$5</div>');
-                            return '<div class="x-cards-wrapper"><x-cards ' + matches[3] + '>' + content + '</x-cards></div>';
+                            content = content.replace(this.getShortCodeRegex("x-card"), fn);
+                            content = content.replace(this.getShortCodeRegex("collapse"), fn);
+                            return '<div class="x-cards-wrapper"><div class="x-card" ' + matches[3] + '>' + content + '</div></div>';
+                        });
+                    }
+                    if (html.indexOf("[collapses")) {
+                        html = html.replace(this.getShortCodeRegex("collapses"), (...matches) => {
+                            let content = matches[5];
+                            content = content.replace(this.getShortCodeRegex("x-card"), fn);
+                            content = content.replace(this.getShortCodeRegex("collapse"), fn);
+                            return '<div class="x-cards-wrapper"><div class="x-card" ' + matches[3] + '>' + content + '</div></div>';
                         });
                     }
                     if (html.indexOf("[collapse")) {
-                        html = html.replace(this.getShortCodeRegex("collapse"), `<div class="x-card-wrapper"><x-card$3>$5</x-card></div>`);
-                    }
-                    if (html.indexOf("[collapse")) {
-                        html = html.replace(this.getShortCodeRegex("collapse"), `<div class="x-card-wrapper"><x-card$3>$5</x-card></div>`);
+                        html = html.replace(this.getShortCodeRegex("collapse"), fn);
                     }
                     if (html.indexOf("[x-card")) {
-                        html = html.replace(this.getShortCodeRegex("x-card"), `<div class="x-card-wrapper"><x-card$3>$5</x-card></div>`);
+                        html = html.replace(this.getShortCodeRegex("x-card"), fn);
                     }
                     if (html.indexOf("[card")) {
                         html = html.replace(this.getShortCodeRegex("card"), (...matches) => {
@@ -84,6 +90,18 @@ class ModuleCard implements Module
                             let title = div.firstElementChild.getAttribute('title') ?? '<?php _e("无标题") ?>';
                             return `<div class="x-card-static"><div class="x-card-title">${title}</div><div class="x-card-content">${matches[5]}</div><div>`;
                         });
+                    }
+
+                    function createCardCallback() {
+                        let attr = arguments[3] || "", content = arguments[5], classList = ['x-card'], title = '<?php _e("无标题") ?>';
+                        let { named } = this.parseShortCodeAttrs(attr);
+                        if (named['class']) {
+                            classList.push(named['class'].split(" "));
+                        }
+                        if (named['title']) {
+                            title = named['title'];
+                        }
+                        return `<div class="x-cards-wrapper" style="overflow: hidden"><div class="${classList.join(" ")}"${attr}><div class="x-card-title">${title}<span class="x-card-icon"></span></div><div class="x-card-content">${content}</div></div></div>`;
                     }
                     return html;
                 }
@@ -141,7 +159,8 @@ class ModuleCard implements Module
             }
 
             document.addEventListener('DOMContentLoaded', xCardInit);
-            document.addEventListener('pjax:complete', xCardInit);
+            document.addEventListener('pjax:success', xCardInit);
+            document.addEventListener('XMPreviewEnd', xCardInit);
         </script>
         <?php
     }

@@ -451,6 +451,38 @@ body:not(.fullscreen) {
 
 #wmd-preview {
   @import "editor/content";
+
+  pre {
+    border-radius: .5em;
+    border: 1px solid #ccc;
+
+    > code {
+      border-radius: .5em;
+      word-break: break-all;
+      white-space: pre-wrap;
+    }
+
+    &.styled {
+      position: relative;
+
+      .copy {
+        position: absolute;
+        right: 0.5em;
+        top: 0.5em;
+        cursor: pointer;
+      }
+    }
+  }
+
+  &:not([hljs]) {
+    pre, code {
+      background-color: #f6f8fa;
+    }
+
+    pre {
+      padding: .75em;
+    }
+  }
 }
 
 #wmd-preview-button:not([active="true"]) ~ #wmd-code-highlight-button {
