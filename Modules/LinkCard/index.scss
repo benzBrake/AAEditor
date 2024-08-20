@@ -1,4 +1,18 @@
 .x-link {
+  all: reset;
+  color: #666;
+  box-shadow: 1px 1px 2px 1px rgb(99 91 227 / 0.4), -1px -1px 2px 1px rgb(99 91 227 / 0.4);
+
+  &:hover {
+    .x-link-title {
+      color: #635be3;
+
+      &:before {
+        width: 100%;
+      }
+    }
+  }
+
   &-wrapper {
     display: flex;
     justify-content: center;
@@ -13,21 +27,22 @@
 
   &-backdrop {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     z-index: 1;
-    background-color: #e0e7ff;
+    border-radius: 8px;
+    background: #fff;
   }
 
   &-content {
     position: relative;
     z-index: 2;
+    border: 1px solid rgb(0 0 0 / 0.1);
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 12px;
+    border-radius: 8px;
+    box-sizing: border-box;
 
     .x-link-title {
       flex-grow: 1;
@@ -40,7 +55,7 @@
       max-height: 40px;
       font-weight: 500;
       line-height: 1.25em;
-      color: #4f46e5;
+      position: relative;
     }
 
     .x-link-icon {
