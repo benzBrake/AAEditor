@@ -40,8 +40,37 @@ class ModuleAudio implements Module
 </div>
 <div class="form-item">
     <label for="autoplay"><?php _e("音频格式") ?></label>
-    <select name="type"><option value="audio/mpeg">mp3</option><option value="audio/wav">wav</option><option value="audio/ogg">ogg</option><option value="audio/x-mpegurl">m3u</option></select>
+    <select name="type">
+        <option data=type="mp3" value="audio/mpeg">mp3</option>
+        <option data-type="wav" value="audio/wav">wav</option>
+        <option data-type="ogg" value="audio/ogg">ogg</option>
+        <option data-type="m3u" value="audio/x-mpegurl">m3u</option>
+        <option data-type="flac" value="audio/flac">flac</option>
+    </select>
 </div>`,
+                        handle(modal) {
+                            $('[name="src"]', modal).on('input', debounce(function (e) {
+                                let src = $(this).val();
+                                if (src && src.length) {
+                                    let suffix = getSuffix(src);
+                                    if (suffix && $(`option[data-type="${suffix}"]`, modal)) {
+                                        $('option[selected]', modal).removeAttr('selected');
+                                        $('[name=type]', modal).val($(`option[data-type="${suffix}"]`, modal).val());
+                                    }
+                                }
+                            }));
+                            function debounce(func, wait) {
+                                let timeout;
+                                return function () {
+                                    const context = this;
+                                    const args = arguments;
+                                    clearTimeout(timeout);
+                                    timeout = setTimeout(() => {
+                                        func.apply(context, args);
+                                    }, wait);
+                                };
+                            }
+                        },
                         confirm(modal) {
                             let src = $('[name="src"]', modal).val(),
                                 autoplay = $('[name="autoplay"]', modal).val() || "off";
@@ -97,7 +126,8 @@ class ModuleAudio implements Module
     {
         ?>
         <script src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/aplayer@1/dist/APlayer.min.js'); ?>"></script>
-        <link href="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/aplayer@1/dist/APlayer.min.css'); ?>" rel="stylesheet">
+        <link href="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/aplayer@1/dist/APlayer.min.css'); ?>"
+              rel="stylesheet">
         <link rel="stylesheet"
               href="<?php echo Util::moduleUrl('Audio', 'index.css'); ?>">
         <script>
@@ -185,7 +215,7 @@ class ModuleAudio implements Module
                         name: name,
                         url: decodeURIComponent(url),
                         artist: artist || '<?php _e("未知艺术家"); ?>',
-                        cover: el.getAttribute('cover') || "https://cdn-us.imgs.moe/2023/09/08/64fb20d21209f.png",
+                        cover: el.getAttribute('cover') || "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MCA0MCI+PHBhdGggZmlsbD0iIzhiYjdmMCIgZD0iTTIwLDM3LjVjLTkuNiwwLTE3LjUtNy45LTE3LjUtMTcuNVMxMC40LDIuNSwyMCwyLjVTMzcuNSwxMC40LDM3LjUsMjBTMjkuNiwzNy41LDIwLDM3LjV6IE0yMCwxNi43Yy0xLjgsMC0zLjMsMS41LTMuMywzLjNzMS41LDMuMywzLjMsMy4zczMuMy0xLjUsMy4zLTMuM1MyMS44LDE2LjcsMjAsMTYuN3oiLz48cGF0aCBmaWxsPSIjNGU3YWI1IiBkPSJNMjAsM2M5LjQsMCwxNyw3LjYsMTcsMTdzLTcuNiwxNy0xNywxN1MzLDI5LjQsMywyMFMxMC42LDMsMjAsMyBNMjAsMjMuOGMyLjEsMCwzLjgtMS43LDMuOC0zLjhzLTEuNy0zLjgtMy44LTMuOHMtMy44LDEuNy0zLjgsMy44UzE3LjksMjMuOCwyMCwyMy44IE0yMCwyQzEwLjEsMiwyLDEwLjEsMiwyMHM4LjEsMTgsMTgsMThzMTgtOC4xLDE4LTE4UzI5LjksMiwyMCwyTDIwLDJ6IE0yMCwyMi44Yy0xLjUsMC0yLjgtMS4yLTIuOC0yLjhzMS4yLTIuOCwyLjgtMi44czIuOCwxLjIsMi44LDIuOEMyMi44LDIxLjUsMjEuNSwyMi44LDIwLDIyLjhMMjAsMjIuOHoiLz48cGF0aCBmaWxsPSIjYzJlOGZmIiBkPSJNMjUuOSw0LjFsLTQuNiwxMi40YzAuOSwwLjQsMS43LDEuMSwyLjEsMmwxMi4xLTUuNEMzMy42LDguOSwzMC4yLDUuNywyNS45LDQuMXoiLz48cGF0aCBmaWxsPSIjZmZmIiBkPSJNMjUuOSw0LjFsLTQuNiwxMi40YzAuMywwLjEsMC42LDAuMywwLjksMC41bDcuNy0xMC43QzI4LjcsNS4zLDI3LjMsNC42LDI1LjksNC4xeiIvPjxwYXRoIGZpbGw9IiNjMmU4ZmYiIGQ9Ik0xNC4xLDM1LjlsNC42LTEyLjRjLTAuOS0wLjQtMS43LTEuMS0yLjEtMkw0LjUsMjYuOUM2LjQsMzEuMSw5LjgsMzQuMywxNC4xLDM1Ljl6Ii8+PHBhdGggZmlsbD0iI2ZmZiIgZD0iTTE0LjEsMzUuOWw0LjYtMTIuNGMtMC4zLTAuMS0wLjYtMC4zLTAuOS0wLjVsLTcuNywxMC43QzExLjMsMzQuNywxMi43LDM1LjQsMTQuMSwzNS45eiIvPjxwYXRoIGZpbGw9IiM0ZTdhYjUiIGQ9Ik0yMCwxNy41YzEuNCwwLDIuNSwxLjEsMi41LDIuNXMtMS4xLDIuNS0yLjUsMi41cy0yLjUtMS4xLTIuNS0yLjVTMTguNiwxNy41LDIwLDE3LjUgTTIwLDE1Yy0yLjgsMC01LDIuMi01LDUgczIuMiw1LDUsNXM1LTIuMiw1LTVTMjIuOCwxNSwyMCwxNUwyMCwxNXoiLz48L3N2Zz4=",
                         lrc: el.getAttribute('lrc')
                     }
                 }
@@ -221,7 +251,8 @@ class ModuleAudio implements Module
                     'mp3': 'audio/mpeg',
                     'wav': 'audio/wav',
                     'ogg': 'audio/ogg',
-                    'm3u': 'audio/x-mpegurl'
+                    'm3u': 'audio/x-mpegurl',
+                    'flac': 'audio/flac',
                 };
 
                 // 如果文件扩展名存在于映射关系中，则返回对应的MIME类型；否则返回null
