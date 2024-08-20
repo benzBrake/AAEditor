@@ -436,7 +436,7 @@ class ModuleTabs implements Module
             }
             if ($active < 1) $active = 1;
             $content = implode('', $tabs_html);
-            return "<div class='x-tabs-wrapper'><x-tabs active='{$active}' style='display: block'>{$content}</x-tabs></div>";
+            return "<div class='x-tabs-wrapper' style='position: relative'><x-tabs active='{$active}' style='display: block; position: relative'>{$content}</x-tabs></div>";
         }, $text);
     }
 
