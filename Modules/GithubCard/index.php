@@ -151,9 +151,9 @@ class ModuleGithubCard implements Module
 
                     getRegex(is_github, is_gitee) {
                         if (is_github) {
-                            return /(?:git@|https?:\/\/)(?:github.com)(?:\/)([^\/]*)(\/?)(?<=\/)([.\w-]*=?)/is;
+                            return /(?:git@|https?:\/\/)github.com\/([^\/]*)(\/?)(?<=\/)([.\w-]*=?)/is;
                         } else if (is_gitee) {
-                            return /https?:\/\/(?:gitee.com)(?:\/)([^\/]*)(\/?)(?<=\/)([.\w-]*=?)/is;
+                            return /https?:\/\/gitee.com\/([^\/]*)(\/?)(?<=\/)([.\w-]*=?)/is;
                         } else {
                             return /([^\/]+)\/([^\/]+)/i;
                         }
@@ -231,13 +231,13 @@ class ModuleGithubCard implements Module
                     }
 
                     forksIcon() {
-                        return `<svg viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true">
+                        return `<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
                 <path fill-rule="evenodd" fill="currentColor" d="M5 3.09V12.9c-.6.3-1 .8-1 1.4 0 .8.8 1.7 2 1.7s2-.9 2-1.7c0-.6-.4-1.1-1-1.4v-4h3v.9c-.6.3-1 .8-1 1.4 0 .8.8 1.7 2 1.7s2-.9 2-1.7c0-.6-.4-1.1-1-1.4V6.09c.6-.3 1-.8 1-1.4 0-.8-.8-1.7-2-1.7s-2 .9-2 1.7c0 .6.4 1.1 1 1.4v2H7v-2c.6-.3 1-.8 1-1.4 0-.8-.8-1.7-2-1.7s-2 .9-2 1.7c0 .6.4 1.1 1 1.4z"></path>
             </svg>`;
                     }
 
                     starsIcon() {
-                        return `<svg viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true">
+                        return `<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
                 <path fill-rule="evenodd" fill="currentColor" d="M8 12.7l-4.3 2.3c-.5.3-1-.2-.8-.8l.8-4.7-3.5-3.4c-.4-.4-.2-1.1.4-1.2l4.8-.7 2.2-4.5c.3-.5 1-.5 1.2 0l2.2 4.5 4.8.7c.6.1.8.8.4 1.2l-3.5 3.4.8 4.7c.1.6-.5 1.1-.9.8L8 12.7z"></path>
             </svg>`;
                     }
@@ -281,10 +281,10 @@ class ModuleGithubCard implements Module
 
     public static function parseExcerpt($text, $archive): string
     {
-        if (strpos($text, '[x-link') === false) { //提高效率，避免每篇文章都要解析
+        if (strpos($text, '[github') === false && strpos($text, '[x-github') === false) { //提高效率，避免每篇文章都要解析
             return $text;
         }
-        $pattern = Util::get_shortcode_regex(['x-link']);
+        $pattern = Util::get_shortcode_regex(['x-github', 'github']);
         return preg_replace_callback(/**
          * @throws \Typecho\Exception
          */ "/$pattern/", function ($m) {

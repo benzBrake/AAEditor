@@ -140,7 +140,7 @@ class Util
         if ($filename !== "off" && array_key_exists($filename, $cssFiles)) {
             ?>
             <script
-                    src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js') ?>"></script>
+                src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js') ?>"></script>
             <link rel="stylesheet"
                   href="<?php echo Common::url(preg_replace("/(?<!\.min)\.css$/", ".min.css", $filename), Util::parseJSD('https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/')) ?>">
             <link rel="stylesheet" href="<?php echo Util::pluginStatic('css', 'hljs.css') ?>"/>
@@ -223,10 +223,10 @@ class Util
                 if (strpos($matches[1], Helper::options()->pluginUrl . '/AAEditor') !== false) {
                     $uri = str_replace(Helper::options()->pluginUrl . '/AAEditor', '', $matches[1]);
                     $arr = explode('?h=', $uri);
-                    array_push($cssFiles, [
+                    $cssFiles[] = [
                         'file' => Util::pluginDir($arr[0]),
                         'hash' => $arr[1]
-                    ]);
+                    ];
                     return '';
                 }
             }
@@ -263,7 +263,7 @@ class Util
         if (!is_dir(Util::pluginDir('cache'))) {
             try {
                 mkdir(Util::pluginDir('cache'), 0755, true);
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
             }
         }
         try {
@@ -302,7 +302,7 @@ class Util
             <script src="<?php $options->adminStaticUrl('js', 'purify.js'); ?>"></script>
             <script src="<?php echo Util::pluginStatic('js', 'previewUtils.js'); ?>"></script>
             <script
-                    src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/html-to-md@0.8.5/dist/index.min.js'); ?>"></script>
+                src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/html-to-md@0.8.5/dist/index.min.js'); ?>"></script>
             <link rel="stylesheet" type="text/css"
                   href="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css'); ?>">
             <script type="text/javascript"
@@ -637,7 +637,6 @@ class Util
                         .then(text => {
                             const fragment = document.createElement('div');
                             fragment.innerHTML = text;
-                            text = fragment.querySelector('.post-content,.entry-content')?.innerHTML;
                             let firstNode = fragment.querySelector('h2, h3');
                             let upldateLog = firstNode.nextElementSibling;
                             let updateLinkNode = firstNode.previousElementSibling.querySelector('a[href^="https://"]');
@@ -1033,12 +1032,15 @@ class Util
                 "[ ]" => '【未完成】'
             ));
         }
-        foreach (Util::$excerptParsers as $parserItem) {
-            $pos = stripos($parserItem['parser'], '::');
-            $class = substr($parserItem['parser'], 0, $pos);
-            $method = substr($parserItem['parser'], $pos + 2);
-            if (array_key_exists('parser', $parserItem) && method_exists($class, $method)) {
-                $text = call_user_func([$class, $method], $text, $archive);
+
+        if (is_array(Util::$excerptParsers)) {
+            foreach (Util::$excerptParsers as $parserItem) {
+                $pos = stripos($parserItem['parser'], '::');
+                $class = substr($parserItem['parser'], 0, $pos);
+                $method = substr($parserItem['parser'], $pos + 2);
+                if (array_key_exists('parser', $parserItem) && method_exists($class, $method)) {
+                    $text = call_user_func([$class, $method], $text, $archive);
+                }
             }
         }
 
@@ -1231,7 +1233,7 @@ class Util
         if (is_file($manifestPath)) {
             try {
                 $manifest = json_decode(file_get_contents($manifestPath), true);
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
             }
         }
         self::$manifest = $manifest;
@@ -1317,6 +1319,7 @@ class Util
         } else {
             return preg_replace("/((https?:)?)\/\/cdn\.jsdelivr\.net/", $mirror, $url);
         }
+        return $url;
     }
 
     /**
@@ -1339,7 +1342,7 @@ class Util
      * @return mixed
      * @throws \ReflectionException
      */
-    public static function reflectGetValue($object, $name)
+    public static function reflectGetValue($object, string $name)
     {
         $reflect = new ReflectionClass($object);
         $property = $reflect->getProperty($name);
@@ -1632,7 +1635,6 @@ class Util
             $content = $archive->markdown($archive->text);
             // 然后是正文匹配
             preg_match_all("/<img(?<images>[^>]*?)>/i", $content, $matches);
-            $text = implode("\n", $matches["images"]);
             foreach ($matches['images'] as $value) {
                 if ($quantity <= 0) {
                     break;
