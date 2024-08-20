@@ -118,13 +118,13 @@ class ModuleLinkCard implements Module
         }
         $pattern = Util::get_shortcode_regex(['x-link']);
         return preg_replace_callback("/$pattern/", function ($matches) {
-            $attrs = Util::shortcode_parse_atts(htmlspecialchars_decode($matches[3]));
+            $attrs = Util::shortcode_parse_atts(strip_tags(htmlspecialchars_decode($matches[3])));
             $url = array_key_exists('url', $attrs) ? strip_tags($attrs['url']) : '';
             if (empty($url)) {
                 return '';
             }
-            $title = array_key_exists('title', $attrs) ? strip_tags($attrs['title']) : $url;
-            $icon = array_key_exists('icon', $attrs) ? strip_tags($attrs['icon']) : Util::pluginUrl('index.php?url=' . $url);
+            $title = array_key_exists('title', $attrs) ? $attrs['title'] : $url;
+            $icon = array_key_exists('icon', $attrs) ? $attrs['icon'] : Util::pluginUrl('index.php?url=' . $url);
             return '<div class="x-link-wrapper"><a class="x-link" href="' . $url . '" target="_blank">
 <div class="x-link-backdrop"></div>
     <div class="x-link-content">
