@@ -199,6 +199,10 @@
       opacity: 0;
       transform: translateY(-100%);
 
+      & > div:last-child {
+        margin-bottom: 0;
+      }
+
       &-active {
         position: relative;
         z-index: 1;
