@@ -2,8 +2,11 @@
   all: reset;
   color: #666;
   box-shadow: 1px 1px 2px 1px rgb(99 91 227 / 0.4), -1px -1px 2px 1px rgb(99 91 227 / 0.4);
-
+  transition: all 0.3s ease-in-out;
   &:hover {
+    transform: translateY(-2px);
+    box-shadow: 2px 2px 4px 4px rgb(99 91 227 / 0.4), -2px -2px 4px 4px rgb(99 91 227 / 0.4);
+
     .x-link-title {
       color: #635be3;
 
