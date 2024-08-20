@@ -55,8 +55,8 @@ class Util
         Plugin::factory('\Widget\Archive')->handleInit = [__CLASS__, 'shortCodeInit'];
 
         // 内容替换处理
-        Plugin::factory('\Widget\Base\Contents')->contentEx = [__CLASS__, 'contentEx'];
-        Plugin::factory('\Widget\Base\Contents')->excerptEx = [__CLASS__, 'excerptEx'];
+        Plugin::factory('\Widget\Base\Contents')->contentEx_99 = [__CLASS__, 'contentEx'];
+        Plugin::factory('\Widget\Base\Contents')->excerptEx_99 = [__CLASS__, 'excerptEx'];
         return _t('插件已启用，请进入插件设置启用你需要的模块！');
     }
 
@@ -1613,7 +1613,7 @@ class Util
      * @param string $template 转换模板
      * @return mixed
      */
-    public static function thumbs($archive, int $quantity = 3, bool $return = false, bool $parse = false, string $template = '<img alt="" src="%s" />')
+    public static function thumbs($archive, int $quantity = 3, bool $return = false, bool $parse = false, string $template = /** @lang text */'<img alt="" src="%s" />')
     {
         $thumbs = [];
         if (isset($archive)) {
