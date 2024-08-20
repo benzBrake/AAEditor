@@ -62,7 +62,8 @@ class Util
 
         // 增加路由
         Helper::addAction('editor', __NAMESPACE__ . '\Action');
-        return _t('插件已启用，请进入插件设置启用你需要的模块！');
+        $url = Common::url('options-plugin.php?config=AAEditor#typecho-option-item-XModules-8', Helper::options()->adminUrl);
+        return _t('插件已启用，<a href="%s">点此进入插件设置</a>启用你需要的模块！', $url);
     }
 
     /**
