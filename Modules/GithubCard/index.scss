@@ -11,8 +11,8 @@
     border-radius: .25em .25em 0 0;
 
     .icon {
-      display: flex;
-      align-items: center;
+      padding-top: 2px;
+      padding-right: .5em;
     }
 
     svg {
@@ -21,7 +21,6 @@
     }
 
     > a, span {
-      margin-right: .25em;
       text-decoration: none;
     }
 
@@ -182,9 +181,8 @@
       }
 
       .icon {
-        display: flex;
-        align-items: center;
-        margin-right: .5em;
+        padding-top: 2px;
+        padding-right: .5em;
       }
     }
   }

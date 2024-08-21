@@ -63,7 +63,7 @@ class Util
         // 增加路由
         Helper::addAction('editor', __NAMESPACE__ . '\Action');
         $url = Common::url('options-plugin.php?config=AAEditor#typecho-option-item-XModules-8', Helper::options()->adminUrl);
-        return _t('插件已启用，<a href="%s">点此进入插件设置</a>启用你需要的模块！', $url);
+        return _t(/** @lang text */ '插件已启用，<a href="%s">点此进入插件设置</a>启用你需要的模块！', $url);
     }
 
     /**
@@ -99,13 +99,32 @@ class Util
                   href="<?php echo Util::pluginStatic('css', 'content.css'); ?>">
             <?php
         }
-        if (Util::pluginOption('XLoadFontAwesome', 'on') === 'on') {
+        $lfa = Util::pluginOption('XLoadFontAwesome', 'on');
+        if ($lfa === 'on') {
             // 引入字体图标
             ?>
             <link rel="stylesheet"
                   href="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css'); ?>">
             <?php
-
+        } else if ($lfa === 'auto') {
+            ?>
+            <script>
+                (function () {
+                    function loadFontAwesome() {
+                        if (document.querySelector('.fa')) {
+                            let rel = document.createElement('link');
+                            rel.rel = 'stylesheet';
+                            rel.href = '<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css'); ?>';
+                            document.body.appendChild(rel);
+                        }
+                    }
+                    loadFontAwesome();
+                    document.addEventListener('pjax:complete', () => {
+                        loadFontAwesome();
+                    });
+                })();
+            </script>
+            <?php
         }
         if (Util::pluginOption('XMathJaxSupport', 'on') === 'on') {
             // 引入 MathJax
