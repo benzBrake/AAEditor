@@ -206,11 +206,12 @@ class Plugin implements PluginInterface
         $edit = new Form\Element\Select(
             'XLoadFontAwesome',
             [
-                'on' => _t('开启（默认）'),
+                'auto' => _t('自动（默认）'),
+                'on' => _t('开启'),
                 'off' => _t('关闭')
-            ], 'on',
+            ], 'auto',
             _t('前台载入FontAwesome'),
-            _t('说明：关闭后需要自行载入相关字体图片'));
+            _t('说明：关闭后需要自行载入相关字体图标'));
         $edit->setAttribute('class', 'x-item x-basic');
         $form->addInput($edit);
 

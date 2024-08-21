@@ -193,9 +193,9 @@ class ModuleGithubCard implements Module
                         return `<div class="x-github">
                 <div class="x-github-title">
                     <span class="icon">${icon}</span>
-                    <a class="user" href="${json.owner.html_url}" target="_blank">${json.owner.login}</a>
+                    <a class="user reset" href="${json.owner.html_url}" target="_blank">${json.owner.login}</a>
                     <span>/</span>
-                    <a class="x-github-repository" href="${json.html_url}" target="_blank">${json.name}</a>
+                    <a class="x-github-repository reset" href="${json.html_url}" target="_blank">${json.name}</a>
                     <div class="x-github-statics">
                         <span class="forks">${this.forksIcon()}${json.forks_count}</span>
                         <span class="slash">/</span>
@@ -204,15 +204,15 @@ class ModuleGithubCard implements Module
                 </div>
                 <div class="x-github-content">${json.description}</div>
                 <div class="x-github-footer">
-                    <a class="x-github-btn secondary" href="${json.html_url}" target="_blank"><span class="x-github-btn-content">仓库</span></a>
-                    <a class="x-github-btn warning download-zip" href="${json.html_url}/zipball/master" target="_blank"><span class="x-github-btn-content">下载 zip 文件</span></a>
+                    <a class="x-github-btn secondary reset" href="${json.html_url}" target="_blank"><span class="x-github-btn-content">仓库</span></a>
+                    <a class="x-github-btn warning download-zip reset" href="${json.html_url}/zipball/master" target="_blank"><span class="x-github-btn-content">下载 zip 文件</span></a>
                 </div>
             </div>`;
                     }
 
                     parseUserHTML(json, icon) {
                         return `<div class="x-github x-github-user">
-<a href="${json.html_url}" target="_blank">
+<a class="reset" href="${json.html_url}" target="_blank">
    <span class="icon">${icon}</span>
    <span class="name">${json.login}(${json.name})</span>
 </a>`;
