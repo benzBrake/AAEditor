@@ -93,6 +93,7 @@ class ModulePhotos implements Module
                             el.insertBefore(wrap, c);
                             wrap.appendChild(i);
                             wrap.appendChild(c);
+                            c.classList.add('parsed');
                             if (img.complete) {
                                 wrap.style.width = img.width * widthBase / img.height + "px";
                                 wrap.style.flexGrow = img.width * widthBase / img.height;
@@ -106,6 +107,7 @@ class ModulePhotos implements Module
                             }
                         } else if (c.tagName === "a" && c.querySelector("img")) {
                             a.classList.add("photo");
+                            c.querySelector('img').classList.add('parsed');
                             let img = new Image();
                             img.src = c.src;
                             let i = document.createElement('i');

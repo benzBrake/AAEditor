@@ -2,20 +2,25 @@
   display: none;
 }
 
-.x-video,
-.x-bilibili-wrapper {
+.x-video {
   width: 100%;
   position: relative;
   margin: .5em 0;
 
   &.fake {
+    &::before {
+      content: "";
+      display: block;
+      padding-top: 56.25%;
+    }
+
     .x-video-inner {
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: #4b5563;
+      background-color: #555;
       border-radius: 4px;
       display: flex;
       justify-content: center;
@@ -31,15 +36,7 @@
   }
 
   iframe {
-    width: 100%;
     aspect-ratio: 16 / 9;
-  }
-}
-
-.x-bilibili {
-  &.fake {
-    .x-video-inner {
-      background-color: #fb7299;
-    }
+    width: 100%;
   }
 }

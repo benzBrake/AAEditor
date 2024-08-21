@@ -1,9 +1,7 @@
 <?php
 
-use Typecho\Config;
 use TypechoPlugin\AAEditor\Module;
 use TypechoPlugin\AAEditor\Util;
-use Utils\Helper;
 
 /**
  * 插入视频卡片到文章正文中（Firefox浏览器无法播放 H.265 视频），支持 m3u8/mp4/Bilibili视频
@@ -20,6 +18,8 @@ class ModuleVideo implements Module
     public static function editorStatic(): void
     {
         ?>
+        <link rel="stylesheet"
+              href="<?php echo Util::moduleUrl('Video', 'index.css'); ?>">
         <script>
             $('body').trigger('XEditorAddButton', [{
                 id: 'wmd-video-button',
@@ -106,9 +106,19 @@ class ModuleVideo implements Module
                 }
             }]).trigger('XEditorAddHtmlProcessor', [
                 function (html) {
+                    const t = this;
                     if (html.indexOf("[x-player")) {
                         if ((localStorage.getItem("editor-preview-video") || "false") === "true") {
-                            html = html.replace(this.getShortCodeRegex("x-player"), `<div class="x-video" $3>$5</div>`);
+                            html = html.replace(this.getShortCodeRegex("x-player"), function () {
+                                let {named} = t.parseShortCodeAttrs(arguments[3]);
+                                if (named.src) {
+                                    let autoplay = (named.autoplay ?? "off") === 'on';
+                                    let player = named.player || "<?php echo self::defaultPlayer() ?>";
+                                    return `<iframe src="${player}?src=${encodeURIComponent(named.src)}&autoplay=${autoplay}" frameborder="0" allowfullscreen></iframe>`;
+                                } else {
+                                    return '';
+                                }
+                            });
                         } else {
                             html = html.replace(this.getShortCodeRegex("x-player"), `<div class="x-video fake">
 <div class="x-video-inner">
@@ -118,14 +128,33 @@ class ModuleVideo implements Module
                         }
                     }
                     if (html.indexOf("[x-bilibili")) {
-                        html = html.replace(this.getShortCodeRegex('x-bilibili'), '<div class="x-bilibili-wrapper"><x-bilibili$3></x-bilibili></div>');
+                        if ((localStorage.getItem("editor-preview-video") || "false") === "true") {
+                            html = html.replace(this.getShortCodeRegex('x-bilibili'), function () {
+                                let {named} = t.parseShortCodeAttrs(arguments[3]);
+                                if (named.id) {
+                                    let autoplay = named.autoplay ?? "off";
+                                    let src = "https://www.bilibili.com/blackboard/html5mobileplayer.html?" + (`${name.id}`.startsWith('BV') ? 'bvid' : 'aid') + `=${named.id}` + `&page=${named.page ?? 1}` + "&fjw=" + (autoplay === "on" ? 'true' : 'false');
+                                    return `<div class="x-bilibili-wrapper"><iframe src="${src}" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" /></div>`;
+                                } else {
+                                    return '<div class="x-alert" type="warning"><span class="x-alert-icon"></span><div class="x-alert-content"><?php _e("Bvid 未填写") ?></div></div>';
+                                }
+                            });
+                        } else {
+                            html = html.replace(this.getShortCodeRegex('x-bilibili'), function () {
+                                let {named} = t.parseShortCodeAttrs(arguments[3]);
+                                if (named.id) {
+                                    return '<div class="x-video bilibili fake"><div class="x-video-inner"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24"><path fill="#1e88e5" d="M36.5,12h-7.086l3.793-3.793c0.391-0.391,0.391-1.023,0-1.414s-1.023-0.391-1.414,0L26.586,12 h-5.172l-5.207-5.207c-0.391-0.391-1.023-0.391-1.414,0s-0.391,1.023,0,1.414L18.586,12H12.5C9.467,12,7,14.467,7,17.5v15 c0,3.033,2.467,5.5,5.5,5.5h2c0,0.829,0.671,1.5,1.5,1.5s1.5-0.671,1.5-1.5h14c0,0.829,0.671,1.5,1.5,1.5s1.5-0.671,1.5-1.5h2 c3.033,0,5.5-2.467,5.5-5.5v-15C42,14.467,39.533,12,36.5,12z M39,32.5c0,1.378-1.122,2.5-2.5,2.5h-24c-1.378,0-2.5-1.122-2.5-2.5 v-15c0-1.378,1.122-2.5,2.5-2.5h24c1.378,0,2.5,1.122,2.5,2.5V32.5z"/><rect width="2.75" height="7.075" x="30.625" y="18.463" fill="#1e88e5" transform="rotate(-71.567 32.001 22)"/><rect width="7.075" height="2.75" x="14.463" y="20.625" fill="#1e88e5" transform="rotate(-18.432 17.998 21.997)"/><path fill="#1e88e5" d="M28.033,27.526c-0.189,0.593-0.644,0.896-1.326,0.896c-0.076-0.013-0.139-0.013-0.24-0.025 c-0.013,0-0.05-0.013-0.063,0c-0.341-0.05-0.745-0.177-1.061-0.467c-0.366-0.265-0.808-0.745-0.947-1.477 c0,0-0.29,1.174-0.896,1.49c-0.076,0.05-0.164,0.114-0.253,0.164l-0.038,0.025c-0.303,0.164-0.682,0.265-1.086,0.278 c-0.568-0.051-0.947-0.328-1.136-0.821l-0.063-0.164l-1.427,0.656l0.05,0.139c0.467,1.124,1.465,1.768,2.74,1.768 c0.922,0,1.667-0.303,2.209-0.909c0.556,0.606,1.288,0.909,2.209,0.909c1.856,0,2.55-1.288,2.765-1.843l0.051-0.126l-1.427-0.657 L28.033,27.526z"/></svg></div></div>';
+                                } else {
+                                    return '<div class="x-alert" type="warning"><span class="x-alert-icon"></span><div class="x-alert-content"><?php _e("Bvid 未填写") ?></div></div>';
+                                }
+                            });
+                        }
                     }
                     return html;
                 }
             ]);
         </script>
         <?php
-        self::commonStatic();
     }
 
     /**
@@ -136,40 +165,9 @@ class ModuleVideo implements Module
      */
     public static function archiveStatic($archive): void
     {
-        self::commonStatic();
-    }
-
-    /**
-     * 自定义函数，输出样式 link href
-     *
-     * @return void
-     */
-    public static function commonStatic(): void
-    {
         ?>
         <link rel="stylesheet"
               href="<?php echo Util::moduleUrl('Video', 'index.css'); ?>">
-        <script>
-            function initVideo() {
-                Array.from(document.querySelectorAll('.x-video:not([loaded])')).forEach(function (el) {
-                    el.setAttribute('loaded', '');
-                    let src = el.getAttribute('src'),
-                        autoplay = el.getAttribute('autoplay') || "off",
-                        player = el.getAttribute('player') || "<?php echo Util::pluginUrl('Modules/Video/Player.php') ?>";
-                    el.innerHTML = `<iframe frameborder="0" referrerpolicy="origin-when-cross-origin" allowfullscreen="true" src="${player}?url=${encodeURIComponent(src)}&autoplay=${autoplay}"></iframe>`;
-                });
-            }
-
-            <?php if (defined("__TYPECHO_ADMIN__") && __TYPECHO_ADMIN__): ?>
-            $('body').on('XEditorPreviewEnd', function () {
-                if ((localStorage.getItem("editor-preview-video") || "false") === "false") return;
-                initVideo();
-            })
-            <?php else: ?>
-            document.addEventListener('DOMContentLoaded', initVideo);
-            document.addEventListener('pjax:complete', initVideo);
-            <?php endif; ?>
-        </script>
         <?php
     }
 
@@ -182,7 +180,24 @@ class ModuleVideo implements Module
     {
         if (strpos($text, '[x-player') !== false) { //提高效率，避免每篇文章都要解析
             $pattern = Util::get_shortcode_regex(['x-player']);
-            $text = preg_replace("/$pattern/", '<div class="x-video" $3>$5</div>', $text);
+            $text = preg_replace_callback("/$pattern/", function ($matches) {
+                if ($matches[1] == '[' && $matches[6] == ']')
+                    return substr($matches[0], 1, -1);
+                $attr = strip_tags(htmlspecialchars_decode($matches[3]));
+                $attrs = Util::shortcode_parse_atts($attr);
+                if (!isset($attrs['src'])) {
+                    return '';
+                }
+                $video_src = $attrs['src'];
+                $autoplay = ($attrs['autoplay'] ?? 'off') === 'on';
+                $player = $attrs['player'] ?? self::defaultPlayer();
+                $params = [
+                    'url' => $video_src,
+                    'autoplay' => $autoplay
+                ];
+                $iframe_src = $player . '?' . http_build_query($params);
+                return '<div class="x-video"><iframe src="' . $iframe_src . '" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" autoplay="' . $autoplay . '"></iframe></div>';
+            }, $text);
         }
         if (strpos($text, '[x-bilibili') !== false) { //提高效率，避免每篇文章都要解析
             $pattern = Util::get_shortcode_regex(['x-bilibili']);
@@ -192,16 +207,15 @@ class ModuleVideo implements Module
                 }
                 $attr = htmlspecialchars_decode($matches[3]);
                 $attrs = Util::shortcode_parse_atts($attr);
-                if (isset($attrs['id']) || isset($attrs['bvid'])) {
-                    $vid = $attrs['id'] ?? $attrs['bvid'];
+                $vid = $attrs['id'] ?? $attrs['bvid'] ?? "";
+                if (strlen($vid)) {
                     $idType = (strpos($vid, 'BV') === 0) ? 'bvid' : 'aid';
                     $page = $attrs['page'] ?? '1';
                     $autoplay = ($attrs['autoplay'] ?? 'off') === 'on';
                     $src = "//www.bilibili.com/blackboard/html5mobileplayer.html?" . $idType . '=' . $vid . '&page=' . $page . '&fjw=' . $autoplay;
                     return '<div class="x-bilibili-wrapper"><iframe class="x-bilibili" src="' . $src . '" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe></div>';
-                } else {
-                    return '<div class="x-bilibili-wrapper"><div class="x-bilibili fake"><div class="x-video-inner"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20"><path d="M7.17157 2.75725L10.414 5.99936H13.585L16.8284 2.75725C17.219 2.36672 17.8521 2.36672 18.2426 2.75725C18.6332 3.14777 18.6332 3.78094 18.2426 4.17146L16.414 5.99936L18.5 5.99989C20.433 5.99989 22 7.56689 22 9.49989V17.4999C22 19.4329 20.433 20.9999 18.5 20.9999H5.5C3.567 20.9999 2 19.4329 2 17.4999V9.49989C2 7.56689 3.567 5.99989 5.5 5.99989L7.585 5.99936L5.75736 4.17146C5.36684 3.78094 5.36684 3.14777 5.75736 2.75725C6.14788 2.36672 6.78105 2.36672 7.17157 2.75725ZM18.5 7.99989H5.5C4.7203 7.99989 4.07955 8.59478 4.00687 9.35543L4 9.49989V17.4999C4 18.2796 4.59489 18.9203 5.35554 18.993L5.5 18.9999H18.5C19.2797 18.9999 19.9204 18.405 19.9931 17.6444L20 17.4999V9.49989C20 8.67146 19.3284 7.99989 18.5 7.99989ZM8 10.9999C8.55228 10.9999 9 11.4476 9 11.9999V13.9999C9 14.5522 8.55228 14.9999 8 14.9999C7.44772 14.9999 7 14.5522 7 13.9999V11.9999C7 11.4476 7.44772 10.9999 8 10.9999ZM16 10.9999C16.5523 10.9999 17 11.4476 17 11.9999V13.9999C17 14.5522 16.5523 14.9999 16 14.9999C15.4477 14.9999 15 14.5522 15 13.9999V11.9999C15 11.4476 15.4477 10.9999 16 10.9999Z"></path></svg></div></div></div>';
                 }
+                return '<div class="x-alert" type="warning"><span class="x-alert-icon"></span><div class="x-alert-content">' . _t("Bvid 未填写") . '</div></div>';
             }, $text);
         }
         return $text;

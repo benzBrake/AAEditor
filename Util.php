@@ -146,7 +146,7 @@ class Util
         if ($filename !== "off" && array_key_exists($filename, $cssFiles)) {
             ?>
             <script
-                src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js') ?>"></script>
+                    src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js') ?>"></script>
             <link rel="stylesheet"
                   href="<?php echo Common::url(preg_replace("/(?<!\.min)\.css$/", ".min.css", $filename), Util::parseJSD('https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/')) ?>">
             <link rel="stylesheet" href="<?php echo Util::pluginStatic('css', 'hljs.css') ?>"/>
@@ -319,7 +319,7 @@ class Util
             <script src="<?php $options->adminStaticUrl('js', 'purify.js'); ?>"></script>
             <script src="<?php echo Util::pluginStatic('js', 'previewUtils.js'); ?>"></script>
             <script
-                src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/html-to-md@0.8.5/dist/index.min.js'); ?>"></script>
+                    src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/html-to-md@0.8.5/dist/index.min.js'); ?>"></script>
             <link rel="stylesheet" type="text/css"
                   href="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css'); ?>">
             <script type="text/javascript"
@@ -461,6 +461,11 @@ class Util
                                         reloadScroll(true);
                                     }
                                 });
+                            }
+
+                            // 修复 p 包裹问题
+                            if (preview.children().length === 1 && preview.children().first().is('p')) {
+                                preview.html(preview.children().first().html());
                             }
 
                             $('body').trigger('XEditorPreviewEnd');
