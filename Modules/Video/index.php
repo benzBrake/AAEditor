@@ -228,7 +228,15 @@ class ModuleVideo implements Module
         if (strpos($text, '[x-player') === false && strpos($text, '[x-bilibili') === false) { //提高效率，避免每篇文章都要解析
             return $text;
         }
-        $patternPlayer = Util::get_shortcode_regex(['x-player', 'x-bilibili']);
-        return preg_replace("/$patternPlayer/", '【▶️视频】', $text);
+        $pattern = Util::get_shortcode_regex(['x-player']);
+        $text = preg_replace_callback("/$pattern/", function ($m) {
+            $attrs = Util::shortcode_parse_atts(strip_tags($m[3]));
+            if (isset($attrs['src']) && preg_match('#^https://(www\.)?youtu(\.)?be(\.com)?/#', $attrs['src'])) {
+                return '【🎞️Youtube】';
+            }
+            return '【🎞️️视频】';
+        }, $text);
+        $pattern = Util::get_shortcode_regex(['x-bilibili']);
+        return preg_replace("/$pattern/",    '【📺️Bilibili】', $text);
     }
 }

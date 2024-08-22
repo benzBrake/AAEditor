@@ -157,8 +157,11 @@ class ModuleLinkCard implements Module
             return substr($m[0], 1, -1);
         }
         $attrs = Util::shortcode_parse_atts($m[3]);
+        if (array_key_exists('title', $attrs)) {
+            return sprintf("【📶%s】",  $attrs['title']);
+        }
         if (array_key_exists('url', $attrs)) {
-            return $attrs['url'];
+            return sprintf("【📶%s】",  $attrs['url']);
         }
         return '';
     }

@@ -93,8 +93,9 @@ class ModuleCard implements Module
                     }
 
                     function createCardCallback() {
-                        let attr = arguments[3] || "", content = arguments[5], classList = ['x-card'], title = '<?php _e("无标题") ?>';
-                        let { named } = this.parseShortCodeAttrs(attr);
+                        let attr = arguments[3] || "", content = arguments[5], classList = ['x-card'],
+                            title = '<?php _e("无标题") ?>';
+                        let {named} = this.parseShortCodeAttrs(attr);
                         if (named['class']) {
                             classList.push(named['class'].split(" "));
                         }
@@ -106,6 +107,7 @@ class ModuleCard implements Module
                         }
                         return `<div class="x-cards-wrapper" style="overflow: hidden"><div class="${classList.join(" ")}"><div class="x-card-title">${title}<span class="x-card-icon"></span></div><div class="x-card-content">${content}</div></div></div>`;
                     }
+
                     return html;
                 }
             ]);
@@ -251,10 +253,10 @@ class ModuleCard implements Module
             return substr($m[0], 1, -1);
         }
         $attrs = Util::shortcode_parse_atts($m[3]) ?? [];
-        $text = '';
+        $text = '【🗂️';
         if (array_key_exists('title', $attrs)) {
             $text .= $attrs['title'];
         }
-        return $text . $m[5];
+        return $text . ' · ' . $m[5] . '】';
     }
 }

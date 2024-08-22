@@ -133,27 +133,10 @@ class ModuleCodepen implements Module
 
     public static function parseExcerpt($text, $archive): string
     {
-        if (strpos($text, '[x-link') === false) { //提高效率，避免每篇文章都要解析
+        if (strpos($text, '[x-codepen') === false) { //提高效率，避免每篇文章都要解析
             return $text;
         }
-        $pattern = Util::get_shortcode_regex(['x-link']);
-        return preg_replace_callback(/**
-         * @throws \Typecho\Exception
-         */ "/$pattern/", function ($m) {
-            return self::excerptCallback($m);
-        }, $text);
-    }
-
-    public static function excerptCallback($m)
-    {
-        // Allow [[foo]] syntax for escaping a tag.
-        if ('[' === $m[1] && ']' === $m[6]) {
-            return substr($m[0], 1, -1);
-        }
-        $attrs = Util::shortcode_parse_atts($m[3]);
-        if (array_key_exists('url', $attrs)) {
-            return $attrs['url'];
-        }
-        return '';
+        $pattern = Util::get_shortcode_regex(['x-codepen']);
+        return preg_replace("/$pattern/", '【🔡前端代码】', $text);
     }
 }

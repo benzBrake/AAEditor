@@ -289,6 +289,10 @@ class ModuleAudio implements Module
 
     public static function parseExcerpt($text, $archive): string
     {
+        $pattern = Util::get_shortcode_regex(['audio-album', 'x-album']);
+        return preg_replace("/$pattern/",
+            _t('【🎶播放列表】')
+            , $text);
         $pattern = Util::get_shortcode_regex(['audio', 'x-audio']);
         return preg_replace("/$pattern/",
             _t('【▶️音频】')

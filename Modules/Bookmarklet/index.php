@@ -120,10 +120,14 @@ class ModuleBookmarklet implements Module
 
     public static function parseExcerpt($text, $archive): string
     {
-        if (strpos($text, '[x-span') === false) { //提高效率，避免每篇文章都要解析
+        if (strpos($text, '[bookmarklet') === false) { //提高效率，避免每篇文章都要解析
             return $text;
         }
-        $pattern = Util::get_shortcode_regex(['x-span']);
-        return preg_replace("/$pattern/", '<span class="x-span"$3>$5</span>', $text);
+        $pattern = Util::get_shortcode_regex(['bookmarklet']);
+        return preg_replace_callback("/$pattern/", function ($m) {
+            $attrs = Util::shortcode_parse_atts(htmlspecialchars_decode($m[3] ?? ''));
+            $name = (isset($attrs['name']) && strlen($attrs['name'])) ? $attrs['name'] : _t("小书签链接");
+            return sprintf('【🔖%s】', $name);
+        }, $text);
     }
 }
