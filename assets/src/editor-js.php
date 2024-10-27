@@ -413,7 +413,7 @@
                         el.parentNode.classList.add('styled');
                     }
                 });
-                let clp = new ClipboardJS('span.copy');
+                let clp = new ClipboardJS('#wmd-preview pre span.copy');
                 clp.on('success', function (e) {
                     Toastify({
                         text: "<?php _e("复制成功"); ?>",
