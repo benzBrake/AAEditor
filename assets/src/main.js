@@ -12,6 +12,7 @@ class XEditor {
 
         this.isInit = false;
         this.buttons = [];
+        this.insertProcessors = [];
         $('body').on('XEditorAddButton', (event, ...buttons) => {
             buttons.forEach(button => {
                 if (isObject(button)) {
@@ -34,7 +35,13 @@ class XEditor {
             let sp = this.textarea.getScrollPosition();
             this.setContent(this.getContent());
             this.textarea.setScrollPosition(sp.top, sp.left);
-        });
+        }).on('XEditorAddInsertProcessor', (event, ...processors) => {
+            processors.forEach(processor => {
+                if (typeof processor === 'function') {
+                    this.insertProcessors.push(processor);
+                }
+            });
+        })
     }
 
     /**
