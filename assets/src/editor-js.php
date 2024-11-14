@@ -135,6 +135,8 @@
                     const httpMatch = selectedText.match(httpLinkReg);
                     if (httpMatch && httpMatch.length > 0) {
                         url = httpMatch[0];
+                    } else {
+                        title = selectedText;
                     }
                 }
             }
