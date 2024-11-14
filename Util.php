@@ -599,6 +599,19 @@ class Util
                         Typecho.insertFileToEditor = function (file, url, isImage) {
                             let html = isImage ? '![' + file + '](' + url + ')'
                                 : '[' + file + '](' + url + ')';
+                            if (XEditor.insertProcessors && Array.isArray(XEditor.insertProcessors)) {
+                                for (let i = 0; i < XEditor.insertProcessors.length; i++) {
+                                    if (typeof XEditor.insertProcessors[i] === 'function') {
+                                        let { html: _html, done } = XEditor.insertProcessors[i].call(XEditor, file, url, isImage, html);
+                                        if (typeof _html === "string") {
+                                            html = _html;
+                                        }
+                                        if (done) {
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
                             $('body').trigger('XEditorReplaceSelection', [html]);
                         };
 
