@@ -621,3 +621,16 @@ body.fullscreen {
   }
 }
 
+#ph-insert-images {
+  display: flex;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 6px;
+  margin: 4px;
+  cursor: pointer;
+  transition: background-color .2s ease-out;
+  &:hover {
+    background-color: #0000002b;
+  }
+}
+

@@ -5,3 +5,4 @@ pack/*
 /node_modules
 /cache
 /cache/*
+/npminstall-debug.log

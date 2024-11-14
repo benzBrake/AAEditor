@@ -312,10 +312,27 @@ class Util
                 (function () {
                     let link = document.querySelector('link[href="<?php Helper::options()->adminStaticUrl('css', 'style.css') ?>"]');
                     if (link) link.parentNode.removeChild(link);
+                    <?php if (Util::pluginOption('XInsertALlImages', 'on')): ?>
+                    if ($('#ph-insert-images').length == 0)
+                        $('#upload-panel').append(`<span id="ph-insert-images" class="ph-btn"><?php _e("插入所有图片") ?></span>`);
+
+                    $('#ph-insert-images').off('click').on('click', function () {
+                        let fileList = $('#file-list').children('li'),
+                            text = "";
+                        fileList.each((num, el) => {
+                            let item = $(el);
+                            if (item.data('image')) {
+                                text += "\n" + "![{name}]({url})".replace('{name}', item.find('.insert').text()).replace('{url}', item.data('url'));
+                            }
+                        });
+                        $('body').trigger('XEditorReplaceSelection', [text]);
+                    });
+                    <?php endif; ?>
                 })();
+
             </script>
             <link rel="stylesheet" href="<?php Helper::options()->index('action/editor?admin_style_css'); ?>">
-        <?php
+            <?php
         endif;
     }
 
