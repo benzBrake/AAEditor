@@ -24,7 +24,7 @@ class ModuleAudio implements Module
                     if (/\.(mp3|wav|ogg|m3u|flac)$/.test(url)) {
                         let title = file.replace(/\.[^/.]+$/, '').replaceAll('"', '&quot;');
                             suffix = url.split('.').pop().toLowerCase();
-                            titleAttr = title ? ` title="${title}"` : '';
+                            titleAttr = title ? ` name="${title}"` : '';
                         html = `[x-audio src="${url}"${titleAttr} /]`;
                     }
                     return {
