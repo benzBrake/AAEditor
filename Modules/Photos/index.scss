@@ -15,11 +15,22 @@
       flex-grow: 999999999;
     }
 
+    @for $i from 1 through 6 {
+      &[grid-cols="#{$i}"] {
+        $width: 100% / $i;
+        .photo {
+          width: $width;
+        }
+      }
+    }
+
     .photo {
       width: 25%;
       height: 200px;
       display: flex;
       margin-bottom: 4px;
+      border-bottom: unset;
+
       #wmd-preview & {
         width: 25%;
         height: 150px;
