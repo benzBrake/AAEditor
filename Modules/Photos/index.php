@@ -78,12 +78,16 @@ class ModulePhotos implements Module
         <script>
             <?php if (defined("__TYPECHO_ADMIN__") && __TYPECHO_ADMIN__): // 后台执行  ?>
             $('body').on('XEditorPreviewEnd', function () {
-                $('#wmd-preview img').each(function() {
-                    if (this.parentNode.tagName !== 'A') {
-                        this.outerHTML = '<a class="photo" href="' + this.src + '">' + this.outerHTML + '</a>';
-                    } else {
-                        this.parentNode.classList.add('photo');
-                    }
+                $('#wmd-preview .x-photos').each(function() {
+                    let block = $(this);
+                    block.find('br').remove();
+                    block.attr('grid-cols', Math.round(block[0].offsetWidth / 150) + 1).find('img').each(function() {
+                        if (this.parentNode.tagName !== 'A') {
+                            this.outerHTML = '<a class="photo" href="' + this.src + '">' + this.outerHTML + '</a>';
+                        } else {
+                            this.parentNode.classList.add('photo');
+                        }
+                    });
                 })
             })
             <?php else: ?>
@@ -92,7 +96,6 @@ class ModulePhotos implements Module
                         album.setAttribute('inited', 'true');
                         Array.from(album.children).forEach(child => {
                             if (child.tagName === 'IMG') {
-                                console.log(child)
                                 child.style.removeProperty('aspect-ratio');
                                 child.removeAttribute('width');
                                 child.removeAttribute('height');
@@ -107,8 +110,27 @@ class ModulePhotos implements Module
                         });
                     });
                 }
+                function updatePhotosBlock() {
+                    document.querySelectorAll('.x-photos').forEach(block => {
+                        let width = block.offsetWidth;
+                        block.setAttribute('grid-cols', Math.round(width / 200) + 1);
+                    });
+                }
                 renderPhotos();
+                updatePhotosBlock();
                 document.addEventListener("pjax:complete", renderPhotos);
+                window.addEventListener('resize', debounce(updatePhotosBlock, 200));
+                function debounce(func, wait) {
+                    let timeout;
+                    return function () {
+                        const context = this;
+                        const args = arguments;
+                        clearTimeout(timeout);
+                        timeout = setTimeout(() => {
+                            func.apply(context, args);
+                        }, wait);
+                    };
+                }
             <?php endif; ?>
         </script>
         <?php
