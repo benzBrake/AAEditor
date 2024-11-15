@@ -1,33 +1,58 @@
+/** 相册排列通用样式 */
 .x-photos {
-  br {
-    display: none;
-  }
-
-  &.google {
+  &.google{
+    padding: 2px;
     display: flex;
     flex-wrap: wrap;
-    padding: 4px;
-    margin: -8px;
+    margin-bottom: -4px;
 
-    &::after {
+    & > :is( br,span.line) {
+     display: none !important;
+    }
+
+    &:after {
       content: '';
       flex-grow: 999999999;
     }
 
-    > a, > .photo {
-      margin: 4px;
-      position: relative;
-      transition: width .2s, height .2s;
-
-      > i {
-        display: block;
+    .photo {
+      width: 25%;
+      height: 200px;
+      display: flex;
+      margin-bottom: 4px;
+      #wmd-preview & {
+        width: 25%;
+        height: 150px;
       }
 
-      > img {
-        position: absolute;
-        top: 0;
-        width: 100%;
-        vertical-align: bottom;
+      img {
+        width: calc(100% - 4px);
+        display: block;
+        object-fit: cover;
+        margin: 2px;
+        height: 100%;
+
+        @media (min-width: 768px) {
+          img {
+            &:nth-last-child(6),
+            &:nth-last-child(6) ~ .photo {
+              flex-grow: 0;
+            }
+          }
+        }
+        @media (min-width: 1200px) {
+          img {
+            &:nth-last-child(8),
+            &:nth-last-child(8) ~ .photo {
+              flex-grow: 0;
+            }
+          }
+         }
+      }
+
+      &:nth-last-child(4),
+      &:nth-last-child(4) ~ .photo {
+        flex-grow: 0;
       }
     }
   }

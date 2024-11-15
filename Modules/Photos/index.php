@@ -76,92 +76,39 @@ class ModulePhotos implements Module
         <link rel="stylesheet"
               href="<?php echo Util::moduleUrl('Photos', 'index.css'); ?>">
         <script>
-            function initPhotos() {
-                Array.from(document.querySelectorAll(".x-photos.google")).forEach(el => {
-                    if (el.hasAttribute("loaded")) return;
-                    el.setAttribute("loaded", true);
-                    let widthBase = el.clientWidth > 960 ? 200 : (el.clientWidth > 640 ? 150 : 100);
-                    Array.from(el.childNodes).forEach(c => {
-                        if (c.tagName === "BR") {
-                            el.removeChild(c);
-                        } else if (c.tagName === "IMG") {
-                            let img = new Image();
-                            img.src = c.src;
-                            let wrap = document.createElement('div'),
-                                i = document.createElement('i');
-                            wrap.className = "photo";
-                            el.insertBefore(wrap, c);
-                            wrap.appendChild(i);
-                            wrap.appendChild(c);
-                            c.classList.add('parsed');
-                            if (img.complete) {
-                                wrap.style.width = img.width * widthBase / img.height + "px";
-                                wrap.style.flexGrow = img.width * widthBase / img.height;
-                                i.style.paddingBottom = img.height / img.width * 100 + "%";
-                            } else {
-                                img.addEventListener("load", function () {
-                                    wrap.style.width = img.width * widthBase / img.height + "px";
-                                    wrap.style.flexGrow = img.width * widthBase / img.height;
-                                    i.style.paddingBottom = img.height / img.width * 100 + "%";
-                                });
-                            }
-                        } else if (c.tagName === "a" && c.querySelector("img")) {
-                            a.classList.add("photo");
-                            c.querySelector('img').classList.add('parsed');
-                            let img = new Image();
-                            img.src = c.src;
-                            let i = document.createElement('i');
-                            c.appendChild(i);
-                            if (img.complete) {
-                                c.style.width = img.width * widthBase / img.height + "px";
-                                c.style.flexGrow = img.width * widthBase / img.height;
-                                i.style.paddingBottom = img.height / img.width * 100 + "%";
-                            } else {
-                                img.addEventListener("load", function () {
-                                    c.style.width = img.width * widthBase / img.height + "px";
-                                    c.style.flexGrow = img.width * widthBase / img.height;
-                                    i.style.paddingBottom = img.height / img.width * 100 + "%";
-                                });
-                            }
-                        }
-                    });
-                });
-            }
-
-            function debounce(func, wait) {
-                let timeout;
-                return function () {
-                    const context = this;
-                    const args = arguments;
-                    clearTimeout(timeout);
-                    timeout = setTimeout(() => {
-                        func.apply(context, args);
-                    }, wait);
-                };
-            }
-
-            function refreshWidth() {
-                Array.from(document.querySelectorAll(".x-photos.google[loaded]")).forEach(el => {
-                    let widthBase = el.clientWidth > 960 ? 200 : (el.clientWidth > 640 ? 150 : 100);
-                    Array.from(el.childNodes).forEach(c => {
-                        if (c.classList.contains("photo") && c.querySelector("i") && c.querySelector("img")) {
-                            let img = c.querySelector("img");
-                            c.style.width = img.width * widthBase / img.height + "px";
-                            c.style.flexGrow = img.width * widthBase / img.height;
-                            c.querySelector("i").style.paddingBottom = img.height / img.width * 100 + "%";
-                        }
-                    });
-                });
-            }
-
             <?php if (defined("__TYPECHO_ADMIN__") && __TYPECHO_ADMIN__): // 后台执行  ?>
-            $("body").on("XEditorPreviewEnd", () => {
-                initPhotos();
+            $('body').on('XEditorPreviewEnd', function () {
+                $('#wmd-preview img').each(function() {
+                    if (this.parentNode.tagName !== 'A') {
+                        this.outerHTML = '<a class="photo" href="' + this.src + '">' + this.outerHTML + '</a>';
+                    } else {
+                        this.parentNode.classList.add('photo');
+                    }
+                })
             })
-            <?php else:  // 前台执行 ?>
-            initPhotos();
-            document.addEventListener("pjax:complete", initPhotos);
-            window.addEventListener("resize", debounce(refreshWidth, 300));
+            <?php else: ?>
+                function renderPhotos() {
+                    document.querySelectorAll('.x-photos:not([inited])').forEach(album => {
+                        album.setAttribute('inited', 'true');
+                        Array.from(album.children).forEach(child => {
+                            if (child.tagName === 'IMG') {
+                                console.log(child)
+                                child.style.removeProperty('aspect-ratio');
+                                child.removeAttribute('width');
+                                child.removeAttribute('height');
+                                if (child.parentNode.tagName !== 'A') {
+                                    child.outerHTML = '<a class="photo" href="' + child.src + '">' + child.outerHTML + '</a>';
+                                } else {
+                                    child.parentNode.classList.add('photo');
+                                }
+                            } else if (child.tagName === 'BR') {
+                                child.remove();
+                            }
+                        });
+                    });
+                }
+                renderPhotos();
+                document.addEventListener("pjax:complete", renderPhotos);
             <?php endif; ?>
         </script>
         <?php
