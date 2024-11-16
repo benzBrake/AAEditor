@@ -4,7 +4,7 @@ use TypechoPlugin\AAEditor\Module;
 use TypechoPlugin\AAEditor\Util;
 
 /**
- * 增加图片暗箱功能
+ * 点击图片网页全屏预览
  *
  * @package 图片暗箱
  * @author Ryan
@@ -77,20 +77,26 @@ class ModuleViewImage implements Module
         <script>
             (function () {
                 const fn = _ => {
-                    Array.from(document.querySelectorAll('img[view-image]')).forEach(img => {
+                    const images = document.querySelector('#wmd-preview') ? document.querySelectorAll('#wmd-preview img') : document.querySelectorAll('img[view-image]');
+                    Array.from(images).forEach(img => {
                         img.removeAttribute('view-image')
                         if (img.parentNode.tagName === 'A') {
-                            img.setAttribute('data-fslightbox', 'gallery')
-                            img.setAttribute('data-type', 'image')
+                            img.parentNode.setAttribute('data-fslightbox', 'gallery')
+                            img.parentNode.setAttribute('data-type', 'image')
                         } else {
                             img.outerHTML = '<a href="' + img.src + '" data-fslightbox="gallery" data-type="image">' + img.outerHTML + '</a>';
                         }
                     });
                     refreshFsLightbox();
                 }
+                <?php if (defined("__TYPECHO_ADMIN__") && __TYPECHO_ADMIN__): ?>
+                $('body').on('XEditorPreviewEnd', function () {
+                    fn();
+                });
+                <?php else: ?>
                 fn();
-                $('body').on('XEditorPreviewEnd', fn)
                 document.addEventListener('pjax:complete', fn);
+                <?php endif; ?>
             })();
         </script>
         <style>
