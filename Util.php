@@ -9,6 +9,7 @@ use Typecho\Plugin;
 use Typecho\Plugin\Exception;
 use Utils\Helper;
 use Widget\Contents;
+use Widget\Options;
 use Widget\User;
 
 if (!defined('__TYPECHO_ROOT_DIR__')) exit;
@@ -118,6 +119,7 @@ class Util
                             document.body.appendChild(rel);
                         }
                     }
+
                     loadFontAwesome();
                     document.addEventListener('pjax:complete', () => {
                         loadFontAwesome();
@@ -305,6 +307,7 @@ class Util
      */
     public static function editorFooter()
     {
+        $info = Plugin::parseInfo(Common::url('AAEditor/Plugin.php', Options::alloc()->pluginDir));
         $admin_dir = Common::url(trim(defined('__TYPECHO_ADMIN_DIR__') ? __TYPECHO_ADMIN_DIR__ : '/admin/', '/'), __TYPECHO_ROOT_DIR__);
         $css_path = Common::url('css/style.css', $admin_dir);
         if (is_file($css_path)): ?>
@@ -331,8 +334,9 @@ class Util
                 })();
 
             </script>
-            <link rel="stylesheet" href="<?php Helper::options()->index('action/editor?admin_style_css'); ?>">
-            <?php
+            <link rel="stylesheet"
+                  href="<?php Helper::options()->index('action/editor?admin_style_css&version=' . $info['version'] ?? 'unknown'); ?>">
+        <?php
         endif;
     }
 
@@ -602,7 +606,10 @@ class Util
                             if (XEditor.insertProcessors && Array.isArray(XEditor.insertProcessors)) {
                                 for (let i = 0; i < XEditor.insertProcessors.length; i++) {
                                     if (typeof XEditor.insertProcessors[i] === 'function') {
-                                        let { html: _html, done } = XEditor.insertProcessors[i].call(XEditor, file, url, isImage, html);
+                                        let {
+                                            html: _html,
+                                            done
+                                        } = XEditor.insertProcessors[i].call(XEditor, file, url, isImage, html);
                                         if (typeof _html === "string") {
                                             html = _html;
                                         }
