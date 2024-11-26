@@ -32,6 +32,7 @@ class Action extends Widget implements ActionInterface
         $css_content = str_replace('#wmd-preview pre { padding: 1em; }', '', $css_content);
         $css_content = str_replace('../img', sprintf('%s/img', $relative_path), $css_content);
         header('Content-Type: text/css; charset=UTF-8');
+        header('Cache-Control: max-age=86400, must-revalidate');
         echo $css_content;
     }
 
