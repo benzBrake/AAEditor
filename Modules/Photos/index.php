@@ -37,14 +37,14 @@ class ModulePhotos implements Module
                 insertAfter: '#wmd-image-button', // 在 #wmd-image-button 后插入，选择器，document.querySelector 支持的选择器格式
                 shortcut: 'ctrl+alt+g', // 快捷键
                 command() {
-                    // 点击按钮就的操作
-                    this.wrapText('[photos]\n', '\n[/photos]');
+                    // 点击按钮的操作
+                    this.wrapText('[photos title="相册名"]\n', '\n[/photos]');
                 }
             }]).trigger('XEditorAddHtmlProcessor', [function (html) {
                 if (html.indexOf("[photos") > -1) {
-                    html = html.replace(this.getShortCodeRegex('photos'), '<div class="x-photos ' + (localStorage.getItem('editor-album-style') || 'google') + '">$5</div>');
+                    html = html.replace(this.getShortCodeRegex('photos'), '<div class="x-photos" $3>$5</div>');
                 } else {
-                    html = html.replace(this.getShortCodeRegex('album'), '<div class="x-photos ' + (localStorage.getItem('editor-album-style') || 'google') + '">$5</div>');
+                    html = html.replace(this.getShortCodeRegex('album'), '<div class="x-photos" $3>$5</div>');
                 }
                 return html;
             }])
@@ -76,50 +76,89 @@ class ModulePhotos implements Module
         <link rel="stylesheet"
               href="<?php echo Util::moduleUrl('Photos', 'index.css'); ?>">
         <script>
-            <?php if (defined("__TYPECHO_ADMIN__") && __TYPECHO_ADMIN__): // 后台执行  ?>
-            $('body').on('XEditorPreviewEnd', function () {
-                $('#wmd-preview .x-photos').each(function() {
-                    let block = $(this);
-                    block.find('br').remove();
-                    block.attr('grid-cols', Math.round(block[0].offsetWidth / 150) + 1).find('img').each(function() {
-                        if (this.parentNode.tagName !== 'A') {
-                            this.outerHTML = '<a class="photo" href="' + this.src + '">' + this.outerHTML + '</a>';
+            (function () {
+                const fsLightboxEnabled = () => typeof fsLightbox !== 'undefined';
+                const processEmptyParagraph = (p) => p.outerHTML = p.innerHTML;
+                function renderPhotos() {
+                    document.querySelectorAll('.x-photos:not([inited])').forEach((album, i) => {
+                        album.setAttribute('inited', 'true');
+                        album.querySelectorAll(':scope>p').forEach(processEmptyParagraph);
+                        if (fsLightboxEnabled()) {
+                            let title = album.getAttribute('title') || "";
+                            let images = Array.from(album.children);
+                            images.forEach((child) => {
+                                if (child.tagName === 'IMG') {
+                                    child.style.removeProperty('aspect-ratio');
+                                    child.removeAttribute('width');
+                                    child.removeAttribute('height');
+                                    if (child.parentNode.tagName !== 'A') {
+                                        child.outerHTML = `<a class="photo" data-fslightbox="gallery-${i}" data-type="image" href="${child.src}">${child.outerHTML}</a>`;
+                                    } else {
+                                        child.parentNode.classList.add('photo');
+                                        child.parentNode.setAttribute('data-fslightbox', `gallery-${i}`);
+                                    }
+                                } else {
+                                    child.remove();
+                                }
+                            });
+                            if (title.length === 0) title = '<?php _e("{count} 张") ?>'; else title = "<?php _e("{title}: {count} 张") ?>".replace('{title}', title);
+                            title = title.replace('{count}', album.querySelectorAll('img').length);
+                            album.insertAdjacentHTML('afterbegin', `<div class="x-photos-title"><span>${title}</span></div>`);
                         } else {
-                            this.parentNode.classList.add('photo');
+                            album.setAttribute('show-all', true);
+                            let widthBase = album.clientWidth > 960 ? 200 : (album.clientWidth > 640 ? 150 : 100);
+                            Array.from(album.childNodes).forEach(c => {
+                                if (c.tagName === "IMG") {
+                                    if (c.style.apsectRatio) {
+                                        return;
+                                    }
+                                    let img = new Image();
+                                    img.src = c.src;
+                                    let wrap = document.createElement('div'),
+                                        i = document.createElement('i');
+                                    wrap.className = "photo";
+                                    album.insertBefore(wrap, c);
+                                    wrap.appendChild(i);
+                                    wrap.appendChild(c);
+                                    c.classList.add('parsed');
+                                    if (img.complete) {
+                                        wrap.style.width = img.width * widthBase / img.height + "px";
+                                        wrap.style.flexGrow = img.width * widthBase / img.height;
+                                        i.style.paddingBottom = img.height / img.width * 100 + "%";
+                                    } else {
+                                        img.addEventListener("load", function () {
+                                            wrap.style.width = img.width * widthBase / img.height + "px";
+                                            wrap.style.flexGrow = img.width * widthBase / img.height;
+                                            i.style.paddingBottom = img.height / img.width * 100 + "%";
+                                        });
+                                    }
+                                } else if (c.tagName === "a" && c.querySelector("img")) {
+                                    a.classList.add("photo");
+                                    c.querySelector('img').classList.add('parsed');
+                                    let img = new Image();
+                                    img.src = c.src;
+                                    let i = document.createElement('i');
+                                    c.appendChild(i);
+                                    if (img.complete) {
+                                        c.style.width = img.width * widthBase / img.height + "px";
+                                        c.style.flexGrow = img.width * widthBase / img.height;
+                                        i.style.paddingBottom = img.height / img.width * 100 + "%";
+                                    } else {
+                                        img.addEventListener("load", function () {
+                                            c.style.width = img.width * widthBase / img.height + "px";
+                                            c.style.flexGrow = img.width * widthBase / img.height;
+                                            i.style.paddingBottom = img.height / img.width * 100 + "%";
+                                        });
+                                    }
+                                } else {
+                                    album.removeChild(c);
+                                }
+                            });
                         }
                     });
-                })
-            })
-            <?php else: ?>
-                function renderPhotos() {
-                    document.querySelectorAll('.x-photos:not([inited])').forEach(album => {
-                        album.setAttribute('inited', 'true');
-                        Array.from(album.children).forEach(child => {
-                            if (child.tagName === 'IMG') {
-                                child.style.removeProperty('aspect-ratio');
-                                child.removeAttribute('width');
-                                child.removeAttribute('height');
-                                if (child.parentNode.tagName !== 'A') {
-                                    child.outerHTML = '<a class="photo" href="' + child.src + '">' + child.outerHTML + '</a>';
-                                } else {
-                                    child.parentNode.classList.add('photo');
-                                }
-                            } else if (child.tagName === 'BR') {
-                                child.remove();
-                            }
-                        });
-                    });
+                    if (typeof refreshFsLightbox === 'function') refreshFsLightbox();
                 }
-                function updatePhotosBlock() {
-                    document.querySelectorAll('.x-photos').forEach(block => {
-                        let width = block.offsetWidth;
-                        block.setAttribute('grid-cols', Math.round(width / 200) + 1);
-                    });
-                }
-                renderPhotos();
-                updatePhotosBlock();
-                document.addEventListener("pjax:complete", renderPhotos);
-                window.addEventListener('resize', debounce(updatePhotosBlock, 200));
+
                 function debounce(func, wait) {
                     let timeout;
                     return function () {
@@ -131,7 +170,36 @@ class ModulePhotos implements Module
                         }, wait);
                     };
                 }
-            <?php endif; ?>
+
+                function refreshWidth() {
+                    Array.from(document.querySelectorAll(".x-photos[loaded]")).forEach(el => {
+                        let widthBase = el.clientWidth > 960 ? 200 : (el.clientWidth > 640 ? 150 : 100);
+                        Array.from(el.childNodes).forEach(c => {
+                            if (c.classList.contains("photo") && c.querySelector("i") && c.querySelector("img")) {
+                                let img = c.querySelector("img");
+                                c.style.width = img.width * widthBase / img.height + "px";
+                                c.style.flexGrow = img.width * widthBase / img.height;
+                                c.querySelector("i").style.paddingBottom = img.height / img.width * 100 + "%";
+                            }
+                        });
+                    });
+                }
+
+                <?php if (defined("__TYPECHO_ADMIN__") && __TYPECHO_ADMIN__): ?>
+                $('body').on('XEditorPreviewEnd', function () {
+                    renderPhotos();
+                });
+                <?php else: ?>
+                setTimeout(function () {
+                    renderPhotos();
+                    document.addEventListener("pjax:complete", renderPhotos);
+                }, 100);
+                <?php endif; ?>
+                if(!fsLightboxEnabled()) {
+                    refreshWidth();
+                    window.addEventListener("resize", debounce(refreshWidth, 200));
+                }
+            })()
         </script>
         <?php
     }
@@ -148,8 +216,8 @@ class ModulePhotos implements Module
         if (strpos($text, '[photos') === false && strpos($text, '[album') === false) { //提高效率，避免每篇文章都要解析
             return $text;
         }
-        $text = preg_replace("/\[photos](.*?)\[\/photos]/sm", '<div class="x-photos google">$1</div>', $text);
-        return preg_replace("/\[album](.*?)\[\/album]/sm", '<div class="x-photos google">$1</div>', $text);
+        $pattern = Util::get_shortcode_regex(['photos', 'album']);
+        return preg_replace("/$pattern/", '<div class="x-photos"$3>$5</div>', $text);
     }
 
     public static function parseExcerpt($text, $archive): string
@@ -157,7 +225,7 @@ class ModulePhotos implements Module
         if (strpos($text, '[photos') === false && strpos($text, '[album') === false) { //提高效率，避免每篇文章都要解析
             return $text;
         }
-        $text = preg_replace("/\[photos](.*?)\[\/photos]/sm", "$1", $text);
-        return preg_replace("/\[album](.*?)\[\/album]/sm", '$1', $text);
+        $text = preg_replace("/\[photos](.*?)\[\/photos]/sm", "【相册】", $text);
+        return preg_replace("/\[album](.*?)\[\/album]/sm", '【相册】', $text);
     }
 }
