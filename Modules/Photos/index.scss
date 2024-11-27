@@ -20,6 +20,7 @@
     border-radius: 0 0 8px 8px;
     z-index: 1;
     font-size: 16px;
+    backdrop-filter: blur(3px);
   }
 
   .hidden {
