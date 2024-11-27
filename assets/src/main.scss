@@ -483,6 +483,10 @@ body:not(.fullscreen) {
       padding: .75em;
     }
   }
+
+  input.x-checkbox {
+    display: inline-flex !important;
+  }
 }
 
 #wmd-preview-button:not([active="true"]) ~ #wmd-code-highlight-button {
