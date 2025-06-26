@@ -20,7 +20,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
  *
  * @package AAEditor
  * @author Ryan
- * @version 0.5.7
+ * @version 1.3.0.1
  * @link https://doufu.ru
  *
  */
@@ -115,7 +115,7 @@ class Plugin implements PluginInterface
         }
         $errorMessage = [];
         if (!$pluginData_backup) {
-            $errorMessage[] = _t(/** @lang text */'检测到设置备份不存在，<a href="%s">点此</a>备份设置', Common::url('/options-plugin.php?config=AAEditor&type=backup', Helper::options()->adminUrl));
+            $errorMessage[] = _t(/** @lang text */ '检测到设置备份不存在，<a href="%s">点此</a>备份设置', Common::url('/options-plugin.php?config=AAEditor&type=backup', Helper::options()->adminUrl));
         }
         Util::collectManifest();
         ?>
@@ -251,7 +251,7 @@ class Plugin implements PluginInterface
         $edit->setAttribute('class', 'x-item x-basic');
         $form->addInput($edit->multiMode());
 
-        $edit = new Form\Element\Text('XModules', null, '', _t('选择需要启用的模块'));
+        $edit = new Form\Element\Text('XModules', null, '', _t('选择需要启用的模块'), _t("按需配置即可"));
         $edit->setAttribute('class', 'x-item x-basic');
         $form->addInput($edit->multiMode());
 
@@ -281,6 +281,11 @@ class Plugin implements PluginInterface
      */
     public static function personalConfig(Form $form)
     {
+    }
+
+    public static function isTypechoGe13()
+    {
+        return version_compare(Helper::options()->version, '1.3.0', '>=');
     }
 
     /**

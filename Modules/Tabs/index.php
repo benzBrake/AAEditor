@@ -19,10 +19,10 @@ class ModuleTabs implements Module
         ?>
         <script>
             $('body').trigger('XEditorAddButton', [{
-                id: 'wmd-tabs-button',
+                id: 'wmd-tabs-button-aaeditor',
                 name: '<?php _e("多标签"); ?>',
                 icon: '<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path d="M202.667 149.333c-52.651 0-96 43.35-96 96v533.334c0 52.65 43.349 96 96 96h618.666c52.651 0 96-43.35 96-96V245.333c0-52.65-43.349-96-96-96h-448a32 32 0 0 0-5.504.427c-2.816-.213-5.653-.427-8.49-.427H202.667zm0 64h156.672a53.32 53.32 0 0 1 37.696 15.616l102.997 103.019a32 32 0 0 0 22.635 9.365h298.666c18.048 0 32 13.952 32 32v405.334c0 18.048-13.952 32-32 32H202.667c-18.048 0-32-13.952-32-32V245.333c0-18.048 13.952-32 32-32zm269.248 0h349.418c18.048 0 32 13.952 32 32v37.974a94.016 94.016 0 0 0-32-5.974H535.915l-64-64z"></path></svg>',
-                insertBefore: '#wmd-spacer4',
+                insertBefore: '#wmd-spacer4-aaeditor',
                 command() {
                     this.openModal({
                         title: '<?php _e("插入多标签卡片"); ?>',

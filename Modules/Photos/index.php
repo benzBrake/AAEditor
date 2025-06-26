@@ -31,7 +31,7 @@ class ModulePhotos implements Module
         ?>
         <script>
             $('body').trigger('XEditorAddButton', [{
-                id: 'wmd-photos-button', // 按钮 id 建议为 wmd-自定义-button
+                id: 'wmd-photos-button-aaeditor', // 按钮 id 建议为 wmd-自定义-button
                 name: '<?php _e("相册排版"); ?>',
                 icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20"><path d="M3 3C1.9069372 3 1 3.9069372 1 5L1 15C1 16.093063 1.9069372 17 3 17L16 17C17.093063 17 18 16.093063 18 15L18 5C18 3.9069372 17.093063 3 16 3L3 3 z M 3 5L16 5L16 12L13.5 9.5L9.34375 13.648438L7.9238281 12.240234L9.4804688 10.677734L7.4335938 8.5214844L3 12.992188L3 5 z M 11 6 A 1 1 0 0 0 10 7 A 1 1 0 0 0 11 8 A 1 1 0 0 0 12 7 A 1 1 0 0 0 11 6 z M 20 7L20 19L5 19L5 21L20 21C21.093063 21 22 20.093063 22 19L22 7L20 7 z"></path></svg>',
                 insertAfter: '#wmd-image-button', // 在 #wmd-image-button 后插入，选择器，document.querySelector 支持的选择器格式

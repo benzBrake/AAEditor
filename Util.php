@@ -304,17 +304,15 @@ class Util
     /**
      * 编辑页面附加 CSS JS
      * @return void
+     * @throws Exception
      */
     public static function editorFooter()
     {
-        $info = Plugin::parseInfo(Common::url('AAEditor/Plugin.php', Options::alloc()->pluginDir));
         $admin_dir = Common::url(trim(defined('__TYPECHO_ADMIN_DIR__') ? __TYPECHO_ADMIN_DIR__ : '/admin/', '/'), __TYPECHO_ROOT_DIR__);
         $css_path = Common::url('css/style.css', $admin_dir);
         if (is_file($css_path)): ?>
             <script>
                 (function () {
-                    let link = document.querySelector('link[href="<?php Helper::options()->adminStaticUrl('css', 'style.css') ?>"]');
-                    if (link) link.parentNode.removeChild(link);
                     <?php if (Util::pluginOption('XInsertALlImages', 'on')): ?>
                     if ($('#ph-insert-images').length == 0)
                         $('#upload-panel').append(`<span id="ph-insert-images" class="ph-btn"><?php _e("插入所有图片") ?></span>`);
@@ -334,8 +332,6 @@ class Util
                 })();
 
             </script>
-            <link rel="stylesheet"
-                  href="<?php Helper::options()->index('action/editor?admin_style_css&version=' . $info['version'] ?? 'unknown'); ?>">
         <?php
         endif;
     }
@@ -422,14 +418,14 @@ class Util
 
                     var isFullScreen = false,
                         textarea = $('#text'),
-                        toolbar = $('<div class="editor" id="wmd-button-bar" />').insertBefore(textarea.parent()),
-                        pWrapper = $('<div id="wmd-preview-wrapper" />').insertAfter("#text"),
-                        preview = $('<div id="wmd-preview" />').appendTo(pWrapper),
+                        toolbar = $('<div class="editor" id="wmd-button-bar-aaeditor" />').insertBefore(textarea.parent()),
+                        pWrapper = $('<div id="wmd-preview-wrapper-aaeditor" />').insertAfter("#text"),
+                        preview = $('<div id="wmd-preview-aaeditor" />').appendTo(pWrapper),
                         editor;
 
                     function initMarkdownEditor() {
                         var converter = new HyperDown();
-                        editor = new Markdown.Editor(converter, '', options);
+                        editor = new Markdown.Editor(converter, '-aaeditor', options);
 
                         // 自动跟随
                         converter.enableHtml(true);
@@ -534,7 +530,7 @@ class Util
                             $(document.body).addClass('fullscreen');
                             var h = $(window).height() - tbh;
                             textarea.css('height', h).get(0).style.setProperty('--offset-top', tbh + 'px');
-                            document.querySelector('.submit.clearfix').style.setProperty('--offset-height', tbh + 'px');
+                            document.querySelector('p.submit').style.setProperty('--offset-height', tbh + 'px');
                             preview.parent().css('height', h).get(0).style.setProperty('--offset-top', tbh + 'px');
                             isFullScreen = true;
                         });
@@ -572,7 +568,7 @@ class Util
                         $('#wmd-button-bar-fake').remove();
 
                         // 初始化预览区域大小
-                        let previewArea = $('#wmd-preview-wrapper');
+                        let previewArea = $('#wmd-preview-wrapper-aaeditor');
                         previewArea.css('height', (parseInt($('#text').outerHeight())) + 'px');
 
                         // 拖拽实时改变大小
@@ -623,15 +619,15 @@ class Util
                         };
 
                         // 剪贴板复制图片
-                        textarea.pastableTextarea().on('pasteImage', function (e, data) {
-                            var name = data.name ? data.name.replace(/[\(\)\[\]\*#!]/g, '') : (new Date()).toISOString().replace(/\..+$/, '');
-                            if (!name.match(/\.[a-z0-9]{2,}$/i)) {
-                                var ext = data.blob.type.split('/').pop();
-                                name += '.' + ext;
-                            }
-
-                            Typecho.uploadFile(new File([data.blob], name), name);
-                        });
+                        // textarea.pastableTextarea().on('pasteImage', function (e, data) {
+                        //     var name = data.name ? data.name.replace(/[\(\)\[\]\*#!]/g, '') : (new Date()).toISOString().replace(/\..+$/, '');
+                        //     if (!name.match(/\.[a-z0-9]{2,}$/i)) {
+                        //         var ext = data.blob.type.split('/').pop();
+                        //         name += '.' + ext;
+                        //     }
+                        //
+                        //     Typecho.uploadFile(new File([data.blob], name), name);
+                        // });
 
                         // 上传完成后自动插入
                         const splitRegex = /[\s,|]/gm;
@@ -677,15 +673,15 @@ class Util
                         .on('click', function () {
                             let newVerticalStatus = (localStorage.getItem('submit-vertical') || "false") === 'true' ? 'false' : 'true';
                             localStorage.setItem('submit-vertical', newVerticalStatus);
-                            $(".submit.clearfix").attr('vertical', newVerticalStatus);
+                            $("p.submit").attr('vertical', newVerticalStatus);
                         });
-                    $(".submit.clearfix").attr('vertical', localStorage.getItem('submit-vertical') || "false")
+                    $("p.submit").attr('vertical', localStorage.getItem('submit-vertical') || "false")
                         .prepend(toggleDirection);
                     setOffsetLeft();
                     window.addEventListener('resize', setOffsetLeft);
 
                     function setOffsetLeft() {
-                        document.querySelector(".submit.clearfix").style.setProperty('--offset-left', (document.querySelector('.container').offsetLeft - 35) + 'px');
+                        document.querySelector("p.submit").style.setProperty('--offset-left', (document.querySelector('.container').offsetLeft - 35) + 'px');
                     }
 
                     let toggleWideScreen = $(`<button id="toggle-widescreen" class="btn square secondary" type="button" title="<?php _e("切换宽屏显示") ?>"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="20" height="20"><path d="M4 8L4 24L6 24L6 8 Z M 8 8C7.449219 8 7 8.449219 7 9C7 9.550781 7.449219 10 8 10C8.550781 10 9 9.550781 9 9C9 8.449219 8.550781 8 8 8 Z M 12 8C11.449219 8 11 8.449219 11 9C11 9.550781 11.449219 10 12 10C12.550781 10 13 9.550781 13 9C13 8.449219 12.550781 8 12 8 Z M 16 8C15.449219 8 15 8.449219 15 9C15 9.550781 15.449219 10 16 10C16.550781 10 17 9.550781 17 9C17 8.449219 16.550781 8 16 8 Z M 20 8C19.449219 8 19 8.449219 19 9C19 9.550781 19.449219 10 20 10C20.550781 10 21 9.550781 21 9C21 8.449219 20.550781 8 20 8 Z M 24 8C23.449219 8 23 8.449219 23 9C23 9.550781 23.449219 10 24 10C24.550781 10 25 9.550781 25 9C25 8.449219 24.550781 8 24 8 Z M 26 8L26 24L28 24L28 8 Z M 11 13L7 16L11 19L11 17L21 17L21 19L25 16L21 13L21 15L11 15 Z M 8 22C7.449219 22 7 22.449219 7 23C7 23.550781 7.449219 24 8 24C8.550781 24 9 23.550781 9 23C9 22.449219 8.550781 22 8 22 Z M 12 22C11.449219 22 11 22.449219 11 23C11 23.550781 11.449219 24 12 24C12.550781 24 13 23.550781 13 23C13 22.449219 12.550781 22 12 22 Z M 16 22C15.449219 22 15 22.449219 15 23C15 23.550781 15.449219 24 16 24C16.550781 24 17 23.550781 17 23C17 22.449219 16.550781 22 16 22 Z M 20 22C19.449219 22 19 22.449219 19 23C19 23.550781 19.449219 24 20 24C20.550781 24 21 23.550781 21 23C21 22.449219 20.550781 22 20 22 Z M 24 22C23.449219 22 23 22.449219 23 23C23 23.550781 23.449219 24 24 24C24.550781 24 25 23.550781 25 23C25 22.449219 24.550781 22 24 22Z"/></svg></button`)

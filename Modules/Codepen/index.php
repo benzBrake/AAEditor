@@ -20,10 +20,10 @@ class ModuleCodepen implements Module
         ?>
         <script>
             $('body').trigger('XEditorAddButton', [{
-                id: 'wmd-codepen-button',
+                id: 'wmd-codepen-button-aaeditor',
                 name: '<?php _e("插入 Codepen"); ?>',
                 icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="20" height="20"><path d="M16 2.84375L15.4375 3.21875L3.4375 11.25L3 11.53125L3 20.46875L3.4375 20.75L15.4375 28.78125L16 29.15625L16.5625 28.78125L28.5625 20.75L29 20.46875L29 11.53125L28.5625 11.25L16.5625 3.21875 Z M 15 5.90625L15 11.34375L9.84375 14.8125L5.8125 12.09375 Z M 17 5.90625L26.1875 12.09375L22.15625 14.8125L17 11.34375 Z M 16 13.09375L20.34375 16L16 18.90625L11.65625 16 Z M 5 13.9375L8.0625 16L5 18.0625 Z M 27 13.9375L27 18.0625L23.9375 16 Z M 9.875 17.1875L15 20.65625L15 26.09375L5.8125 19.90625 Z M 22.125 17.1875L26.1875 19.90625L17 26.09375L17 20.65625Z"></path></svg>',
-                insertBefore: '#wmd-spacer4',
+                insertBefore: '#wmd-spacer4-aaeditor',
                 command() {
                     this.openModal({
                         title: '<?php _e("插入 Codepen"); ?>',
