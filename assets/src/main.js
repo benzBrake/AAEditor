@@ -162,7 +162,7 @@ class XEditor {
         // 创建分隔符
         const createSplitter = (num = 0, attrs) => {
             let el = $C('li', {
-                id: sprintf('wmd-spacer%d', num),
+                id: sprintf('wmd-spacer%d-aaeditor', num),
                 ...attrs
             });
             el.classList.add('wmd-spacer');
@@ -171,10 +171,10 @@ class XEditor {
         }
 
         const getSpacerCount = () => {
-            return $('#wmd-button-bar .wmd-spacer').length;
+            return $('#wmd-button-bar-aaeditor .wmd-spacer').length;
         }
 
-        this.toolbar = $('#wmd-button-row');
+        this.toolbar = $('#wmd-button-row-aaeditor');
         this.buttons.forEach(btnCfg => {
             let el, isExists = false;
             if ("id" in btnCfg) {
