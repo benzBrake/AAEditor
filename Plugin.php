@@ -251,7 +251,7 @@ class Plugin implements PluginInterface
         $edit->setAttribute('class', 'x-item x-basic');
         $form->addInput($edit->multiMode());
 
-        $edit = new Form\Element\Text('XModules', null, '', _t('选择需要启用的模块'), _t(""));
+        $edit = new Form\Element\Text('XModules', null, '', _t('选择需要启用的模块'));
         $edit->setAttribute('class', 'x-item x-basic');
         $form->addInput($edit->multiMode());
 
