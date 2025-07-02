@@ -124,6 +124,15 @@ body:not(.fullscreen) {
   }
 }
 
+.fullscreen #wmd-button-bar-aaeditor {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 50%;
+  background: #FFF;
+  z-index: 1000;
+}
+
 .aa {
   &-modal {
     display: flex;
@@ -654,13 +663,14 @@ body.fullscreen {
     top: var(--offset-top, 53px);
     right: 0;
     margin: 0;
-    padding: 0;
+    padding: 8px;
     background: #F6F6F3;
     overflow: auto;
     position: absolute;
     width: 50%;
     box-sizing: border-box;
     border: 1px solid #D9D9D6;
+    z-index: 1;
 
     #wmd-preview {
       position: relative;
