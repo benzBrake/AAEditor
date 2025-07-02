@@ -351,7 +351,9 @@ class Util
             <link rel="stylesheet" href="<?php echo Util::pluginStatic('css', 'main.css'); ?>"/>
             <script src="<?php $options->adminStaticUrl('js', 'hyperdown.js'); ?>"></script>
             <script src="<?php $options->adminStaticUrl('js', 'pagedown.js'); ?>"></script>
-            <script src="<?php $options->adminStaticUrl('js', 'paste.js'); ?>"></script>
+            <?php if (!\TypechoPlugin\AAEditor\Plugin::isTypechoGe13()): ?>
+                <script src="<?php $options->adminStaticUrl('js', 'paste.js'); ?>"></script>
+            <?php endif; ?>
             <script src="<?php $options->adminStaticUrl('js', 'purify.js'); ?>"></script>
             <script src="<?php echo Util::pluginStatic('js', 'previewUtils.js'); ?>"></script>
             <script
@@ -618,16 +620,37 @@ class Util
                             $('body').trigger('XEditorReplaceSelection', [html]);
                         };
 
+                        <?php if (\TypechoPlugin\AAEditor\Plugin::isTypechoGe13()): ?>
+                        textarea.bind('paste', function (e) {
+                            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+
+                            for (const item of items) {
+                                if (item.kind === 'file') {
+                                    const file = item.getAsFile();
+
+                                    if (file.size > 0) {
+                                        if (!file.name) {
+                                            file.name = (new Date()).toISOString().replace(/\..+$/, '')
+                                                + '.' + file.type.split('/').pop();
+                                        }
+
+                                        Typecho.uploadFile(file);
+                                    }
+                                }
+                            }
+                        });
+                        <?php else: ?>
                         // 剪贴板复制图片
-                        // textarea.pastableTextarea().on('pasteImage', function (e, data) {
-                        //     var name = data.name ? data.name.replace(/[\(\)\[\]\*#!]/g, '') : (new Date()).toISOString().replace(/\..+$/, '');
-                        //     if (!name.match(/\.[a-z0-9]{2,}$/i)) {
-                        //         var ext = data.blob.type.split('/').pop();
-                        //         name += '.' + ext;
-                        //     }
-                        //
-                        //     Typecho.uploadFile(new File([data.blob], name), name);
-                        // });
+                        textarea.pastableTextarea().on('pasteImage', function (e, data) {
+                            var name = data.name ? data.name.replace(/[\(\)\[\]\*#!]/g, '') : (new Date()).toISOString().replace(/\..+$/, '');
+                            if (!name.match(/\.[a-z0-9]{2,}$/i)) {
+                                var ext = data.blob.type.split('/').pop();
+                                name += '.' + ext;
+                            }
+
+                            Typecho.uploadFile(new File([data.blob], name), name);
+                        });
+                        <?php endif; ?>
 
                         // 上传完成后自动插入
                         const splitRegex = /[\s,|]/gm;
