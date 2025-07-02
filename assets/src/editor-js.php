@@ -488,5 +488,44 @@
     document.addEventListener('DOMContentLoaded', () => {
         if ($('[name="markdown"]').val())
             $('body').trigger('XEditorInit', []);
-    })
+    });
+    (function () {
+        function debounce(func, delay) {
+            let timeout;
+            return function() {
+                clearTimeout(timeout);
+                timeout = setTimeout(func, delay);
+            };
+        }
+
+        function handleResize() {
+            if (!document.body.classList.contains('fullscreen')) return;
+            const buttonBar = document.getElementById('wmd-button-bar-aaeditor');
+            const textElement = document.getElementById('text');
+
+            if (buttonBar && textElement) {
+                const height = buttonBar.offsetHeight;
+                textElement.style.setProperty('--offset-top', `${height}px`);
+            }
+        }
+
+        window.addEventListener('resize', debounce(handleResize, 250));
+
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (
+                    mutation.type === 'attributes' &&
+                    mutation.attributeName === 'class' &&
+                    document.body.classList.contains('fullscreen')
+                ) {
+                    handleResize(); // 立即执行
+                }
+            });
+        });
+
+        observer.observe(document.body, {
+            attributes: true,
+            attributeFilter: ['class']
+        });
+    })()
 </script>
