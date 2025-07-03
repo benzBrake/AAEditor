@@ -25,7 +25,6 @@ class Util
         'https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css' => 'css/font-awesome.min.css',
         'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js' => 'js/tex-mml-chtml.js',
         'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js' => 'js/highlight.min.js',
-        'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/' => 'css/highlight.js',
         'https://cdn.jsdelivr.net/npm/html-to-md@0.8.5/dist/index.min.js' => 'js/html-to-md.min.js',
         'https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css' => 'css/toastify.min.css',
         'https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.js' => 'js/toastify.min.js',
@@ -1412,7 +1411,9 @@ class Util
         }
 
         if ($mirror === 'local') {
-            if (array_key_exists($url, self::$staticMap)) {
+            if (rtrim($url, '/') === 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles') {
+                return str_replace('https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles', self::pluginStatic('css', 'highlight.js'), $url);
+            } else if (array_key_exists($url, self::$staticMap)) {
                 return self::pluginMirror(self::$staticMap[$url]);
             }
         } else {
