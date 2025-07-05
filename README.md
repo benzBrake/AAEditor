@@ -195,11 +195,11 @@ public static function parseContent($text, $archive): string {
 
 摘要处理，同上边一样的
 
-## 编译JS
+## 编译核心JS
 1.需要 nodejs 环境
 2.在插件目录运行 CMD
 ```
-npm install # 安装依赖
+npm install --legacy-peer-deps# 安装依赖
 npm run prod # 编译
 ```
 3.如果需要实时编译
