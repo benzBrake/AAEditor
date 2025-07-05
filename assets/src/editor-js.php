@@ -357,7 +357,65 @@
         icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20"><path d="M23.986328 9C12.666705 9 2.6928719 16.845918 0.046875 27.126953 A 1.5002454 1.5002454 0 0 0 2.953125 27.873047C5.2331281 19.014082 14.065951 12 23.986328 12C33.906705 12 42.767507 19.01655 45.046875 27.873047 A 1.5002454 1.5002454 0 0 0 47.953125 27.126953C45.306493 16.84345 35.305951 9 23.986328 9 z M 24.001953 17C18.681885 17 14.337891 21.343999 14.337891 26.664062C14.337891 31.984127 18.681885 36.330078 24.001953 36.330078C29.322021 36.330078 33.667969 31.984126 33.667969 26.664062C33.667969 21.343999 29.322021 17 24.001953 17 z"></path></svg>',
         insertBefore: '#wmd-spacer4-aaeditor',
         command() {
-            this.wrapSelection('[hide]\n', '\n[/hide]', '<?php _e("回复可见"); ?>');
+            this.wrapSelection('::: pass:comment\n', '\n:::', '<?php _e("回复可见"); ?>');
+        }
+    }, {
+        id: 'wmd-custom-block-button-aaeditor',
+        icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M1 2v3h2V4h2v5H3.5v2h5V9H7V4h2v1h2V2zm20 1h-7v2h6v14H4v-5H2v6a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1"/></svg>',
+        name: '<?php _e("自定义容器"); ?>',
+        insertBefore: '#wmd-spacer4-aaeditor',
+        command() {
+            const {textarea} = this;
+            const lastSelection = textarea.getSelection();
+            const selectedText = this.getSelectedText();
+            this.openModal({
+                title: '<?php _e("插入自定义容器"); ?>',
+                innerHTML: `<div class="form-item">
+    <label for="type"><?php _e("容器类型"); ?></label>
+    <select name="type">
+        <option value="tip">tip</option>
+        <option value="note">note</option>
+        <option value="info">info</option>
+        <option value="warning">warning</option>
+        <option value="danger">danger</option>
+        <option value="success">success</option>
+        <option value="details">details</option>
+    </select>
+</div>
+<div class="form-item" style="display: none;">
+    <label><?php _e("默认展开"); ?></label>
+    <input type="checkbox" name="open" id="open" switch />
+    <label class="form-switcher" for="open"></span>
+</div>
+<div class="form-item">
+    <label for="title"><?php _e("容器标题"); ?></label>
+    <input name="title" id="title" />
+</div>
+<div class="form-item">
+    <label for="content"><?php _e("容器内容"); ?></label>
+    <textarea rows="3" autocomplete="off" name="content" placeholder="<?php _e("请输入提示内容"); ?>">${selectedText}</textarea>
+</div>`,
+                handle(modal) {
+                    $('[name="type"]', modal).on('change', _ => {
+                        $('[name="open"]', modal).parent().css('display', $('[name="type"]', modal).val() === 'details' ? 'flex' : 'none');
+                    })
+                },
+                confirm(modal) {
+                    let type = $('[name="type"]', modal).val(),
+                        title = $('[name="title"]', modal).val(),
+                        content = $('[name="content"]', modal).val() || "<?php _e("这里编辑容器内容"); ?>";
+
+                    if (title.length) title = " " + title;
+                    if ($('[name="open"]', modal).get(0).checked) type += ":open";
+                    let prefix = `::: ${type}${title}\n`;
+                    let postfix = `\n:::`;
+                    this.textarea.setSelection(lastSelection.start, lastSelection.end);
+                    textarea.executeAndAddUndoStack('replaceSelectionText', prefix + content + postfix);
+                    if (selectedText)
+                        this.textarea.setSelection(lastSelection.start + prefix.length, lastSelection.start + prefix.length + content.length);
+                    return true;
+                }
+            })
         }
     }, {
         id: 'wmd-preview-button-aaeditor',
@@ -402,7 +460,6 @@
                 $('#wmd-preview-aaeditor pre code:not([data-highlighted="yes"])').toArray().forEach(el => {
                     const {hljs} = window;
                     if (typeof hljs === "object" && "highlightElement" in hljs) {
-
                         const copy = document.createElement('span');
                         // 还原编码
                         let div = document.createElement('div');
@@ -460,7 +517,7 @@
                         linkElement.type = "text/css";
                         linkElement.href = "<?php echo \TypechoPlugin\AAEditor\Util::pluginStatic('css', 'highlight.js/'); ?>" + filename;
                         document.head.appendChild(linkElement);
-                        previewArea.attr("hljs", filename.replace(/.+\//, ""));
+                        previewArea.attr("hljs", filename.replace(/.+\//, "").replace(/\.css$/, ''));
                     }
 
                 }
@@ -475,16 +532,24 @@
     }].forEach(btn => {
         $('body').trigger('XEditorAddButton', [btn]);
     });
-    $('body').trigger('XEditorAddHtmlProcessor', [function (html) {
-        if (html.indexOf("[hide") === -1) return html;
-        const regex = /\[hide](.*?)\[\/hide]/gi;
-        return html.replace(regex, `<div class="x-hide fake blur">
-    <span class="x-hide-icon" title="<?php _e("显示/隐藏"); ?>" onclick="this.parentNode.classList.toggle('blur');">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20"><path d="M23.986328 9C12.666705 9 2.6928719 16.845918 0.046875 27.126953 A 1.5002454 1.5002454 0 0 0 2.953125 27.873047C5.2331281 19.014082 14.065951 12 23.986328 12C33.906705 12 42.767507 19.01655 45.046875 27.873047 A 1.5002454 1.5002454 0 0 0 47.953125 27.126953C45.306493 16.84345 35.305951 9 23.986328 9 z M 24.001953 17C18.681885 17 14.337891 21.343999 14.337891 26.664062C14.337891 31.984127 18.681885 36.330078 24.001953 36.330078C29.322021 36.330078 33.667969 31.984126 33.667969 26.664062C33.667969 21.343999 29.322021 17 24.001953 17 z"></path></svg>
-    </span>
-    <span class="x-hide-text" onclick="this.parentNode.classList.toggle('blur');">$1</span>
-</div>`);
-    }, 1]);
+    $('body').on('XEditorPreviewEnd', function () {
+        $('.fence-pass:not([rendered])').each(function () {
+            let block = $(this);
+            block.attr('rendered', true);
+            block.addClass('fence-pass-blur');
+            let title = block.find('.fence-title');
+            if (title.text() === "PASS") {
+                title.remove();
+            }
+            let content = block.find('.fence-content');
+            content.on('click', function () {
+                block.toggleClass('fence-pass-blur');
+            })
+            block.append(`<span class="fence-pass-icon" title="<?php _e("显示/隐藏"); ?>" onclick="this.parentNode.classList.toggle('fence-pass-blur');">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20"><path d="M23.986328 9C12.666705 9 2.6928719 16.845918 0.046875 27.126953 A 1.5002454 1.5002454 0 0 0 2.953125 27.873047C5.2331281 19.014082 14.065951 12 23.986328 12C33.906705 12 42.767507 19.01655 45.046875 27.873047 A 1.5002454 1.5002454 0 0 0 47.953125 27.126953C45.306493 16.84345 35.305951 9 23.986328 9 z M 24.001953 17C18.681885 17 14.337891 21.343999 14.337891 26.664062C14.337891 31.984127 18.681885 36.330078 24.001953 36.330078C29.322021 36.330078 33.667969 31.984126 33.667969 26.664062C33.667969 21.343999 29.322021 17 24.001953 17 z"></path></svg>
+</span>`)
+        });
+    });
     document.addEventListener('DOMContentLoaded', () => {
         if ($('[name="markdown"]').val())
             $('body').trigger('XEditorInit', []);
@@ -492,7 +557,7 @@
     (function () {
         function debounce(func, delay) {
             let timeout;
-            return function() {
+            return function () {
                 clearTimeout(timeout);
                 timeout = setTimeout(func, delay);
             };

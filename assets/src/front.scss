@@ -1,0 +1,10 @@
+@import "editor/extend";
+.fence-content.text-center {
+  text-align: center;
+}
+.fence p {
+  margin-top: 0;
+  &:last-child {
+    margin-bottom: 0;
+  }
+}

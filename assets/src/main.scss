@@ -13,8 +13,33 @@ body.no-scroll {
 #wmd-preview-wrapper-aaeditor {
   overflow-y: auto;
   background: #fff;
+
+
+  @media (prefers-color-scheme: dark) {
+    background: #2b2b2b;
+  }
+
   #wmd-preview-aaeditor {
+    &[hljs$="dark"] {
+      @media (prefers-color-scheme: light) {
+        pre {
+          filter: invert(1);
+        }
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      &[hljs$="light"] {
+        pre {
+          filter: invert(1);
+        }
+      }
+    }
+
+    @import "editor/extend.scss";
     @import "editor/content.scss";
+
+
     img {
       max-width: 100%;
     }
@@ -300,7 +325,9 @@ body:not(.fullscreen) {
         .form-item {
           display: flex;
           width: 100%;
-          align-items: center;
+          background: rgba(209, 213, 219, 0.6);
+          border-radius: 4px;
+          align-items: start;
 
           &.hidden {
             display: none;
@@ -318,12 +345,12 @@ body:not(.fullscreen) {
           }
 
           label {
-            background: rgb(209 213 219/ .6);
             padding: 6px 8px;
             height: 32px;
             box-sizing: border-box;
             border-radius: 4px 0 0 4px;
             position: relative;
+            user-select: none;
 
             &.no-bg {
               background: transparent;
@@ -371,6 +398,52 @@ body:not(.fullscreen) {
               animation: shake 800ms ease-in-out;
             }
           }
+
+          input[type="checkbox"] {
+            &[switch] {
+              display: none;
+            }
+
+            & + .form-switcher {
+              height: 20px;
+              width: 40px;
+              background: #fff;
+              border-radius: 9999px;
+              margin-top: 6px;
+              margin-bottom: 6px;
+              border: 1px solid #D9D9D6;
+              box-sizing: border-box;
+              position: relative;
+              cursor: pointer;
+              transition: background-color 0.3s ease;
+
+              &:after {
+                content: "";
+                display: block;
+                width: 16px;
+                height: 16px;
+                border-radius: 9999px;
+                background-color: #fff;
+                left: 1px;
+                top: 1px;
+                position: absolute;
+                box-shadow: 0 0 0 1px #D9D9D6;
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+              }
+            }
+
+            // 4. 当 checkbox 被选中时（即开关打开时）的样式
+            &:checked + .form-switcher {
+              background-color: #0f9cfd;
+
+              // 5. 移动滑块到右侧
+              &:after {
+                transform: translateX(22px);
+                box-shadow: 0 0 0 1px #0f9cfd;
+              }
+            }
+          }
+
 
           textarea {
             height: auto;

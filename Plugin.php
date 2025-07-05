@@ -10,6 +10,7 @@ use Typecho\Plugin\PluginInterface;
 use Typecho\Request;
 use Typecho\Response;
 use Typecho\Widget\Helper\Form;
+use Typecho\Widget\Helper\Layout;
 use Utils\Helper;
 use Widget\Notice;
 
@@ -20,7 +21,8 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
  *
  * @package AAEditor
  * @author Ryan
- * @version 1.3.0.4
+ * @version 1.3.1.0
+ * @since 1.2.0
  * @link https://doufu.ru
  *
  */
@@ -51,14 +53,6 @@ class Plugin implements PluginInterface
         return Util::deactivate();
     }
 
-    /**
-     * 获取插件配置面板
-     *
-     * @access public
-     * @param Form $form 配置面板
-     * @return void
-     * @throws Db\Exception
-     */
     /**
      * 获取插件配置面板
      *
@@ -120,8 +114,7 @@ class Plugin implements PluginInterface
         Util::collectManifest();
         ?>
         <link rel="stylesheet" href="<?php echo Util::pluginStatic('css', 'config.css'); ?>">
-        <script>window.XEditorModules = JSON.parse('<?php echo json_encode(Util::listModules()) ?>');
-            window.XEditorUpldateURL = 'https://xiamp.net/archives/aaeditor-update-log.html';</script>
+        <script>window.XEditorUpdateURL = 'https://xiamp.net/archives/aaeditor-update-log.html';</script>
         <script src="<?php echo Util::pluginStatic('js', 'config.js'); ?>"></script>
         <div class="x-config">
             <?php if (count($errorMessage)): ?>
@@ -152,8 +145,11 @@ class Plugin implements PluginInterface
             </div>
         </div>
         <?php
-        $edit = new Label('<ul class="x-item x-notice"><h2 class="title" data-version="' . Plugin::version() . '"><span class="loading">' . _t("加载中...") . '</span><span class="latest">' . _t("最新版本") . '</span><span class="latest found">' . _t("发现新版本：") . '</span><span class="latest version"></span></span></h2><div class="message"></div></ul>');
-        $form->addItem($edit);
+        $layout = new Layout();
+        $layout->setTagName('ul');
+        $layout->setAttribute('class', 'x-item x-notice');
+        $layout->html('<h2 class="title" data-version="' . Plugin::version() . '"><span class="loading">' . _t("加载中...") . '</span><span class="latest">' . _t("最新版本") . '</span><span class="latest found">' . _t("发现新版本：") . '</span><span class="latest version"></span></span></h2><div class="message"></div>');
+        $form->addItem($layout);
         $edit = new Form\Element\Select(
             'XEditorEnabled',
             array(
@@ -166,20 +162,6 @@ class Plugin implements PluginInterface
         );
         $edit->setAttribute('class', 'x-item x-basic');
         $form->addInput($edit->multiMode());
-
-        $edit = new Form\Element\Select(
-            'XShortCodeParse',
-            array(
-                'off' => _t('关闭'),
-                'on' => _t('开启（默认）')
-            ),
-            'on',
-            _t('是否开启短代码转换'),
-            _t('介绍：如果短代码转换功能与你当前主题冲突，请关闭此功能！！!</br>注意：关闭此功能后可以使用自定义字段<span style="display: inline-block; padding:0 5px; color: firebrick">EnableShortCodeParse</span>强制打开指定文章的短代码解析')
-        );
-        $edit->setAttribute('class', 'x-item x-basic');
-        $form->addInput($edit->multiMode());
-
 
         $edit = new Form\Element\Select(
             'XEditorContentStyle',
@@ -250,18 +232,6 @@ class Plugin implements PluginInterface
             _t('说明：因为jsDelivr的CDN在国内访问不稳定，使用 jsDelivr 的镜像可以提高访问速度，默认为为本地'));
         $edit->setAttribute('class', 'x-item x-basic');
         $form->addInput($edit->multiMode());
-
-        $edit = new Form\Element\Text('XModules', null, '', _t('选择需要启用的模块'), _t("按需配置即可"));
-        $edit->setAttribute('class', 'x-item x-basic');
-        $form->addInput($edit->multiMode());
-
-        $edit = new Form\Element\Select(
-            'XCombileModuleCss',
-            ['off' => _t("关闭（默认）"), 'on' => _t("开启")], 'off',
-            _t('合并模块的 CSS 文件'),
-            _t('说明：修改 CSS 后需要手动清理缓存<code>插件目录/cache/minify.css</code>'));
-        $edit->setAttribute('class', 'x-item x-basic');
-        $form->addInput($edit);
 
         $edit = new Form\Element\Text('XDisableAttachAutoInsert', null, null, _t('附件上传后禁止自动插入到正文'), _t('填写后缀，格式：后缀|后缀'));
         $edit->setAttribute('class', 'x-item x-basic');

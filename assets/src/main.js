@@ -318,6 +318,23 @@ class XEditor {
     }
 
     /**
+     * 获取选中区域的起止位置
+     * @returns {{start: number, end: number}}
+     */
+    getSelection() {
+        return this.textarea.getSelection();
+    }
+
+    /**
+     * 设置选中区域的起止位置
+     * @param {number} start 起始位置
+     * @param {number} end 结束位置
+     */
+    setSelection(start, end) {
+        this.textarea.setSelection(start, end);
+    }
+
+    /**
      * 判定是否聚焦到文本框了
      *
      * @returns {boolean}
@@ -334,8 +351,8 @@ class XEditor {
      */
     wrapSelection(prefix, postfix, defaultText = "") {
         const {textarea} = this;
-        const selection = textarea.getSelection();
-        const selectedText = textarea.getSelectedText();
+        const selection = this.getSelection();
+        const selectedText = this.getSelectedText();
         if (selectedText) {
             // 情况 1: 选中的文本已经是一个完整的包裹块
             if (selectedText.startsWith(prefix) && selectedText.endsWith(postfix)) {
@@ -624,4 +641,4 @@ class XEditor {
     }
 }
 
-new XEditor("#text", "#md-preview");
+new XEditor("#text", "#wmd-preview-aaeditor");
