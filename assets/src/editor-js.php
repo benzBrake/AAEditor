@@ -19,7 +19,7 @@
         insertAfter: '#wmd-bold-button-aaeditor',
         shortcut: 'ctrl+d',
         command: function () {
-            this.wrapText('~~', '~~', '<?php _e("删除线"); ?>');
+            this.wrapSelection('~~', '~~', '<?php _e("删除线"); ?>');
         }
     }, {
         id: 'wmd-italic-button-aaeditor',
@@ -100,7 +100,7 @@
         icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M11 4V2H13V4H19C19.5523 4 20 4.44772 20 5V10C20 10.5523 19.5523 11 19 11H13V13H17C17.5523 13 18 13.4477 18 14V19C18 19.5523 17.5523 20 17 20H13V22H11V20H7C6.44772 20 6 19.5523 6 19V14C6 13.4477 6.44772 13 7 13H11V11H5C4.44772 11 4 10.5523 4 10V5C4 4.44772 4.44772 4 5 4H11ZM8 15V18H16V15H8ZM6 9H18V6H6V9Z"></path></svg>',
         insertBefore: '#wmd-spacer1-aaeditor',
         command() {
-            this.wrapText(`<center>`, `</center>`);
+            this.wrapSelection(`<center>`, `</center>`);
         }
     }, {
         id: 'wmd-link-button-aaeditor',
@@ -238,7 +238,7 @@
         icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20"><path d="M24 12L18.3431 17.6569L16.9289 16.2426L21.1716 12L16.9289 7.75736L18.3431 6.34315L24 12ZM2.82843 12L7.07107 16.2426L5.65685 17.6569L0 12L5.65685 6.34315L7.07107 7.75736L2.82843 12ZM9.78845 21H7.66009L14.2116 3H16.3399L9.78845 21Z"></path></svg>',
         insertBefore: '#wmd-spacer2-aaeditor',
         command() {
-            this.wrapText('`', '`');
+            this.wrapSelection('`', '`');
         }
     }, {
         id: 'wmd-block-code-button-aaeditor',
@@ -246,7 +246,7 @@
         icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20"><path d="M3 3H21C21.5523 3 22 3.44772 22 4V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V4C2 3.44772 2.44772 3 3 3ZM4 5V19H20V5H4ZM20 12L16.4645 15.5355L15.0503 14.1213L17.1716 12L15.0503 9.87868L16.4645 8.46447L20 12ZM6.82843 12L8.94975 14.1213L7.53553 15.5355L4 12L7.53553 8.46447L8.94975 9.87868L6.82843 12ZM11.2443 17H9.11597L12.7557 7H14.884L11.2443 17Z"></path></svg>',
         insertBefore: '#wmd-spacer2-aaeditor',
         command() {
-            this.wrapText('```\n', '\n```');
+            this.wrapSelection('```\n', '\n```');
         }
     }, {
         id: 'wmd-html-icon-aaeditor',
@@ -357,7 +357,7 @@
         icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20"><path d="M23.986328 9C12.666705 9 2.6928719 16.845918 0.046875 27.126953 A 1.5002454 1.5002454 0 0 0 2.953125 27.873047C5.2331281 19.014082 14.065951 12 23.986328 12C33.906705 12 42.767507 19.01655 45.046875 27.873047 A 1.5002454 1.5002454 0 0 0 47.953125 27.126953C45.306493 16.84345 35.305951 9 23.986328 9 z M 24.001953 17C18.681885 17 14.337891 21.343999 14.337891 26.664062C14.337891 31.984127 18.681885 36.330078 24.001953 36.330078C29.322021 36.330078 33.667969 31.984126 33.667969 26.664062C33.667969 21.343999 29.322021 17 24.001953 17 z"></path></svg>',
         insertBefore: '#wmd-spacer4-aaeditor',
         command() {
-            this.wrapText('[hide]\n', '\n[/hide]', '<?php _e("回复可见"); ?>');
+            this.wrapSelection('[hide]\n', '\n[/hide]', '<?php _e("回复可见"); ?>');
         }
     }, {
         id: 'wmd-preview-button-aaeditor',

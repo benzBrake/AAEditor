@@ -13,35 +13,39 @@ class XEditor {
         this.isInit = false;
         this.buttons = [];
         this.insertProcessors = [];
-        $('body').on('XEditorAddButton', (event, ...buttons) => {
-            buttons.forEach(button => {
-                if (isObject(button)) {
-                    if (Object.keys(button).length) {
-                        this.buttons.push(button);
-                    } else {
+        $("body")
+            .on("XEditorAddButton", (event, ...buttons) => {
+                buttons.forEach((button) => {
+                    if (isObject(button)) {
+                        if (Object.keys(button).length) {
+                            this.buttons.push(button);
+                        } else {
+                            this.buttons.push({
+                                class: "wmd-spacer",
+                            });
+                        }
+                    } else if (isString(button) && button === "splitter") {
                         this.buttons.push({
-                            class: 'wmd-spacer'
+                            class: "wmd-spacer",
                         });
                     }
-                } else if (isString(button) && button === "splitter") {
-                    this.buttons.push({
-                        class: 'wmd-spacer'
-                    });
-                }
+                });
+            })
+            .on("XEditorInit", () => {
+                this.init();
+            })
+            .on("XEditorRefresh", () => {
+                let sp = this.textarea.getScrollPosition();
+                this.setContent(this.getContent());
+                this.textarea.setScrollPosition(sp.top, sp.left);
+            })
+            .on("XEditorAddInsertProcessor", (event, ...processors) => {
+                processors.forEach((processor) => {
+                    if (typeof processor === "function") {
+                        this.insertProcessors.push(processor);
+                    }
+                });
             });
-        }).on('XEditorInit', () => {
-            this.init();
-        }).on("XEditorRefresh", () => {
-            let sp = this.textarea.getScrollPosition();
-            this.setContent(this.getContent());
-            this.textarea.setScrollPosition(sp.top, sp.left);
-        }).on('XEditorAddInsertProcessor', (event, ...processors) => {
-            processors.forEach(processor => {
-                if (typeof processor === 'function') {
-                    this.insertProcessors.push(processor);
-                }
-            });
-        })
     }
 
     /**
@@ -57,14 +61,15 @@ class XEditor {
         if (this.isInit) return;
         this.isInit = true;
         window.XEditor = this;
-        $("body").append(`<div id="aa-wrapper"></div>`)
-            .on('XEditorPreviewEnd', () => this.handlePreviewEnd())
-            .on('XEditorReplaceSelection', (e, text) => {
-                console.log('replaceSelection', text);
+        $("body")
+            .append(`<div id="aa-wrapper"></div>`)
+            .on("XEditorPreviewEnd", () => this.handlePreviewEnd())
+            .on("XEditorReplaceSelection", (e, text) => {
+                console.log("replaceSelection", text);
                 this.replaceSelection(text);
             });
         this.initToolbar();
-        $('body').trigger('XEditorPreviewEnd');
+        $("body").trigger("XEditorPreviewEnd");
     }
 
     initToolbar() {
@@ -73,9 +78,11 @@ class XEditor {
             const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform);
 
             // 校验快捷键格式是否正确
-            const isValidShortcut = /^([a-zA-Z0-9]|F[1-9]|10|11|12|\+)+$/.test(shortcut);
+            const isValidShortcut = /^([a-zA-Z0-9]|F[1-9]|10|11|12|\+)+$/.test(
+                shortcut
+            );
             if (!isValidShortcut) {
-                console.error('无效的快捷键格式');
+                console.error("无效的快捷键格式");
                 return false;
             }
 
@@ -84,7 +91,7 @@ class XEditor {
 
             // 检查是否为Mac系统，如果是，则将ctrl替换为cmd
             if (isMac) {
-                shortcut = shortcut.replace('ctrl', 'cmd');
+                shortcut = shortcut.replace("ctrl", "cmd");
             }
 
             // 创建keydown事件处理函数
@@ -96,13 +103,13 @@ class XEditor {
 
                 const pressedKeys = [];
                 if (event.ctrlKey) {
-                    pressedKeys.push('ctrl');
+                    pressedKeys.push("ctrl");
                 }
                 if (event.altKey) {
-                    pressedKeys.push('alt');
+                    pressedKeys.push("alt");
                 }
                 if (event.shiftKey) {
-                    pressedKeys.push('shift');
+                    pressedKeys.push("shift");
                 }
 
                 // 只在有修饰键按下的情况下响应字母和数字键
@@ -110,7 +117,7 @@ class XEditor {
                     pressedKeys.push(event.key.toLowerCase());
                 }
 
-                const pressedShortcut = pressedKeys.join('+');
+                const pressedShortcut = pressedKeys.join("+");
 
                 if (pressedShortcut === shortcut) {
                     event.preventDefault(); // 阻止浏览器默认行为
@@ -121,18 +128,22 @@ class XEditor {
             };
 
             // 绑定keydown事件到document
-            document.addEventListener('keydown', handleKeyDown);
+            document.addEventListener("keydown", handleKeyDown);
 
             return true;
         };
 
         // 创建按钮
         const createButton = (attrs = {}) => {
-            let btn = $C('li', {
-                ...attrs,
-                title: attrs.name
-            }, ['icon', 'command', 'onMounted']);
-            btn.classList.add('wmd-button');
+            let btn = $C(
+                "li",
+                {
+                    ...attrs,
+                    title: attrs.name,
+                },
+                ["icon", "command", "onMounted"]
+            );
+            btn.classList.add("wmd-button");
             let icon = $(attrs.icon);
             if (icon.length) {
                 btn.appendChild(icon.get(0));
@@ -141,42 +152,44 @@ class XEditor {
             }
             // 检查是否存在shortcut属性
             if (attrs.shortcut) {
-                if (registerShortcut(btn, attrs.shortcut, this.handleHotkey)) { // 注册按键，成功才修改 title
+                if (registerShortcut(btn, attrs.shortcut, this.handleHotkey)) {
+                    // 注册按键，成功才修改 title
                     btn.title = `${attrs.name} ${attrs.shortcut.toUpperCase()}`;
                 }
             }
 
             if ("command" in attrs) {
                 if (typeof attrs.command === "function") {
-                    btn.addEventListener('click', () => {
+                    btn.addEventListener("click", () => {
                         attrs.command.call(this, {target: btn});
                     });
                 } else {
-                    btn.setAttribute('onclick', attrs.command)
+                    btn.setAttribute("onclick", attrs.command);
                 }
             }
 
             return btn;
-        }
+        };
 
         // 创建分隔符
         const createSplitter = (num = 0, attrs) => {
-            let el = $C('li', {
-                id: sprintf('wmd-spacer%d-aaeditor', num),
-                ...attrs
+            let el = $C("li", {
+                id: sprintf("wmd-spacer%d-aaeditor", num),
+                ...attrs,
             });
-            el.classList.add('wmd-spacer');
-            el.classList.add(sprintf('wmd-spacer%d', num));
+            el.classList.add("wmd-spacer");
+            el.classList.add(sprintf("wmd-spacer%d", num));
             return el;
-        }
+        };
 
         const getSpacerCount = () => {
-            return $('#wmd-button-bar-aaeditor .wmd-spacer').length;
-        }
+            return $("#wmd-button-bar-aaeditor .wmd-spacer").length;
+        };
 
-        this.toolbar = $('#wmd-button-row-aaeditor');
-        this.buttons.forEach(btnCfg => {
-            let el, isExists = false;
+        this.toolbar = $("#wmd-button-row-aaeditor");
+        this.buttons.forEach((btnCfg) => {
+            let el,
+                isExists = false;
             if ("id" in btnCfg) {
                 if (document.getElementById(btnCfg.id)) {
                     el = document.getElementById(btnCfg.id);
@@ -219,7 +232,7 @@ class XEditor {
                         return $(refSel, parent);
                     }
                 }
-            }
+            };
 
             if ("insertBefore" in btnCfg) {
                 refNode = getRefNode(btnCfg.insertBefore, this.toolbar);
@@ -242,10 +255,10 @@ class XEditor {
             }
             if (typeof btnCfg.onMounted === "function") {
                 btnCfg.onMounted.call(this, {
-                    target: el
-                })
+                    target: el,
+                });
             }
-        })
+        });
     }
 
     handleHotkey({objectTarget}) {
@@ -253,7 +266,6 @@ class XEditor {
     }
 
     handlePreviewEnd() {
-
     }
 
     /**
@@ -271,7 +283,7 @@ class XEditor {
      * @param {string} text
      */
     setContent(text) {
-        this.textarea.executeAndAddUndoStack('setContent', text);
+        this.textarea.executeAndAddUndoStack("setContent", text);
     }
 
     /**
@@ -280,7 +292,7 @@ class XEditor {
      * @param {string} text
      */
     insertText(text) {
-        this.textarea.executeAndAddUndoStack('insertText', text);
+        this.textarea.executeAndAddUndoStack("insertText", text);
     }
 
     /**
@@ -290,9 +302,9 @@ class XEditor {
      */
     replaceSelection(text) {
         if (this.getSelectedText()) {
-            this.textarea.executeAndAddUndoStack('replaceSelection', text);
+            this.textarea.executeAndAddUndoStack("replaceSelection", text);
         } else {
-            this.textarea.executeAndAddUndoStack('insertText', text);
+            this.textarea.executeAndAddUndoStack("insertText", text);
         }
     }
 
@@ -315,84 +327,75 @@ class XEditor {
     }
 
     /**
-     * 增加前缀后缀。
+     * 增加或移除选中文本的前后缀。
      * @param {string} prefix - 前缀。
      * @param {string} postfix - 后缀。
      * @param {string} defaultText - 没有选中文本时插入到前缀和后缀之间的文本。
      */
-    wrapText(prefix, postfix, defaultText = "") {
+    wrapSelection(prefix, postfix, defaultText = "") {
         const {textarea} = this;
+        const selection = textarea.getSelection();
         const selectedText = textarea.getSelectedText();
-        const currentPos = textarea.getSelection();
         if (selectedText) {
-            let prefixPos = selectedText.indexOf(prefix);
-            let postfixPos = selectedText.lastIndexOf(postfix);
-            let insertNewText = false;
-            if (prefixPos !== -1 && postfixPos !== -1) {
-                // 前后缀都存在
-                if (prefixPos < postfixPos) {
-                    // 防止手抖，强制选中正确的位置
-                    currentPos.start = currentPos.start + prefixPos;
-                    currentPos.end = currentPos.start + postfixPos + postfix.length;
-                } else {
-                    insertNewText = true;
-                }
-            } else {
-                // 在选中文本前方搜索 prefix
-                if (prefixPos === -1) {
-                    let textBefore = textarea.getTextInRange(0, currentPos.start);
-                    // 从后往前找 postfix
-                    let lastPostfixPos = textBefore.lastIndexOf(postfix);
-                    if (lastPostfixPos > -1) {
-                        // 如果前边存在后缀，截取最后后一个后缀后边的文本
-                        textBefore = textBefore.slice(lastPostfixPos + postfix.length, textBefore.length);
-                    }
-                    prefixPos = textBefore.indexOf(prefix);
-                    if (prefixPos > -1) {
-                        currentPos.start = currentPos.start - textBefore.length + prefixPos;
-                    }
-                }
-                // 在选中文本后方搜索 postfix
-                if (postfixPos === -1) {
-                    let textAfter = textarea.getTextInRange(currentPos.end, textarea.getContent().length);
-                    // 从前往后找 prefix
-                    let firstPrefixPos = textAfter.indexOf(prefix);
-                    if (firstPrefixPos > -1) {
-                        textAfter = textAfter.slice(0, firstPrefixPos);
-                    }
-                    postfixPos = textAfter.indexOf(postfix);
-                    if (postfixPos !== -1) {
-                        currentPos.end = currentPos.end + postfixPos + postfix.length;
-                    }
-                }
-                if (prefixPos === -1 && postfixPos === -1) {
-                    insertNewText = true;
-                }
+            // 情况 1: 选中的文本已经是一个完整的包裹块
+            if (selectedText.startsWith(prefix) && selectedText.endsWith(postfix)) {
+                const newText = selectedText.slice(
+                    prefix.length,
+                    selectedText.length - postfix.length
+                );
+
+                textarea.executeAndAddUndoStack("replaceSelectionText", newText);
+                // 更新光标，选中被解开包装的文本
+                textarea.setSelection(
+                    selection.start,
+                    selection.start + newText.length
+                );
+                return;
             }
-            if (insertNewText) {
-                const newText = prefix + textarea.getSelectedText() + postfix;
-                textarea.executeAndAddUndoStack('replaceSelectionText', newText);
-                textarea.setSelection(currentPos.start + prefix.length, currentPos.start + newText.length - postfix.length);
-            } else {
-                textarea.setSelection(currentPos.start, currentPos.end);
-                let newText = textarea.getSelectedText();
-                if (newText.startsWith(prefix)) {
-                    newText = newText.slice(prefix.length);
-                }
-                if (newText.endsWith(postfix)) {
-                    newText = newText.slice(0, newText.length - postfix.length);
-                }
-                textarea.executeAndAddUndoStack('replaceSelectionText', newText);
-                textarea.setSelection(currentPos.start, currentPos.start + newText.length);
+            // 情况 2: 选中的文本是包裹块的“内容”部分
+            // 获取紧邻选中区域前后的文本
+            const textBefore = textarea.getTextInRange(0, selection.start);
+            const textAfter = textarea.getTextInRange(
+                selection.end,
+                textarea.getContent().length
+            );
+
+            if (textBefore.endsWith(prefix) && textAfter.startsWith(postfix)) {
+                // 确定完整的块在整个文本中的起始和结束位置
+                const fullBlockStart = selection.start - prefix.length;
+                const fullBlockEnd = selection.end + postfix.length;
+                // 先将选择区域扩展为整个块
+                textarea.setSelection(fullBlockStart, fullBlockEnd);
+                // 然后用原始选择的文本（即无前后缀的内容）替换整个块
+                textarea.executeAndAddUndoStack("replaceSelectionText", selectedText);
+                // 更新光标，选中被解开包装的文本
+                textarea.setSelection(
+                    fullBlockStart,
+                    fullBlockStart + selectedText.length
+                );
+                return;
             }
+            // 情况 3: 以上都不是，执行包裹操作
+            const newText = prefix + selectedText + postfix;
+            textarea.executeAndAddUndoStack("replaceSelectionText", newText);
+            // 更新光标，选中被包裹的原始文本
+            textarea.setSelection(
+                selection.start + prefix.length,
+                selection.end + prefix.length
+            );
         } else {
-            // 插入带有 prefix 和 postfix 的默认文本
-            const newPrefix = textarea.isAtLineStart() ? prefix : '\n' + prefix;
-            const newPostfix = textarea.isAtLineEnd() ? postfix : postfix + '\n';
+            // 没有选中文本时，插入带有默认文本的包裹块
+            const newPrefix = textarea.isAtLineStart() ? prefix : "\n" + prefix;
+            const newPostfix = textarea.isAtLineEnd() ? postfix : postfix + "\n";
             const newText = newPrefix + defaultText + newPostfix;
-            textarea.executeAndAddUndoStack('insertText', newText);
-            const start = textarea.getSelection().start;
-            textarea.setSelection(start - newText.length + newPrefix.length, start - newPostfix.length);
+            textarea.executeAndAddUndoStack("insertText", newText);
+
+            // 更新光标，选中插入的默认文本
+            const insertionStart = textarea.getSelection().start - newText.length;
+            textarea.setSelection(
+                insertionStart + newPrefix.length,
+                insertionStart + newPrefix.length + defaultText.length
+            );
         }
     }
 
@@ -406,16 +409,18 @@ class XEditor {
         let realSelectionText = textarea.getSelectedText();
         defaultText || (defaultText = "");
         if (realSelectionText.length) {
-            let realSelectionArr = realSelectionText.split('\n');
+            let realSelectionArr = realSelectionText.split("\n");
             console.log(realSelectionArr);
-            let newText = realSelectionArr.map((line, i) => {
-                return prefix.replace("%n", i + 1) + line;
-            }).join("\n");
+            let newText = realSelectionArr
+                .map((line, i) => {
+                    return prefix.replace("%n", i + 1) + line;
+                })
+                .join("\n");
             // 检查选中文本的第一行是否在行首，如果不是，在 newText 前添加换行符
             if (!textarea.isAtLineStart()) {
                 newText = "\n" + newText;
             }
-            textarea.executeAndAddUndoStack('replaceSelectionText', newText + "\n");
+            textarea.executeAndAddUndoStack("replaceSelectionText", newText + "\n");
         } else {
             let newPrefix = prefix.replace("%n", 1),
                 newText = newPrefix + defaultText + "\n",
@@ -424,8 +429,14 @@ class XEditor {
                 newText = "\n" + newText;
                 startPosFix = 1;
             }
-            textarea.executeAndAddUndoStack('insertText', newText);
-            textarea.setSelection(textarea.getSelection().start - newText.length + newPrefix.length + startPosFix, textarea.getSelection().start);
+            textarea.executeAndAddUndoStack("insertText", newText);
+            textarea.setSelection(
+                textarea.getSelection().start -
+                newText.length +
+                newPrefix.length +
+                startPosFix,
+                textarea.getSelection().start
+            );
         }
     }
 
@@ -438,7 +449,7 @@ class XEditor {
         const {textarea} = this;
         let realSelectionText = textarea.getSelectedText();
         if (realSelectionText.length) {
-            let realSelectionArr = realSelectionText.split('\n');
+            let realSelectionArr = realSelectionText.split("\n");
             let firstLine = realSelectionArr[0];
 
             // 判断选中的第一行是否以指定前缀开头
@@ -447,7 +458,9 @@ class XEditor {
                 firstLine = firstLine.substring(prefix.length);
             } else {
                 let {start: startPos, end: endPos} = textarea.getSelection();
-                if (textarea.getTextInRange(startPos - prefix.length, startPos) === prefix) {
+                if (
+                    textarea.getTextInRange(startPos - prefix.length, startPos) === prefix
+                ) {
                     textarea.setSelection(startPos - prefix.length, endPos);
                 } else {
                     // 增加前缀
@@ -464,10 +477,11 @@ class XEditor {
                 newText = "\n" + newText;
             }
 
-            textarea.executeAndAddUndoStack('replaceSelectionText', newText);
+            textarea.executeAndAddUndoStack("replaceSelectionText", newText);
         } else {
             let newPrefix = prefix.replace("%n", 1);
-            let newText, startPosFix = 0;
+            let newText,
+                startPosFix = 0;
 
             if (textarea.isAtLineStart()) {
                 newText = newPrefix + defaultText;
@@ -476,10 +490,16 @@ class XEditor {
                 startPosFix = 1;
             }
 
-            textarea.executeAndAddUndoStack('insertText', newText);
+            textarea.executeAndAddUndoStack("insertText", newText);
 
             // 设置光标位置
-            textarea.setSelection(textarea.getSelection().start - newText.length + newPrefix.length + startPosFix, textarea.getSelection().start);
+            textarea.setSelection(
+                textarea.getSelection().start -
+                newText.length +
+                newPrefix.length +
+                startPosFix,
+                textarea.getSelection().start
+            );
         }
     }
 
@@ -490,7 +510,7 @@ class XEditor {
     openModal(options = {}) {
         const _modalOptions = {
             title: "标题",
-            innerHTML: '内容',
+            innerHTML: "内容",
             showFooter: true,
             checkEmptyOnConfirm: true,
             change: function (modal, params) {
@@ -503,12 +523,14 @@ class XEditor {
             handle: function (modal) {
             },
             callback: function (modal) {
-            }
+            },
         };
         let modalOptions = Object.assign(_modalOptions, options);
-        let contentWrap = modalOptions.checkEmptyOnConfirm ? '<form class="params"></form>' : "";
+        let contentWrap = modalOptions.checkEmptyOnConfirm
+            ? '<form class="params"></form>'
+            : "";
         if ($("#aa-modal").length < 1) {
-            $('#aa-wrapper').append(`<div id="aa-modal" class="aa-modal">
+            $("#aa-wrapper").append(`<div id="aa-modal" class="aa-modal">
     <div class="aa-modal-frame">
     <div class="aa-modal-header">
         <div class="aa-modal-header-title"></div><div class="aa-modal-header-close"><i class="close-icon"></i></div>
@@ -522,65 +544,67 @@ class XEditor {
 </div>
 </div>`);
         }
-        $('.aa-modal-header-title').html(modalOptions.title);
+        $(".aa-modal-header-title").html(modalOptions.title);
         if (modalOptions.checkEmptyOnConfirm) {
-            $('.aa-modal-body .params').html(modalOptions.innerHTML);
+            $(".aa-modal-body .params").html(modalOptions.innerHTML);
         } else {
-            $('.aa-modal-body').html(modalOptions.innerHTML);
+            $(".aa-modal-body").html(modalOptions.innerHTML);
         }
         let modalElm = $("#aa-modal").get(0);
-        modalOptions.showFooter ? $(`.aa-modal-footer`).show() : $('.aa-modal-footer').hide();
-        $('body').addClass('no-scroll');
+        modalOptions.showFooter
+            ? $(`.aa-modal-footer`).show()
+            : $(".aa-modal-footer").hide();
+        $("body").addClass("no-scroll");
         modalOptions.handle.call(this, modalElm);
-        $('.aa-modal-footer-confirm').on('click', () => {
+        $(".aa-modal-footer-confirm").on("click", () => {
             let flag = true;
             if (modalOptions.checkEmptyOnConfirm) {
                 // 检查必填输入框
-                const form = $('#aa-modal .aa-modal-body .params');
+                const form = $("#aa-modal .aa-modal-body .params");
                 let params = form.serializeArray();
                 $.each(params, function (i, param) {
                     let element = $(`#aa-modal .params [name=${param.name}]`);
-                    if (element.prop('required') && param.value === "") {
+                    if (element.prop("required") && param.value === "") {
                         flag = false;
-                        element.addClass('required-animate');
+                        element.addClass("required-animate");
                         setTimeout(function () {
-                            element.removeClass('required-animate');
+                            element.removeClass("required-animate");
                         }, 800);
                     }
                 });
             }
             if (flag && modalOptions.confirm.call(this, modalElm)) {
-                $('#aa-modal').remove();
-                $('body').removeClass('no-scroll');
+                $("#aa-modal").remove();
+                $("body").removeClass("no-scroll");
                 modalOptions.callback.call(this, modalElm);
             }
         });
-        $('.aa-modal-header-close').on('click', (event) => {
+        $(".aa-modal-header-close").on("click", (event) => {
             modalOptions.cancel.call(this, event);
-            $('#aa-modal').removeClass("active");
+            $("#aa-modal").removeClass("active");
             setTimeout(function () {
-                $('#aa-modal').remove();
-                $('body').removeClass('no-scroll');
+                $("#aa-modal").remove();
+                $("body").removeClass("no-scroll");
             }, 300);
         });
-        $('.aa-modal-footer-cancel').on('click', (event) => {
-            $('#aa-modal').removeClass("active");
+        $(".aa-modal-footer-cancel").on("click", (event) => {
+            $("#aa-modal").removeClass("active");
             modalOptions.cancel.call(modalElm, event);
             setTimeout(function () {
-                $('#aa-modal').remove();
-                $('body').removeClass('no-scroll');
+                $("#aa-modal").remove();
+                $("body").removeClass("no-scroll");
             }, 300);
         });
         let form = $(".params", modalElm);
-        $("input,select,textarea", form).on('change input', () => {
+        $("input,select,textarea", form).on("change input", () => {
             let data = form.serializeArray(),
                 params = {};
             data.forEach((item) => {
                 params[item.name] = item.value;
-            })
+            });
             modalOptions.change.call(this, modalElm, params);
         });
-        $('#aa-modal').addClass('active');
+        $("#aa-modal").addClass("active");
     }
 
     /**
@@ -591,7 +615,12 @@ class XEditor {
      * @returns {RegExp}
      */
     getShortCodeRegex(tag) {
-        return new RegExp('\\[(\\[?)(' + tag + ')(?![\\w-])([^\\]\\/]*(?:\\/(?!\\])[^\\]\\/]*)*?)(?:(\\/)\\]|\\](?:([^\\[]*(?:\\[(?!\\/\\2\\])[^\\[]*)*)(\\[\\/\\2\\]))?)(\\]?)', 'g');
+        return new RegExp(
+            "\\[(\\[?)(" +
+            tag +
+            ")(?![\\w-])([^\\]\\/]*(?:\\/(?!\\])[^\\]\\/]*)*?)(?:(\\/)\\]|\\](?:([^\\[]*(?:\\[(?!\\/\\2\\])[^\\[]*)*)(\\[\\/\\2\\]))?)(\\]?)",
+            "g"
+        );
     }
 }
 
