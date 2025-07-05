@@ -2,6 +2,8 @@
 
 namespace TypechoPlugin\AAEditor;
 
+use DOMDocument;
+use DOMXPath;
 use ReflectionClass;
 use Typecho\Common;
 use Typecho\Db;
@@ -9,7 +11,6 @@ use Typecho\Plugin;
 use Typecho\Plugin\Exception;
 use Utils\Helper;
 use Widget\Contents;
-use Widget\Options;
 use Widget\User;
 
 if (!defined('__TYPECHO_ROOT_DIR__')) exit;
@@ -17,10 +18,6 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 class Util
 {
     static $manifest;
-    private static $contentParsers;
-    private static $excerptParsers;
-    private static $archiveStatics;
-
     private static $staticMap = [
         'https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css' => 'css/font-awesome.min.css',
         'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js' => 'js/tex-mml-chtml.js',
@@ -52,18 +49,15 @@ class Util
         Plugin::factory('admin/write-post.php')->bottom = [__CLASS__, 'editorFooter'];
         Plugin::factory('admin/write-page.php')->bottom = [__CLASS__, 'editorFooter'];
 
-        // 短代码
-        Plugin::factory('admin/common.php')->begin = [__CLASS__, 'shortCodeInit'];
-        Plugin::factory('\Widget\Archive')->handleInit = [__CLASS__, 'shortCodeInit'];
-
         // 内容替换处理
+        Plugin::factory('\Widget\Base\Contents')->markdown = [__CLASS__, 'markdown'];
         Plugin::factory('\Widget\Base\Contents')->contentEx_99 = [__CLASS__, 'contentEx'];
         Plugin::factory('\Widget\Base\Contents')->excerptEx_99 = [__CLASS__, 'excerptEx'];
 
         // 增加路由
         Helper::addAction('editor', __NAMESPACE__ . '\Action');
-        $url = Common::url('options-plugin.php?config=AAEditor#typecho-option-item-XModules-8', Helper::options()->adminUrl);
-        return _t(/** @lang text */ '插件已启用，<a href="%s">点此进入插件设置</a>启用你需要的模块！', $url);
+        $url = Common::url('options-plugin.php?config=AAEditor', Helper::options()->adminUrl);
+        return _t(/** @lang text */ '插件已启用，<a href="%s">点此进入插件设置</a>', $url);
     }
 
     /**
@@ -93,6 +87,10 @@ class Util
     public static function archiveFooter($archive)
     {
         self::collectManifest();
+        ?>
+        <link rel="stylesheet" href="<?php echo Util::pluginStatic('css', 'front.css'); ?>">
+        <script src="<?php echo Util::pluginStatic('js', 'front.js'); ?>"></script>
+        <?php
         if (Util::pluginOption('XEditorContentStyle', 'off') === 'on') {
             ?>
             <link rel="stylesheet"
@@ -157,9 +155,6 @@ class Util
             <?php
         }
         ?>
-        <style>
-            <?php echo file_get_contents(Util::pluginDir('assets/dist/css/x.css')); ?>
-        </style>
         <?php
         $cssFiles = Util::listHljsCss();
         $filename = Util::pluginOption('XHljs', 'off');
@@ -219,85 +214,6 @@ class Util
             </script>
             <?php
         }
-        $enableParse = $archive->fields->EnableShortCodeParse;
-        if (Util::pluginOption('XShortCodeParse', 'on') === 'on' || $archive->is("single") && isset($enableParse)) {
-            if (Util::pluginOption('XCombileModuleCss', 'off') === "on") {
-                $cached = ob_get_clean();
-                ob_start();
-                foreach (Util::$archiveStatics as $method) {
-                    call_user_func($method['parser'], $archive);
-                }
-                $static_html = ob_get_clean();
-                $static_html = self::combineStyle($static_html);
-                print $cached;
-                print $static_html;
-            } else {
-                foreach (Util::$archiveStatics as $method) {
-                    call_user_func($method['parser'], $archive);
-                }
-            }
-        }
-    }
-
-    private static function combineStyle($input): string
-    {
-        // 构建标签的正则表达式
-        $pattern = '/<link\s+rel="stylesheet"[^>]*\s+href="([^"]+)"[^>]*>/is';
-        $cssFiles = [];
-        $output = preg_replace_callback($pattern, function ($matches) use (&$cssFiles) {
-            if (isset($matches[1])) {
-                if (strpos($matches[1], Helper::options()->pluginUrl . '/AAEditor') !== false) {
-                    $uri = str_replace(Helper::options()->pluginUrl . '/AAEditor', '', $matches[1]);
-                    $arr = explode('?h=', $uri);
-                    $cssFiles[] = [
-                        'file' => Util::pluginDir($arr[0]),
-                        'hash' => $arr[1]
-                    ];
-                    return '';
-                }
-            }
-            return $matches[0];
-        }, $input);
-        $hash = '';
-        foreach ($cssFiles as $file) {
-            $hash .= $file['hash'];
-        }
-        $hash = md5($hash);
-        if (file_exists(Util::pluginDir('cache/minify.css'))) {
-            $url = Util::pluginUrl('cache/minify.css') . "?h=" . md5_file(Util::pluginDir('cache/minify.css'));
-            // 拼接已合并的 CSS 文件
-            $output = '<link rel="stylesheet" href="' . $url . '">' . $output;
-        } else {
-            // 合并 CSS 文件
-            $cssContent = '';
-            foreach ($cssFiles as $file) {
-                $cssContent .= file_get_contents($file['file']);
-            }
-            $url = self::minifyJs($cssContent);
-            if ($url) {
-                // 拼接合并后的 CSS 文件
-                $output = '<link rel="stylesheet" href="' . $url . '">' . '</head>' . $output;
-            } else {
-                $output = $input;
-            }
-        }
-        return $output;
-    }
-
-    private static function minifyJs($input)
-    {
-        if (!is_dir(Util::pluginDir('cache'))) {
-            try {
-                mkdir(Util::pluginDir('cache'), 0755, true);
-            } catch (\Exception $e) {
-            }
-        }
-        try {
-            file_put_contents(Util::pluginDir('cache/minify.css'), $input);
-            return Util::pluginUrl('/cache/minify.css') . "?h=" . md5_file(Util::pluginDir('cache/minify.css'));
-        } catch (\Exception $exception) {
-        }
-        return false;
     }
 
     /**
@@ -348,7 +264,7 @@ class Util
         if (Util::pluginOption('XEditorEnabled', 'on') === 'on') {
             ?>
             <link rel="stylesheet" href="<?php echo Util::pluginStatic('css', 'main.css'); ?>"/>
-            <script src="<?php $options->adminStaticUrl('js', 'hyperdown.js'); ?>"></script>
+            <script src="<?php echo Util::pluginStatic('js', 'hyperdown.js') ?>"></script>
             <script src="<?php $options->adminStaticUrl('js', 'pagedown.js'); ?>"></script>
             <?php if (!\TypechoPlugin\AAEditor\Plugin::isTypechoGe13()): ?>
                 <script src="<?php $options->adminStaticUrl('js', 'paste.js'); ?>"></script>
@@ -941,108 +857,13 @@ class Util
                 </script>
             <?php }
             require_once self::pluginDir('assets/dist/js/editor-js.php');
-            $enabledOptions = json_decode(Util::pluginOption('XModules', '[]'));
-            foreach ($enabledOptions as $module) {
-                $len = strlen($module);
-                if ($len > 4 && strtolower(substr($module, $len - 4)) === ".php") {
-                    $filePath = Util::pluginDir('Modules' . DIRECTORY_SEPARATOR . $module);
-                    if (file_exists($filePath)) {
-                        require_once $filePath;
-                        $className = 'Module' . substr($module, 0, $len - 4);
-                        if (class_exists($className) && method_exists($className, 'editorStatic')) {
-                            call_user_func($className . '::editorStatic');
-                        }
-                    }
-                } else {
-                    $dir = Util::pluginDir('Modules' . DIRECTORY_SEPARATOR . $module);
-                    $filePath = $dir . DIRECTORY_SEPARATOR . 'index.php';
-                    if (is_dir($dir) && is_file($filePath)) {
-                        require_once $filePath;
-                        $className = 'Module' . $module;
-                        if (class_exists($className) && method_exists($className, 'editorStatic')) {
-                            call_user_func($className . '::editorStatic');
-                        }
-                    }
-                }
-            }
         }
     }
 
-    /**
-     * @throws Db\Exception
-     */
-    public static function hasOption(): bool
+    public static function markdown($text): string
     {
-        $db = Db::get();
-        $sql = $db->select()->from('table.options')->where('name = ?', 'plugin:AAEditor');
-        $result = $db->fetchAll($sql);
-        return count($result) > 0;
-    }
-
-    /**
-     * 缓存短代码替换规则
-     *
-     * @return void
-     * @throws Exception
-     * @throws Db\Exception
-     */
-    public static function shortCodeInit()
-    {
-        if (self::hasOption()) {
-            Util::$contentParsers = [];
-            Util::$excerptParsers = [];
-            Util::$archiveStatics = [];
-            $enabledOptions = json_decode(Util::pluginOption('XModules', '[]'));
-            foreach ($enabledOptions as $module) {
-                $len = strlen($module);
-                if ($len > 4 && strtolower(substr($module, $len - 4)) === ".php") {
-                    $filePath = Util::pluginDir('Modules' . DIRECTORY_SEPARATOR . $module);
-                    if (file_exists($filePath)) {
-                        require_once $filePath;
-                        $className = 'Module' . substr($module, 0, $len - 4);
-                        self::addParser($className);
-                    }
-                } else {
-                    $dir = Util::pluginDir('Modules' . DIRECTORY_SEPARATOR . $module);
-                    $filePath = $dir . DIRECTORY_SEPARATOR . 'index.php';
-                    if (is_dir($dir) && is_file($filePath)) {
-                        require_once $filePath;
-                        $className = 'Module' . $module;
-                        self::addParser($className);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * 增加处理函数到队列中
-     *
-     * @param string $className
-     * @return void
-     */
-    public static function addParser(string $className): void
-    {
-        if (class_exists($className)) {
-            if (method_exists($className, 'parseContent')) {
-                self::$contentParsers[] = [
-                    'priority' => ($className::$priority ?? 99),
-                    'parser' => $className . '::parseContent'
-                ];
-            }
-            if (method_exists($className, 'parseExcerpt')) {
-                self::$excerptParsers[] = [
-                    'priority' => ($className::$priority ?? 99),
-                    'parser' => $className . '::parseExcerpt'
-                ];
-            }
-            if (method_exists($className, 'archiveStatic')) {
-                self::$archiveStatics[] = [
-                    'priority' => ($className::$priority ?? 99),
-                    'parser' => $className . '::archiveStatic'
-                ];
-            }
-        }
+        $markdown = new HyperDown();
+        return $markdown->makeHtml($text);
     }
 
     /**
@@ -1055,56 +876,47 @@ class Util
      * @throws \Typecho\Plugin\Exception
      * @throws \Typecho\Widget\Exception
      */
-    public
-    static function contentEx($text, $archive, $last): string
+    public static function contentEx($text, $archive, $last): string
     {
         if ($last) $text = $last;
-        $enableParse = $archive->fields->EnableShortCodeParse;
-        if (Util::pluginOption('XShortCodeParse', 'on') === 'on' || $archive->is("single") && isset($enableParse)) {
-            // 隐藏代码块
-            $blocks = [];
-            $codeHolder = "<pre>__BLOCK__</pre>";
-            $codeHolderLen = strlen($codeHolder);
-            $text = preg_replace_callback('/(?:<pre>.*?<\/pre>|<code>.*?<\/code>)/ism', function ($match) use (&$blocks, $codeHolder) {
-                $blocks[] = $match[0];
-                return $codeHolder;
-            }, $text);
 
-            // Markdown 增强
-            if (strpos($text, '[x]') !== false || strpos($text, '[ ]') !== false) {
-                $text = strtr($text, array(
-                    "[x]" => '<input type="checkbox" class="x-checkbox" checked disabled /><label class="x-checkbox-label"></label>',
-                    "[ ]" => '<input type="checkbox" class="x-checkbox" disabled /><label class="x-checkbox-label"></label>'
-                ));
-            }
+        // 隐藏代码块
+        $blocks = [];
+        $codeHolder = "<pre>__BLOCK__</pre>";
+        $codeHolderLen = strlen($codeHolder);
+        $text = preg_replace_callback('/(?:<pre>.*?<\/pre>|<code>.*?<\/code>)/ism', function ($match) use (&$blocks, $codeHolder) {
+            $blocks[] = $match[0];
+            return $codeHolder;
+        }, $text);
 
-            foreach (Util::$contentParsers as $parserItem) {
-                if (array_key_exists('parser', $parserItem)) {
-                    $newText = call_user_func($parserItem['parser'], $text, $archive);
-                    if ($newText) {
-                        $text = $newText;
-                    }
+        // Markdown 增强
+        if (strpos($text, '[x]') !== false || strpos($text, '[ ]') !== false) {
+            $text = strtr($text, array(
+                "[x]" => '<input type="checkbox" class="x-checkbox" checked disabled /><label class="x-checkbox-label"></label>',
+                "[ ]" => '<input type="checkbox" class="x-checkbox" disabled /><label class="x-checkbox-label"></label>'
+            ));
+        }
+
+        $text = self::processFencesBlock($text, $archive);
+
+        // 还原代码块
+        if (count($blocks)) {
+            foreach ($blocks as $block) {
+                $pos = strpos($text, $codeHolder);
+                if ($pos !== false) {
+                    $text = substr_replace($text, $block, $pos, $codeHolderLen);
                 }
-            }
-
-            // 还原代码块
-            if (count($blocks)) {
-                foreach ($blocks as $block) {
-                    $pos = strpos($text, $codeHolder);
-                    if ($pos !== false) {
-                        $text = substr_replace($text, $block, $pos, $codeHolderLen);
-                    }
-                }
-            }
-
-            if (false !== strpos($text, '[hide')) {
-                $pattern = "(?s)<pre[^<]*>.*?<\/pre>(*SKIP)(*F)|\[hide](.*?)\[\/hide]";
-                $text = preg_replace_callback("/$pattern/ism", function ($m) use ($archive) {
-                    $content = $m[1] ?? null;
-                    return Util::hideCallback($content, $archive);
-                }, $text);
             }
         }
+
+//        if (false !== strpos($text, '[hide')) {
+//            $pattern = "(?s)<pre[^<]*>.*?<\/pre>(*SKIP)(*F)|\[hide](.*?)\[\/hide]";
+//            $text = preg_replace_callback("/$pattern/ism", function ($m) use ($archive) {
+//                $content = $m[1] ?? null;
+//                return Util::hideCallback($content, $archive);
+//            }, $text);
+//        }
+
         return $text;
     }
 
@@ -1129,17 +941,6 @@ class Util
                 "[x]" => '【已完成】',
                 "[ ]" => '【未完成】'
             ));
-        }
-
-        if (is_array(Util::$excerptParsers)) {
-            foreach (Util::$excerptParsers as $parserItem) {
-                $pos = stripos($parserItem['parser'], '::');
-                $class = substr($parserItem['parser'], 0, $pos);
-                $method = substr($parserItem['parser'], $pos + 2);
-                if (array_key_exists('parser', $parserItem) && method_exists($class, $method)) {
-                    $text = call_user_func([$class, $method], $text, $archive);
-                }
-            }
         }
 
         // 还原代码块
@@ -1483,193 +1284,6 @@ class Util
     }
 
     /**
-     * 列出所有模块
-     *
-     * @return array
-     */
-    public static function listModules(): array
-    {
-        $modulesInfo = [];
-
-        // 设置Modules目录的路径
-        $modulesDir = Util::pluginDir('Modules');
-
-        // 获取Modules目录下的所有文件和子目录
-        $files = scandir($modulesDir);
-
-        // 遍历每个文件和子目录
-        foreach ($files as $file) {
-            // 忽略当前目录(.)和上级目录(..)
-            if ($file == '.' || $file == '..') {
-                continue;
-            }
-
-            $filePath = $modulesDir . DIRECTORY_SEPARATOR . $file;
-            // 检查是否是子目录
-            if (is_dir($filePath)) {
-                $filePath = $filePath . DIRECTORY_SEPARATOR . "index.php";
-            }
-            if (!file_exists($filePath))
-                continue;
-            $info = Util::parseInfo($filePath);
-            $info['file'] = $file;
-            if ($info['editorStatic'] || $info['parseContent'] || $info['parseExcerpt']) {
-                $modulesInfo[] = $info;
-            }
-        }
-        return $modulesInfo;
-    }
-
-    /**
-     * 获取插件文件的头信息
-     *
-     * @param string $pluginFile 插件文件路径
-     * @return array
-     */
-    public static function parseInfo(string $pluginFile): array
-    {
-        $tokens = token_get_all(file_get_contents($pluginFile));
-        $isDoc = false;
-        $isFunction = false;
-        $isClass = false;
-        $isInClass = false;
-        $isInFunction = false;
-        $isDefined = false;
-        $current = null;
-
-        /** 初始信息 */
-        $info = [
-            'description' => '',
-            'title' => '',
-            'author' => '',
-            'homepage' => '',
-            'version' => '',
-            'since' => '',
-            'editorStatic' => false,
-            'parseContent' => false,
-            'parseExcerpt' => false
-        ];
-
-        $map = [
-            'package' => 'title',
-            'author' => 'author',
-            'link' => 'homepage',
-            'since' => 'since',
-            'version' => 'version'
-        ];
-
-        foreach ($tokens as $token) {
-            /** 获取doc comment */
-            if (!$isDoc && is_array($token) && T_DOC_COMMENT == $token[0]) {
-
-                /** 分行读取 */
-                $described = false;
-                $lines = preg_split("(\r|\n)", $token[1]);
-                foreach ($lines as $line) {
-                    $line = trim($line);
-                    if (!empty($line) && '*' == $line[0]) {
-                        $line = trim(substr($line, 1));
-                        if (!$described && !empty($line) && '@' == $line[0]) {
-                            $described = true;
-                        }
-
-                        if (!$described && !empty($line)) {
-                            $info['description'] .= $line . "\n";
-                        } elseif ($described && !empty($line) && '@' == $line[0]) {
-                            $info['description'] = trim($info['description']);
-                            $line = trim(substr($line, 1));
-                            $args = explode(' ', $line);
-                            $key = array_shift($args);
-
-                            if (isset($map[$key])) {
-                                $info[$map[$key]] = trim(implode(' ', $args));
-                            }
-                        }
-                    }
-                }
-
-                $isDoc = true;
-            }
-
-            if (is_array($token)) {
-                switch ($token[0]) {
-                    case T_FUNCTION:
-                        $isFunction = true;
-                        break;
-                    case T_IMPLEMENTS:
-                        $isClass = true;
-                        break;
-                    case T_WHITESPACE:
-                    case T_COMMENT:
-                    case T_DOC_COMMENT:
-                        break;
-                    case T_STRING:
-                        $string = strtolower($token[1]);
-                        switch ($string) {
-                            case 'module':
-                                $isInClass = $isClass;
-                                break;
-                            case 'editorstatic':
-                                if ($isFunction) {
-                                    $current = 'editorStatic';
-                                }
-                                break;
-                            case 'parsecontent':
-                                if ($isFunction) {
-                                    $current = 'parseContent';
-                                }
-                                break;
-                            case 'parseExcerpt':
-                                if ($isFunction) {
-                                    $current = 'parseExcerpt';
-                                }
-                                break;
-                            default:
-                                if (!empty($current) && $isInFunction && $isInClass) {
-                                    $info[$current] = true;
-                                }
-                                break;
-                        }
-                        break;
-                    default:
-                        if (!empty($current) && $isInFunction && $isInClass) {
-                            $info[$current] = true;
-                        }
-                        break;
-                }
-            } else {
-                $token = strtolower($token);
-                switch ($token) {
-                    case '{':
-                        if ($isDefined) {
-                            $isInFunction = true;
-                        }
-                        break;
-                    case '(':
-                        if ($isFunction && !$isDefined) {
-                            $isDefined = true;
-                        }
-                        break;
-                    case '}':
-                    case ';':
-                        $isDefined = false;
-                        $isFunction = false;
-                        $isInFunction = false;
-                        $current = null;
-                        break;
-                    default:
-                        if (!empty($current) && $isInFunction && $isInClass) {
-                            $info[$current] = true;
-                        }
-                        break;
-                }
-            }
-        }
-
-        return $info;
-    }
-
-    /**
      * 增加一个假工具条，给适配原生编辑的的插件增加插入点
      *
      * @param Contents\Post\Edit|Contents\Page\Edit $single
@@ -1704,125 +1318,6 @@ class Util
     <?php }
 
     /**
-     * 输出缩略图
-     *
-     * @param \Widget\Archive|\Widget\Base\Contents|null $archive 文章对象
-     * @param int $quantity 图片数量
-     * @param bool $return 是否返回
-     * @param bool $parse 是否转换
-     * @param string $template 转换模板
-     * @return mixed
-     */
-    public static function thumbs($archive, int $quantity = 3, bool $return = false, bool $parse = false, string $template = /** @lang text */ '<img alt="" src="%s" />')
-    {
-        $thumbs = [];
-        if (isset($archive)) {
-            $fields = unserialize($archive->fields);
-
-            // 首先使用自定义字段 thumb
-            if (array_key_exists('thumb', $fields) && (!empty($fields['thumb'])) && $quantity > 0) {
-                if (!in_array($fields['thumb'], $thumbs)) {
-                    $fieldThumbs = explode("\n", $fields['thumb']);
-                    foreach ($fieldThumbs as $thumb) {
-                        if ($quantity > 0 && !empty(trim($thumb))) {
-                            $thumbs[] = preg_replace('/\|\d+x\d+\s*$/i', '', $thumb);
-                            $quantity -= 1;
-                        }
-                    }
-                }
-            }
-
-            $content = $archive->markdown($archive->text);
-            // 然后是正文匹配
-            preg_match_all("/<img(?<images>[^>]*?)>/i", $content, $matches);
-            foreach ($matches['images'] as $value) {
-                if ($quantity <= 0) {
-                    break;
-                }
-                $match = '';
-
-                preg_match('/data-src="(?<src>.*?)"/i', $value, $dataSrcMatch);
-                if (array_key_exists('src', $dataSrcMatch)) {
-                    $match = $dataSrcMatch['src'];
-                }
-
-                if (empty($match)) {
-                    preg_match('/src="(?<src>.*?)"/i', $value, $srcMatch);
-                    if (array_key_exists('src', $srcMatch)) {
-                        $match = $srcMatch['src'];
-                    }
-                }
-                if (!empty($match)) {
-                    // 2020.03.29 修正输出插件图标的BUG
-                    if (strpos($match, __TYPECHO_PLUGIN_DIR__ . "/") !== false) {
-                        continue;
-                    }
-                    if (strpos($match, "//") === false) {
-                        continue;
-                    }
-                    if (strpos($match, "resources/images/expression") !== false) {
-                        // 过滤表情
-                        continue;
-                    }
-                    if (!in_array($match, $thumbs)) {
-                        $thumbs[] = $match;
-                        $quantity -= 1;
-                    }
-                }
-            }
-
-            // 接着是附件匹配
-            /** @var Contents\Attachment\Related $attachments */
-            Contents\Attachment\Related::allocWithAlias($archive->cid, 'parentId=' . $archive->cid)->to($attachments);
-            while ($attachments->next()) {
-                if ($quantity <= 0) {
-                    break;
-                }
-                if (isset($attachments->isImage) && $attachments->isImage == 1) {
-                    if (!in_array($attachments->url, $thumbs)) {
-                        $thumbs[] = $attachments->url;
-                        $quantity -= 1;
-                    }
-                }
-            }
-        }
-
-        // 最后是随机
-        while ($quantity-- > 0) {
-            $thumbs[] = Util::getRandomImage();
-        }
-
-        // 转换
-        if ($parse && (!empty($template))) {
-            for ($i = 0; $i < count($thumbs); $i++) {
-                $thumbs[$i] = str_replace("%s", $thumbs[$i], $template);
-            }
-        }
-
-        // 输出或返回
-        if ($return) {
-            if (count($thumbs) == 1) {
-                return $thumbs[0];
-            }
-            return $thumbs;
-        } else {
-            foreach ($thumbs as $thumb) {
-                echo $thumb;
-            }
-            return true;
-        }
-    }
-
-    /**
-     * 获取随机图片
-     * @return string
-     */
-    public static function getRandomImage(): string
-    {
-        return Util::pluginUrl('/assets/images/thumbs/' . mt_rand(1, 42) . '.jpg');
-    }
-
-    /**
      * 对象转 HTML
      *
      * @param mixed $widget
@@ -1840,28 +1335,102 @@ class Util
         );
     }
 
-    /**
-     * 回复可见区块处理
-     *
-     * @throws Db\Exception
-     * @throws \Typecho\Widget\Exception
-     */
-    public static function hideCallback($text, $archive): string
-    {
-        $user = User::alloc();
-        $db = Db::get();
-        $mail = $user->hasLogin() ? $user->mail : $archive->remember('mail', true);
-        $select = $db->select()->from('table.comments')
-            ->where('cid = ?', $archive->cid)
-            ->where('mail = ?', $mail)
-            ->where('status = ?', 'approved')
-            ->limit(1);
 
-        $result = $db->fetchAll($select);
-        if ($user->pass('administrator', true) || $result) {
-            return '<div class="x-hide already-shown">' . $text . '</div>';
-        } else {
-            return sprintf('<div class="x-hide already-hide">%s</div>', '此处内容已隐藏，<a href="#comments">回复后(需要填写邮箱)</a>可见');
+    public static function processFencesBlock($text, $archive)
+    {
+        // 1. 预检查和权限判断 (这部分逻辑保持不变)
+        if (strpos($text, 'fence-pass-comment') === false) {
+            return $text;
+        }
+        try {
+            $user = User::alloc();
+            $db = Db::get();
+            $hasPermission = $user->pass('administrator', true);
+            if (!$hasPermission) {
+                $mail = $user->hasLogin() ? $user->mail : $archive->remember('mail', true);
+                if (!empty($mail)) {
+                    $select = $db->select()->from('table.comments')
+                        ->where('cid = ?', $archive->cid)
+                        ->where('mail = ?', $mail)
+                        ->where('status = ?', 'approved')
+                        ->limit(1);
+                    if ($db->fetch($select)) {
+                        $hasPermission = true;
+                    }
+                }
+            }
+            // --- 2. 使用原生 DOM 进行解析和修改 ---
+            // 创建 DOMDocument 对象
+            $dom = new DOMDocument();
+            // 为了避免因 HTML 不规范产生的警告信息扰乱输出，需要先禁用内部错误报告
+            libxml_use_internal_errors(true);
+            // 加载 HTML。加上编码声明和 DOCTYPE 可以最大程度保证解析正确
+            // @ 符号可以抑制加载时可能出现的警告
+            if (!@$dom->loadHTML('<?xml encoding="UTF-8">' . $text, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD)) {
+                // 如果加载失败，返回原文
+                libxml_clear_errors();
+                return $text;
+            }
+            // 创建 XPath 对象，用于查询节点
+            $xpath = new DOMXPath($dom);
+            // 构造 XPath 查询语句来查找所有 class 包含 'fence-pass-comment' 的 div
+            // 这是查找 class 的最稳健的 XPath 写法
+            $query = "//div[contains(concat(' ', normalize-space(@class), ' '), ' fence-pass-comment ')]";
+            $fencePassElements = $xpath->query($query);
+            if ($fencePassElements->length === 0) {
+                return $text; // 没有找到元素，直接返回
+            }
+            // 遍历所有找到的元素并修改
+            foreach ($fencePassElements as $element) {
+                // 在当前元素下继续查找 .fence-title
+                $titleNode = $xpath->query(".//*[contains(concat(' ', normalize-space(@class), ' '), ' fence-title ')]", $element)->item(0);
+                if ($titleNode) {
+                    // **修改 title 内容**
+                    // a. 清空节点的所有子元素
+                    $title = $titleNode->textContent;
+                    if (strtoupper($title) === 'PASS') {
+                        while ($titleNode->firstChild) {
+                            $titleNode->removeChild($titleNode->firstChild);
+                        }
+                        // b. 创建新的文本节点并添加
+                        $newTitleText = $dom->createTextNode(_t("回复可见"));
+                        $titleNode->appendChild($newTitleText);
+                    }
+                }
+                if (!$hasPermission) {
+                    // 在当前元素下继续查找 .fence-content
+                    $contentNode = $xpath->query(".//*[contains(concat(' ', normalize-space(@class), ' '), ' fence-content ')]", $element)->item(0);
+                    if ($contentNode) {
+                        // 增加 text-center 类
+                        $contentNode->setAttribute('class', $contentNode->getAttribute('class') . ' text-center');
+                        // **修改 content 内容 (包含HTML)**
+                        $replacementHtml = _t('此处内容已隐藏，<a href="%s">回复后(需要填写邮箱)</a>可见', $archive->permalink . '#comments');
+
+                        // a. 清空节点的所有子元素
+                        while ($contentNode->firstChild) {
+                            $contentNode->removeChild($contentNode->firstChild);
+                        }
+
+                        // b. 创建一个文档片段来承载新的 HTML 字符串
+                        $fragment = $dom->createDocumentFragment();
+                        // 使用 appendXML 将字符串解析为 DOM 节点并添加到片段中
+                        @$fragment->appendXML($replacementHtml);
+
+                        // c. 将片段添加到内容节点中
+                        $contentNode->appendChild($fragment);
+                    }
+                }
+            }
+            // 3. 输出修改后的 HTML
+            $modifiedHtml = $dom->saveHTML();
+            // 清理 libxml 错误缓冲区
+            libxml_clear_errors();
+            // 清理 <!--?xml...?--> 声明
+            return substr($modifiedHtml, 23);
+        } catch (Exception $e) {
+            // 发生任何异常，都返回原始文本，保证网站不会崩溃
+            error_log('Error in processFencesBlock (Native DOM): ' . $e->getMessage());
+            return $text;
         }
     }
 }

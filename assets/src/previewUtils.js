@@ -2,7 +2,7 @@ window.XPreviewUtils = {
     htmlProcessors: [],
     init() {
         this.previewArea = document.getElementById('wmd-preview');
-        $('body').on('XEditorAddHtmlProcessor', (event, processor, priority = 99) => {
+        $('body').on('XEditorAddParser', (event, processor, priority = 99) => {
             this.htmlProcessors.push({
                 priority,
                 processor

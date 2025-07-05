@@ -112,8 +112,8 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Load the log
-    if (typeof window.XEditorUpldateURL === 'string' && window.XEditorUpldateURL.startsWith('http')) {
-        fetch(window.XEditorUpldateURL)
+    if (typeof window.XEditorUpdateURL === 'string' && window.XEditorUpdateURL.startsWith('http')) {
+        fetch(window.XEditorUpdateURL)
             .then(response => response.text())
             .then(text => {
                 const fragment = document.createElement('div');
@@ -148,59 +148,5 @@ document.addEventListener('DOMContentLoaded', function () {
             classList = classList.filter(c => c.startsWith('x-') && c !== "x-item");
             document.querySelector(`[data-class="${classList[0]}"]`).click();
         }
-    }
-
-    if (window.XEditorModules && document.querySelector('input[name="XModules"]')) {
-        let inputNode = document.querySelector('input[name="XModules"]'),
-            refNode = inputNode.nextElementSibling;
-        inputNode.classList.add('hidden');
-        window.XEditorModules.forEach(mConfig => {
-            let span = document.createElement('span');
-            let checkbox = document.createElement('input');
-            checkbox.type = "checkbox";
-            checkbox.value = mConfig.file;
-            checkbox.id = 'module-' + mConfig.file.replaceAll('.', '-');
-            let label = document.createElement('label');
-            label.innerText = mConfig.title + '【' + mConfig.description + '】';
-            label.setAttribute('for', 'module-' + mConfig.file.replaceAll('.', '-'));
-            checkbox.addEventListener('change', checkboxChange);
-            span.appendChild(checkbox);
-            span.appendChild(label);
-            span.classList.add('multiline');
-            refNode.before(span);
-        });
-
-        let enabledModules = JSON.parse(inputNode.value || '[]');
-        enabledModules.forEach(v => {
-            let node = inputNode.parentNode.querySelector(`input[value="${v}"]`);
-            if (node) node.checked = true;
-        });
-
-        function checkboxChange(event) {
-            inputNode.value = JSON.stringify([...refNode.parentNode.querySelectorAll('input[type="checkbox"]')].filter(c => c.checked).map(c => c.value))
-        }
-
-        // 增加全选和全不选按钮
-        let btnAllChecked = document.createElement('button');
-        btnAllChecked.innerText = '全选';
-        btnAllChecked.type = 'button';
-        btnAllChecked.addEventListener('click', () => {
-            Array.from(inputNode.parentNode.querySelectorAll('input[type="checkbox"]')).forEach(input => {
-                input.checked = false;
-                input.click();
-            })
-        });
-
-        let btnAllUnchecked = document.createElement('button');
-        btnAllUnchecked.innerText = '全不选';
-        btnAllUnchecked.type = 'button';
-        btnAllUnchecked.addEventListener('click', () => {
-            Array.from(inputNode.parentNode.querySelectorAll('input[type="checkbox"]')).forEach(input => {
-                input.checked = true;
-                input.click();
-            })
-        });
-        inputNode.previousElementSibling.appendChild(btnAllChecked);
-        inputNode.previousElementSibling.appendChild(btnAllUnchecked);
     }
 });
