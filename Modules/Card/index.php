@@ -165,7 +165,11 @@ class ModuleCard implements Module
 
             document.addEventListener('DOMContentLoaded', xCardInit);
             document.addEventListener('pjax:complete', xCardInit);
-            document.addEventListener('XMPreviewEnd', xCardInit);
+            if (jQuery) {
+                $(document).on('XEditorPreviewEnd', function () {
+                    xCardInit();
+                })
+            }
         </script>
         <?php
     }
