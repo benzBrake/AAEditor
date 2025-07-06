@@ -1,9 +1,13 @@
+@import "variables.scss";
+
 #wmd-button-row-aaeditor {
   height: auto;
 }
 
-body.no-scroll {
-  overflow: hidden;
+body {
+  &.no-scroll {
+    overflow: hidden;
+  }
 }
 
 .container.widescreen {
@@ -12,12 +16,7 @@ body.no-scroll {
 
 #wmd-preview-wrapper-aaeditor {
   overflow-y: auto;
-  background: #fff;
-
-
-  @media (prefers-color-scheme: dark) {
-    background: #2b2b2b;
-  }
+  background: var(--aaeditor-bg-color);
 
   #wmd-preview-aaeditor {
     &[hljs$="dark"] {

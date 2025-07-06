@@ -1,10 +1,20 @@
-@import "editor/extend";
-.fence-content.text-center {
-  text-align: center;
-}
-.fence p {
-  margin-top: 0;
-  &:last-child {
-    margin-bottom: 0;
+@import "variables";
+.post-content,
+[itemprop="articleBody"] {
+  background-color: var(--aaeditor-bg-color, transparent);
+  @import "editor/extend";
+
+  .fence-content.text-center {
+    text-align: center;
   }
+
+  .fence p {
+    margin-top: 0;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  @import "editor/content";
 }

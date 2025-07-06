@@ -88,13 +88,12 @@ class Util
     {
         self::collectManifest();
         ?>
-        <link rel="stylesheet" href="<?php echo Util::pluginStatic('css', 'front.css'); ?>">
         <script src="<?php echo Util::pluginStatic('js', 'front.js'); ?>"></script>
         <?php
         if (Util::pluginOption('XEditorContentStyle', 'off') === 'on') {
             ?>
             <link rel="stylesheet"
-                  href="<?php echo Util::pluginStatic('css', 'content.css'); ?>">
+                  href="<?php echo Util::pluginStatic('css', 'front.css'); ?>">
             <?php
         }
         $lfa = Util::pluginOption('XLoadFontAwesome', 'on');
