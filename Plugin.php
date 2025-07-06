@@ -166,9 +166,9 @@ class Plugin implements PluginInterface
         $edit = new Form\Element\Select(
             'XEditorContentStyle',
             array(
-                'on' => _t('开启'),
-                'off' => _t('关闭（默认）')
-            ), 'off',
+                'on' => _t('开启（默认）'),
+                'off' => _t('关闭')
+            ), 'on',
             _t('前台是否加载插件自带正文样式'),
             _t('说明：只适配的默认主题，其他主题需要手动给正文加上<code>post-content</code>类名'));
         $edit->setAttribute('class', 'x-item x-basic');

@@ -1,0 +1,10 @@
+body {
+  --aaeditor-color: black;
+  @media (prefers-color-scheme: dark) {
+    --aaeditor-color: #dfdfd6;
+    --aaeditor-bg-color: #2b2b2b;
+  }
+  &.no-scroll {
+    overflow: hidden;
+  }
+}
