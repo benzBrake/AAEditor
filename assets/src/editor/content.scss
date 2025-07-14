@@ -232,12 +232,15 @@ table {
       border-top: none;
     }
 
-    th:first-child {
-      border-top-left-radius: 6px;
-    }
+    th {
+      background-color: transparent;
+      &:first-child {
+        border-top-left-radius: 6px;
+      }
 
-    th:last-child {
-      border-top-right-radius: 6px;
+      &:last-child {
+        border-top-right-radius: 6px;
+      }
     }
   }
 
