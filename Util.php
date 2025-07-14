@@ -93,7 +93,7 @@ class Util
         if (Util::pluginOption('XEditorContentStyle', 'off') === 'on') {
             ?>
             <link rel="stylesheet"
-                  href="<?php echo Util::pluginStatic('css', 'front.css'); ?>">
+                  href="<?php echo Util::pluginStatic('css', 'front.cs s'); ?>">
             <?php
         }
         $lfa = Util::pluginOption('XLoadFontAwesome', 'on');
@@ -280,10 +280,6 @@ class Util
                     src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js'); ?>"></script>
             <script>
                 $(document).ready(function () {
-                    // 伪工具栏处理
-                    document.getElementById('wmd-button-bar').id = 'wmd-button-bar-fake';
-                    document.getElementById('wmd-button-row').id = 'wmd-button-row-fake';
-
                     var options = {}, isMarkdown = <?php echo intval($content->isMarkdown || !$content->have()); ?>;
 
                     options.strings = {
@@ -477,11 +473,35 @@ class Util
                         textarea.parent().addClass('edit-area');
 
                         // 移动按钮（如有需要）
-                        $('#wmd-button-row-fake').children().toArray().reverse().forEach((i, el) => {
-                            $('#wmd-button-row').append(el);
+                        let originalBar = $('#wmd-button-row');
+                        let targetBar = $('#wmd-button-row-aaeditor');
+
+                        // 初始移动所有子节点
+                        originalBar.children().toArray().reverse().forEach((el) => {
+                            targetBar.append(el);
                         });
 
-                        $('#wmd-button-bar-fake').remove();
+                        // 创建观察器实例
+                        let observer = new MutationObserver(function (mutations) {
+                            mutations.forEach(function (mutation) {
+                                // 检查是否有新增的节点
+                                if (mutation.addedNodes.length > 0) {
+                                    // 将新增的节点按相反顺序移动到targetBar
+                                    $(mutation.addedNodes).toArray().reverse().forEach((el) => {
+                                        targetBar.append(el);
+                                    });
+                                }
+                            });
+                        });
+
+                        // 配置观察选项
+                        const config = {
+                            childList: true  // 观察子节点的添加或删除
+                        };
+
+                        // 开始观察目标节点
+                        observer.observe(originalBar[0], config);
+
 
                         // 初始化预览区域大小
                         let previewArea = $('#wmd-preview-wrapper-aaeditor');
