@@ -1009,7 +1009,7 @@ class HyperDown
         } else {
             $classes = "fence fence-{$type}";
             if ($variant) {
-                $classes .= " fence-${type}-{$variant}";
+                $classes .= " fence-{$type}-{$variant}";
             }
             $html = "<div class=\"{$classes}\"{$html_attrs}>";
             $html .= "<div class=\"fence-title\">" . $this->parseInline($final_title) . "</div>";
