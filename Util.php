@@ -93,7 +93,7 @@ class Util
         if (Util::pluginOption('XEditorContentStyle', 'off') === 'on') {
             ?>
             <link rel="stylesheet"
-                  href="<?php echo Util::pluginStatic('css', 'front.cs s'); ?>">
+                  href="<?php echo Util::pluginStatic('css', 'front.css'); ?>">
             <?php
         }
         $lfa = Util::pluginOption('XLoadFontAwesome', 'on');
@@ -103,6 +103,7 @@ class Util
             <link rel="stylesheet"
                   href="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css'); ?>">
             <?php
+        } else if ($lfa === 'auto') {
         } else if ($lfa === 'auto') {
             ?>
             <script>
@@ -928,14 +929,6 @@ class Util
             }
         }
 
-//        if (false !== strpos($text, '[hide')) {
-//            $pattern = "(?s)<pre[^<]*>.*?<\/pre>(*SKIP)(*F)|\[hide](.*?)\[\/hide]";
-//            $text = preg_replace_callback("/$pattern/ism", function ($m) use ($archive) {
-//                $content = $m[1] ?? null;
-//                return Util::hideCallback($content, $archive);
-//            }, $text);
-//        }
-
         return $text;
     }
 
@@ -962,6 +955,9 @@ class Util
             ));
         }
 
+        // Fences 去除默认标题
+        $text = self::processFencesBlock($text, $archive, true);
+
         // 还原代码块
         if (count($blocks)) {
             foreach ($blocks as $block) {
@@ -977,138 +973,6 @@ class Util
             $text = preg_replace("/$pattern/ism", '【内容回复可见】', $text);
         }
         return $text;
-    }
-
-    /**
-     * Retrieve the shortcode regular expression for searching.
-     *
-     * The regular expression combines the shortcode tags in the regular expression
-     * in a regex class.
-     *
-     * The regular expression contains 6 different sub matches to help with parsing.
-     *
-     * 1 - An extra [ to allow for escaping shortcodes with double [[]]
-     * 2 - The shortcode name
-     * 3 - The shortcode argument list
-     * 4 - The self closing /
-     * 5 - The content of a shortcode when it wraps some content.
-     * 6 - An extra ] to allow for escaping shortcodes with double [[]]
-     *
-     * @param array $tagnames Optional. List of shortcodes to find. Defaults to all registered shortcodes.
-     * @return string The shortcode search regular expression
-     * @global array $shortcode_tags
-     *
-     * @since 2.5.0
-     * @since 4.4.0 Added the `$tagnames` parameter.
-     *
-     */
-    public static function get_shortcode_regex($tagnames = null): string
-    {
-        global $shortcode_tags;
-
-        if (empty($tagnames)) {
-            $tagnames = array_keys($shortcode_tags);
-        }
-        $tagregexp = implode('|', array_map('preg_quote', $tagnames));
-
-        // WARNING! Do not change this regex without changing do_shortcode_tag() and strip_shortcode_tag().
-        // Also, see shortcode_unautop() and shortcode.js.
-
-        // phpcs:disable Squiz.Strings.ConcatenationSpacing.PaddingFound -- don't remove regex indentation
-        return '\\['                             // Opening bracket.
-            . '(\\[?)'                           // 1: Optional second opening bracket for escaping shortcodes: [[tag]].
-            . "($tagregexp)"                     // 2: Shortcode name.
-            . '(?![\\w-])'                       // Not followed by word character or hyphen.
-            . '('                                // 3: Unroll the loop: Inside the opening shortcode tag.
-            . '[^\\]\\/]*'                   // Not a closing bracket or forward slash.
-            . '(?:'
-            . '\\/(?!\\])'               // A forward slash not followed by a closing bracket.
-            . '[^\\]\\/]*'               // Not a closing bracket or forward slash.
-            . ')*?'
-            . ')'
-            . '(?:'
-            . '(\\/)'                        // 4: Self closing tag...
-            . '\\]'                          // ...and closing bracket.
-            . '|'
-            . '\\]'                          // Closing bracket.
-            . '(?:'
-            . '('                        // 5: Unroll the loop: Optionally, anything between the opening and closing shortcode tags.
-            . '[^\\[]*+'             // Not an opening bracket.
-            . '(?:'
-            . '\\[(?!\\/\\2\\])' // An opening bracket not followed by the closing shortcode tag.
-            . '[^\\[]*+'         // Not an opening bracket.
-            . ')*+'
-            . ')'
-            . '\\[\\/\\2\\]'             // Closing shortcode tag.
-            . ')?'
-            . ')'
-            . '(\\]?)';                          // 6: Optional second closing brocket for escaping shortcodes: [[tag]].
-        // phpcs:enable
-    }
-
-    /**
-     * Retrieve all attributes from the shortcodes tag.
-     *
-     * The attributes list has the attribute name as the key and the value of the
-     * attribute as the value in the key/value pair. This allows for easier
-     * retrieval of the attributes, since all attributes have to be known.
-     *
-     * @param string $text
-     * @return array|string List of attribute values.
-     *                      Returns empty array if '""' === trim( $text ).
-     *                      Returns empty string if '' === trim( $text ).
-     *                      All other matches are checked for not empty().
-     * @since 2.5.0
-     *
-     */
-    public static function shortcode_parse_atts($text)
-    {
-        $atts = array();
-        $pattern = Util::get_shortcode_atts_regex();
-        $text = preg_replace("/[\x{00a0}\x{200b}]+/u", ' ', $text);
-        if (preg_match_all($pattern, $text, $match, PREG_SET_ORDER)) {
-            foreach ($match as $m) {
-                if (!empty($m[1])) {
-                    $atts[strtolower($m[1])] = stripcslashes($m[2]);
-                } elseif (!empty($m[3])) {
-                    $atts[strtolower($m[3])] = stripcslashes($m[4]);
-                } elseif (!empty($m[5])) {
-                    $atts[strtolower($m[5])] = stripcslashes($m[6]);
-                } elseif (isset($m[7]) && strlen($m[7])) {
-                    $atts[] = stripcslashes($m[7]);
-                } elseif (isset($m[8]) && strlen($m[8])) {
-                    $atts[] = stripcslashes($m[8]);
-                } elseif (isset($m[9])) {
-                    $atts[] = stripcslashes($m[9]);
-                }
-            }
-
-            // Reject any unclosed HTML elements.
-            foreach ($atts as &$value) {
-                if (false !== strpos($value, '<')) {
-                    if (1 !== preg_match('/^[^<]*+(?:<[^>]*+>[^<]*+)*+$/', $value)) {
-                        $value = '';
-                    }
-                }
-            }
-        } else {
-            $atts = ltrim($text);
-        }
-
-        return $atts;
-    }
-
-
-    /**
-     * Retrieve the shortcode attributes regex.
-     *
-     * @return string The shortcode attribute regular expression
-     * @since 4.4.0
-     *
-     */
-    public static function get_shortcode_atts_regex(): string
-    {
-        return '/([\w-]+)\s*=\s*"([^"]*)"(?:\s|$)|([\w-]+)\s*=\s*\'([^\']*)\'(?:\s|$)|([\w-]+)\s*=\s*([^\s\'"]+)(?:\s|$)|"([^"]*)"(?:\s|$)|\'([^\']*)\'(?:\s|$)|(\S+)(?:\s|$)/';
     }
 
     /**
@@ -1355,13 +1219,55 @@ class Util
     }
 
 
-    public static function processFencesBlock($text, $archive)
+    public static function processFencesBlock($text, $archive, $isExcerpt = false)
     {
-        // 1. 预检查和权限判断 (这部分逻辑保持不变)
+        // 1. 预检查
         if (strpos($text, 'fence-pass-comment') === false) {
             return $text;
         }
+
         try {
+            // 创建 DOMDocument 对象
+            $dom = new DOMDocument();
+            libxml_use_internal_errors(true);
+            if (!@$dom->loadHTML('<?xml encoding="UTF-8">' . $text, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD)) {
+                libxml_clear_errors();
+                return $text;
+            }
+
+            // 创建 XPath 对象
+            $xpath = new DOMXPath($dom);
+            $query = "//div[contains(concat(' ', normalize-space(@class), ' '), ' fence-pass-comment ')]";
+            $fencePassElements = $xpath->query($query);
+            if ($fencePassElements->length === 0) {
+                return $text;
+            }
+
+            // 2. 处理 $isExcerpt = true 的情况
+            if ($isExcerpt) {
+                $output = '';
+                foreach ($fencePassElements as $element) {
+                    // 获取 .fence-title
+                    $titleNode = $xpath->query(".//*[contains(concat(' ', normalize-space(@class), ' '), ' fence-title ')]", $element)->item(0);
+                    $title = $titleNode ? trim($titleNode->textContent) : '';
+                    // 获取 .fence-content
+                    $contentNode = $xpath->query(".//*[contains(concat(' ', normalize-space(@class), ' '), ' fence-content ')]", $element)->item(0);
+                    $content = $contentNode ? $dom->saveHTML($contentNode) : '';
+
+                    // 如果标题不是默认值 "PASS"，保留标题
+                    if ($title && strtoupper($title) !== 'PASS') {
+                        $output .= $title . "\n";
+                    }
+                    // 保留内容
+                    if ($content) {
+                        $output .= $content . "\n";
+                    }
+                }
+                libxml_clear_errors();
+                return $output ?: $text; // 返回提取的内容，或原文如果无内容
+            }
+
+            // 3. 默认情况（$isExcerpt = false）
             $user = User::alloc();
             $db = Db::get();
             $hasPermission = $user->pass('administrator', true);
@@ -1378,76 +1284,39 @@ class Util
                     }
                 }
             }
-            // --- 2. 使用原生 DOM 进行解析和修改 ---
-            // 创建 DOMDocument 对象
-            $dom = new DOMDocument();
-            // 为了避免因 HTML 不规范产生的警告信息扰乱输出，需要先禁用内部错误报告
-            libxml_use_internal_errors(true);
-            // 加载 HTML。加上编码声明和 DOCTYPE 可以最大程度保证解析正确
-            // @ 符号可以抑制加载时可能出现的警告
-            if (!@$dom->loadHTML('<?xml encoding="UTF-8">' . $text, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD)) {
-                // 如果加载失败，返回原文
-                libxml_clear_errors();
-                return $text;
-            }
-            // 创建 XPath 对象，用于查询节点
-            $xpath = new DOMXPath($dom);
-            // 构造 XPath 查询语句来查找所有 class 包含 'fence-pass-comment' 的 div
-            // 这是查找 class 的最稳健的 XPath 写法
-            $query = "//div[contains(concat(' ', normalize-space(@class), ' '), ' fence-pass-comment ')]";
-            $fencePassElements = $xpath->query($query);
-            if ($fencePassElements->length === 0) {
-                return $text; // 没有找到元素，直接返回
-            }
-            // 遍历所有找到的元素并修改
+
             foreach ($fencePassElements as $element) {
-                // 在当前元素下继续查找 .fence-title
                 $titleNode = $xpath->query(".//*[contains(concat(' ', normalize-space(@class), ' '), ' fence-title ')]", $element)->item(0);
                 if ($titleNode) {
-                    // **修改 title 内容**
-                    // a. 清空节点的所有子元素
                     $title = $titleNode->textContent;
                     if (strtoupper($title) === 'PASS') {
                         while ($titleNode->firstChild) {
                             $titleNode->removeChild($titleNode->firstChild);
                         }
-                        // b. 创建新的文本节点并添加
                         $newTitleText = $dom->createTextNode(_t("回复可见"));
                         $titleNode->appendChild($newTitleText);
                     }
                 }
                 if (!$hasPermission) {
-                    // 在当前元素下继续查找 .fence-content
                     $contentNode = $xpath->query(".//*[contains(concat(' ', normalize-space(@class), ' '), ' fence-content ')]", $element)->item(0);
                     if ($contentNode) {
-                        // 增加 text-center 类
                         $contentNode->setAttribute('class', $contentNode->getAttribute('class') . ' text-center');
-                        // **修改 content 内容 (包含HTML)**
                         $replacementHtml = _t('此处内容已隐藏，<a href="%s">回复后(需要填写邮箱)</a>可见', $archive->permalink . '#comments');
-
-                        // a. 清空节点的所有子元素
                         while ($contentNode->firstChild) {
                             $contentNode->removeChild($contentNode->firstChild);
                         }
-
-                        // b. 创建一个文档片段来承载新的 HTML 字符串
                         $fragment = $dom->createDocumentFragment();
-                        // 使用 appendXML 将字符串解析为 DOM 节点并添加到片段中
                         @$fragment->appendXML($replacementHtml);
-
-                        // c. 将片段添加到内容节点中
                         $contentNode->appendChild($fragment);
                     }
                 }
             }
-            // 3. 输出修改后的 HTML
+
+            // 4. 输出修改后的 HTML
             $modifiedHtml = $dom->saveHTML();
-            // 清理 libxml 错误缓冲区
             libxml_clear_errors();
-            // 清理 <!--?xml...?--> 声明
             return substr($modifiedHtml, 23);
         } catch (Exception $e) {
-            // 发生任何异常，都返回原始文本，保证网站不会崩溃
             error_log('Error in processFencesBlock (Native DOM): ' . $e->getMessage());
             return $text;
         }
