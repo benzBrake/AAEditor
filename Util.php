@@ -334,16 +334,401 @@ class Util
                         toolbar = $('<div class="editor" id="wmd-button-bar-aaeditor" />').insertBefore(textarea.parent()),
                         pWrapper = $('<div id="wmd-preview-wrapper-aaeditor" />').insertAfter("#text"),
                         preview = $('<div id="wmd-preview-aaeditor" />').appendTo(pWrapper),
-                        editor;
+                        editor,
+                        reloadScroll,
+                        syncFrameId = 0,
+                        previewRefreshCount = 0,
+                        debugPrefix = '[AAEditor:scroll-sync]';
+
+                    function debugLog() {
+                        var args = Array.prototype.slice.call(arguments);
+                        args.unshift(debugPrefix);
+                        console.log.apply(console, args);
+                    }
+
+                    function createThrottle(interval, handler) {
+                        var lastTime = 0;
+                        return function () {
+                            var now = Date.now();
+                            if (now - lastTime < interval) {
+                                return;
+                            }
+                            lastTime = now;
+                            return handler.apply(this, arguments);
+                        };
+                    }
+
+                    function getTextareaLineHeight() {
+                        var textareaElement = textarea.get(0);
+                        if (!textareaElement) {
+                            return 24;
+                        }
+
+                        var lineHeight = parseFloat(window.getComputedStyle(textareaElement).lineHeight);
+                        if (isNaN(lineHeight) || lineHeight <= 0) {
+                            lineHeight = 24;
+                        }
+                        return lineHeight;
+                    }
+
+                    function getOffsetTopWithinContainer(element, container) {
+                        var offsetTop = 0,
+                            current = element;
+
+                        while (current && current !== container) {
+                            offsetTop += current.offsetTop || 0;
+                            current = current.offsetParent;
+                        }
+
+                        return offsetTop;
+                    }
+
+                    function findLineAnchor(lineNumber) {
+                        var anchors = preview.find('.line[data-start][data-end]').toArray(),
+                            nearest = null;
+
+                        for (var i = 0; i < anchors.length; i++) {
+                            var anchor = anchors[i],
+                                start = parseInt(anchor.getAttribute('data-start') || '0', 10),
+                                end = parseInt(anchor.getAttribute('data-end') || String(start), 10);
+
+                            if (isNaN(start) || isNaN(end)) {
+                                continue;
+                            }
+
+                            nearest = {
+                                element: anchor,
+                                start: start,
+                                end: end
+                            };
+
+                            if (lineNumber >= start && lineNumber <= end) {
+                                return nearest;
+                            }
+
+                            if (start > lineNumber) {
+                                return nearest;
+                            }
+                        }
+
+                        return nearest;
+                    }
+
+                    function collectLineAnchors() {
+                        var previewElement = preview.get(0);
+                        if (!previewElement) {
+                            return [];
+                        }
+
+                        return preview.find('.line[data-start][data-end]').toArray()
+                            .map(function (anchor) {
+                                var start = parseInt(anchor.getAttribute('data-start') || '0', 10),
+                                    end = parseInt(anchor.getAttribute('data-end') || String(start), 10);
+
+                                if (isNaN(start) || isNaN(end)) {
+                                    return null;
+                                }
+
+                                return {
+                                    element: anchor,
+                                    start: start,
+                                    end: end,
+                                    top: getOffsetTopWithinContainer(anchor, previewElement),
+                                    height: anchor.offsetHeight || 0
+                                };
+                            })
+                            .filter(Boolean);
+                    }
+
+                    function syncPreviewByRatio(reason, shouldLog) {
+                        var textareaElement = textarea.get(0),
+                            previewWrapperElement = pWrapper.get(0);
+
+                        if (!textareaElement || !previewWrapperElement) {
+                            if (shouldLog) {
+                                debugLog('fallback-sync:skip', {
+                                    reason: reason,
+                                    textareaElement: !!textareaElement,
+                                    previewWrapperElement: !!previewWrapperElement
+                                });
+                            }
+                            return;
+                        }
+
+                        var textareaScrollableHeight = textareaElement.scrollHeight - textareaElement.clientHeight,
+                            previewScrollableHeight = previewWrapperElement.scrollHeight - previewWrapperElement.clientHeight;
+
+                        if (previewScrollableHeight <= 0) {
+                            if (shouldLog) {
+                                debugLog('fallback-sync:skip-no-preview-scroll', {
+                                    reason: reason,
+                                    previewScrollableHeight: previewScrollableHeight
+                                });
+                            }
+                            return;
+                        }
+
+                        if (textareaElement.scrollTop <= 1) {
+                            previewWrapperElement.scrollTop = 0;
+                            if (shouldLog) {
+                                debugLog('fallback-sync:clamp-top', {
+                                    reason: reason
+                                });
+                            }
+                            return;
+                        }
+
+                        if (textareaScrollableHeight > 0 && textareaElement.scrollTop >= textareaScrollableHeight - 1) {
+                            previewWrapperElement.scrollTop = previewScrollableHeight;
+                            if (shouldLog) {
+                                debugLog('fallback-sync:clamp-bottom', {
+                                    reason: reason,
+                                    previewScrollableHeight: previewScrollableHeight
+                                });
+                            }
+                            return;
+                        }
+
+                        var ratio = textareaScrollableHeight <= 0 ? 0 : textareaElement.scrollTop / textareaScrollableHeight,
+                            targetScrollTop = Math.max(0, Math.min(previewScrollableHeight * ratio, previewScrollableHeight));
+
+                        previewWrapperElement.scrollTop = targetScrollTop;
+                        if (shouldLog) {
+                            debugLog('fallback-sync:apply', {
+                                reason: reason,
+                                ratio: ratio,
+                                textareaScrollTop: textareaElement.scrollTop,
+                                textareaScrollableHeight: textareaScrollableHeight,
+                                previewScrollableHeight: previewScrollableHeight,
+                                targetScrollTop: targetScrollTop
+                            });
+                        }
+                    }
+
+                    function syncPreviewToEditor(reason, shouldLog) {
+                        var textareaElement = textarea.get(0),
+                            previewWrapperElement = pWrapper.get(0),
+                            previewElement = preview.get(0);
+
+                        if (!textareaElement || !previewWrapperElement || !previewElement) {
+                            syncPreviewByRatio(reason, shouldLog);
+                            return;
+                        }
+
+                        var previewScrollableHeight = previewWrapperElement.scrollHeight - previewWrapperElement.clientHeight;
+                        if (previewScrollableHeight <= 0) {
+                            if (shouldLog) {
+                                debugLog('anchor-sync:skip-no-preview-scroll', {
+                                    reason: reason
+                                });
+                            }
+                            return;
+                        }
+
+                        var textareaScrollableHeight = textareaElement.scrollHeight - textareaElement.clientHeight;
+                        if (textareaElement.scrollTop <= 1) {
+                            previewWrapperElement.scrollTop = 0;
+                            if (shouldLog) {
+                                debugLog('anchor-sync:clamp-top', {
+                                    reason: reason
+                                });
+                            }
+                            return;
+                        }
+
+                        if (textareaScrollableHeight > 0 && textareaElement.scrollTop >= textareaScrollableHeight - 1) {
+                            previewWrapperElement.scrollTop = previewScrollableHeight;
+                            if (shouldLog) {
+                                debugLog('anchor-sync:clamp-bottom', {
+                                    reason: reason,
+                                    previewScrollableHeight: previewScrollableHeight
+                                });
+                            }
+                            return;
+                        }
+
+                        var lineHeight = getTextareaLineHeight(),
+                            lineNumber = Math.max(0, Math.floor(textareaElement.scrollTop / lineHeight)),
+                            lineOffset = textareaElement.scrollTop - lineNumber * lineHeight,
+                            lineProgress = lineHeight > 0 ? lineOffset / lineHeight : 0,
+                            anchors = collectLineAnchors();
+
+                        if (!anchors.length) {
+                            syncPreviewByRatio(reason + ':no-anchor', shouldLog);
+                            return;
+                        }
+
+                        var targetScrollTop = null,
+                            debugPayload = {
+                                reason: reason,
+                                lineNumber: lineNumber,
+                                anchorCount: anchors.length
+                            };
+
+                        for (var i = 0; i < anchors.length; i++) {
+                            var anchor = anchors[i],
+                                nextAnchor = anchors[i + 1] || null,
+                                anchorHeight = anchor.height || lineHeight,
+                                anchorSpan = Math.max(anchor.end - anchor.start, 0);
+
+                            if (lineNumber >= anchor.start && lineNumber <= anchor.end) {
+                                var anchorRatio = anchorSpan > 0
+                                    ? (lineNumber - anchor.start + lineProgress) / (anchorSpan + 1)
+                                    : lineProgress;
+                                targetScrollTop = anchor.top + anchorHeight * anchorRatio;
+                                debugPayload.mode = 'anchor-range';
+                                debugPayload.anchorStart = anchor.start;
+                                debugPayload.anchorEnd = anchor.end;
+                                debugPayload.anchorTop = anchor.top;
+                                debugPayload.anchorHeight = anchorHeight;
+                                break;
+                            }
+
+                            if (nextAnchor && lineNumber > anchor.end && lineNumber < nextAnchor.start) {
+                                var gapSpan = Math.max(nextAnchor.start - anchor.end, 1),
+                                    gapRatio = (lineNumber - anchor.end + lineProgress) / gapSpan,
+                                    fromTop = anchor.top + anchorHeight,
+                                    toTop = nextAnchor.top;
+                                targetScrollTop = fromTop + (toTop - fromTop) * gapRatio;
+                                debugPayload.mode = 'anchor-gap';
+                                debugPayload.anchorStart = anchor.start;
+                                debugPayload.anchorEnd = anchor.end;
+                                debugPayload.nextAnchorStart = nextAnchor.start;
+                                debugPayload.nextAnchorEnd = nextAnchor.end;
+                                debugPayload.fromTop = fromTop;
+                                debugPayload.toTop = toTop;
+                                break;
+                            }
+                        }
+
+                        if (targetScrollTop === null) {
+                            var lastAnchor = anchors[anchors.length - 1];
+                            if (lineNumber >= lastAnchor.end) {
+                                var lastAnchorHeight = lastAnchor.height || lineHeight,
+                                    trailingRatio = Math.min(
+                                        1,
+                                        Math.max(
+                                            0,
+                                            (lineNumber - lastAnchor.end + lineProgress) /
+                                            Math.max(1, (textareaScrollableHeight - textareaElement.scrollTop) / lineHeight)
+                                        )
+                                    );
+                                targetScrollTop = lastAnchor.top + lastAnchorHeight + (previewScrollableHeight - (lastAnchor.top + lastAnchorHeight)) * trailingRatio;
+                                debugPayload.mode = 'anchor-tail';
+                                debugPayload.anchorStart = lastAnchor.start;
+                                debugPayload.anchorEnd = lastAnchor.end;
+                            } else {
+                                syncPreviewByRatio(reason + ':interpolate-fallback', shouldLog);
+                                return;
+                            }
+                        }
+
+                        targetScrollTop = Math.max(
+                            0,
+                            Math.min(targetScrollTop, previewScrollableHeight)
+                        );
+
+                        previewWrapperElement.scrollTop = targetScrollTop;
+                        if (shouldLog) {
+                            debugPayload.targetScrollTop = targetScrollTop;
+                            debugLog('anchor-sync:apply', debugPayload);
+                        }
+                    }
+
+                    function schedulePreviewSync(reason, shouldLog) {
+                        if (syncFrameId) {
+                            cancelAnimationFrame(syncFrameId);
+                        }
+                        syncFrameId = requestAnimationFrame(function () {
+                            syncFrameId = 0;
+                            syncPreviewToEditor(reason, shouldLog);
+                        });
+                    }
 
                     function initMarkdownEditor() {
+                        debugLog('initMarkdownEditor:start', {
+                            isMarkdown: isMarkdown,
+                            textareaFound: textarea.length > 0,
+                            previewFound: preview.length > 0,
+                            wrapperFound: pWrapper.length > 0,
+                            hasScrollableEditor: typeof scrollableEditor,
+                            hasXEditor: typeof window.XEditor
+                        });
                         var converter = new HyperDown();
                         editor = new Markdown.Editor(converter, '-aaeditor', options);
+                        debugLog('Markdown.Editor:created', {
+                            editorCreated: !!editor
+                        });
 
                         // 自动跟随
                         converter.enableHtml(true);
                         converter.enableLine(true);
+                        debugLog('converter:line-enabled');
                         reloadScroll = scrollableEditor(textarea, preview);
+                        debugLog('scrollableEditor:init', {
+                            reloadScrollType: typeof reloadScroll
+                        });
+
+                        var loggedReloadScroll = function () {
+                            var args = Array.prototype.slice.call(arguments);
+                            debugLog('reloadScroll:call', {
+                                args: args,
+                                textareaScrollTop: textarea.scrollTop(),
+                                textareaHeight: textarea.outerHeight(),
+                                textareaScrollHeight: textarea.get(0) ? textarea.get(0).scrollHeight : null,
+                                previewWrapperScrollTop: pWrapper.scrollTop(),
+                                previewWrapperHeight: pWrapper.outerHeight(),
+                                previewWrapperScrollHeight: pWrapper.get(0) ? pWrapper.get(0).scrollHeight : null,
+                                previewScrollTop: preview.scrollTop(),
+                                previewHeight: preview.outerHeight(),
+                                previewScrollHeight: preview.get(0) ? preview.get(0).scrollHeight : null,
+                                lineCount: preview.find('.line[data-start][data-end]').length
+                            });
+                            if (typeof reloadScroll !== 'function') {
+                                debugLog('reloadScroll:missing');
+                                return;
+                            }
+                            try {
+                                var result = reloadScroll.apply(this, args);
+                                debugLog('reloadScroll:done', {
+                                    resultType: typeof result,
+                                    previewWrapperScrollTop: pWrapper.scrollTop(),
+                                    previewScrollTop: preview.scrollTop()
+                                });
+                                return result;
+                            } catch (error) {
+                                console.error(debugPrefix, 'reloadScroll:error', error);
+                                throw error;
+                            }
+                        };
+
+                        textarea.on('scroll', createThrottle(200, function () {
+                            debugLog('event:textarea-scroll', {
+                                scrollTop: textarea.scrollTop(),
+                                scrollHeight: textarea.get(0) ? textarea.get(0).scrollHeight : null,
+                                clientHeight: textarea.get(0) ? textarea.get(0).clientHeight : null
+                            });
+                        }));
+
+                        textarea.on('scroll', function () {
+                            schedulePreviewSync('textarea-scroll', false);
+                        });
+
+                        pWrapper.on('scroll', createThrottle(200, function () {
+                            debugLog('event:preview-wrapper-scroll', {
+                                scrollTop: pWrapper.scrollTop(),
+                                scrollHeight: pWrapper.get(0) ? pWrapper.get(0).scrollHeight : null,
+                                clientHeight: pWrapper.get(0) ? pWrapper.get(0).clientHeight : null
+                            });
+                        }));
+
+                        preview.on('scroll', createThrottle(200, function () {
+                            debugLog('event:preview-scroll', {
+                                scrollTop: preview.scrollTop(),
+                                scrollHeight: preview.get(0) ? preview.get(0).scrollHeight : null,
+                                clientHeight: preview.get(0) ? preview.get(0).clientHeight : null
+                            });
+                        }));
 
                         let additionalTags = ["x-tabs"];
 
@@ -399,15 +784,28 @@ class Util
 
                         editor.hooks.chain('onPreviewRefresh', function () {
                             var images = $('img', preview), count = images.length;
+                            previewRefreshCount++;
+                            debugLog('hook:onPreviewRefresh', {
+                                previewRefreshCount: previewRefreshCount,
+                                imageCount: count,
+                                lineCount: preview.find('.line[data-start][data-end]').length,
+                                previewHtmlLength: preview.html() ? preview.html().length : 0
+                            });
 
                             if (count == 0) {
-                                reloadScroll(true);
+                                loggedReloadScroll(true);
+                                schedulePreviewSync('preview-refresh-no-images', true);
                             } else {
                                 images.bind('load error', function () {
                                     count--;
+                                    debugLog('image:load-or-error', {
+                                        remaining: count,
+                                        src: this.currentSrc || this.src || null
+                                    });
 
                                     if (count == 0) {
-                                        reloadScroll(true);
+                                        loggedReloadScroll(true);
+                                        schedulePreviewSync('preview-refresh-images-complete', true);
                                     }
                                 });
                             }
@@ -418,7 +816,25 @@ class Util
                             }
 
                             $('body').trigger('XEditorPreviewEnd');
+                            setTimeout(function () {
+                                schedulePreviewSync('preview-refresh-delayed', true);
+                            }, 50);
                         });
+
+                        $('body').on('XEditorPreviewEnd', function () {
+                            debugLog('event:XEditorPreviewEnd', {
+                                previewRefreshCount: previewRefreshCount,
+                                lineCount: preview.find('.line[data-start][data-end]').length,
+                                previewWrapperScrollTop: pWrapper.scrollTop(),
+                                previewWrapperScrollHeight: pWrapper.get(0) ? pWrapper.get(0).scrollHeight : null,
+                                previewScrollTop: preview.scrollTop(),
+                                previewScrollHeight: preview.get(0) ? preview.get(0).scrollHeight : null
+                            });
+                        });
+
+                        setTimeout(function () {
+                            schedulePreviewSync('init-delayed', true);
+                        }, 100);
 
                         <?php \Typecho\Plugin::factory('admin/editor-js.php')->markdownEditor($content); ?>
 
