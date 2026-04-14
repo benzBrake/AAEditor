@@ -551,7 +551,10 @@ class Util
                             lineNumber = Math.max(0, Math.floor(textareaElement.scrollTop / lineHeight)),
                             lineOffset = textareaElement.scrollTop - lineNumber * lineHeight,
                             lineProgress = lineHeight > 0 ? lineOffset / lineHeight : 0,
-                            anchors = collectLineAnchors();
+                            anchors = collectLineAnchors(),
+                            ratioTargetScrollTop = textareaScrollableHeight <= 0
+                                ? 0
+                                : previewScrollableHeight * (textareaElement.scrollTop / textareaScrollableHeight);
 
                         if (!anchors.length) {
                             syncPreviewByRatio(reason + ':no-anchor', shouldLog);
@@ -621,6 +624,23 @@ class Util
                                 syncPreviewByRatio(reason + ':interpolate-fallback', shouldLog);
                                 return;
                             }
+                        }
+
+                        var topBlendRange = Math.max(80, Math.min(textareaElement.clientHeight * 0.8, 240)),
+                            bottomBlendRange = Math.max(80, Math.min(textareaElement.clientHeight * 0.8, 240)),
+                            distanceToTop = textareaElement.scrollTop,
+                            distanceToBottom = Math.max(0, textareaScrollableHeight - textareaElement.scrollTop);
+
+                        if (distanceToTop < topBlendRange) {
+                            var topBlendWeight = distanceToTop / topBlendRange;
+                            targetScrollTop = ratioTargetScrollTop * (1 - topBlendWeight) + targetScrollTop * topBlendWeight;
+                            debugPayload.edgeBlend = 'top';
+                            debugPayload.edgeBlendWeight = topBlendWeight;
+                        } else if (distanceToBottom < bottomBlendRange) {
+                            var bottomBlendWeight = distanceToBottom / bottomBlendRange;
+                            targetScrollTop = previewScrollableHeight * (1 - bottomBlendWeight) + targetScrollTop * bottomBlendWeight;
+                            debugPayload.edgeBlend = 'bottom';
+                            debugPayload.edgeBlendWeight = bottomBlendWeight;
                         }
 
                         targetScrollTop = Math.max(
