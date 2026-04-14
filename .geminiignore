@@ -1,0 +1,32 @@
+# 依赖目录
+node_modules/
+
+# 构建产物
+assets/dist/
+pack/
+
+# IDE 和编辑器
+.idea/
+.vscode/
+*.swp
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 日志和临时文件
+*.log
+cache/
+npminstall-debug.log
+
+# MCP 插件缓存
+.playwright-mcp/
+
+# 数据库文件（按需）
+*.db
+*.sqlite
+
+# OS 生成文件
+.DS_Store?
+ehthumbs.db
+Desktop.ini
