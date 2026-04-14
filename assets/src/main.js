@@ -6,6 +6,8 @@ class XEditor {
         if (document.querySelector(sel)) {
             this.textarea = new TextAreaUtils(sel);
             this.previewArea = document.querySelector(sel_preview);
+            this.previewWrapper =
+                this.previewArea?.closest("#wmd-preview-wrapper-aaeditor") || null;
         } else {
             console.warn(sprintf("element [%s] not e", sel));
         }
@@ -13,6 +15,11 @@ class XEditor {
         this.isInit = false;
         this.buttons = [];
         this.insertProcessors = [];
+        this.scrollSyncFrame = 0;
+        this.scrollSyncLock = false;
+        this.scrollSyncBound = false;
+        this.previewLineAnchors = [];
+        this.pendingPreviewSyncTimers = [];
         $("body")
             .on("XEditorAddButton", (event, ...buttons) => {
                 buttons.forEach((button) => {
@@ -69,7 +76,285 @@ class XEditor {
                 this.replaceSelection(text);
             });
         this.initToolbar();
+        this.initScrollSync();
         $("body").trigger("XEditorPreviewEnd");
+    }
+
+    initScrollSync() {
+        if (this.scrollSyncBound || !this.previewArea || !this.previewWrapper) {
+            return;
+        }
+        this.scrollSyncBound = true;
+        const textareaElement = this.textarea.getInstance();
+
+        textareaElement.addEventListener("scroll", () => {
+            this.schedulePreviewScrollSync();
+        });
+        window.addEventListener("scroll", () => {
+            this.schedulePreviewScrollSync();
+        });
+        window.addEventListener("resize", () => {
+            this.schedulePreviewScrollSync(true);
+        });
+    }
+
+    clearPendingPreviewSyncTimers() {
+        this.pendingPreviewSyncTimers.forEach((timerId) => {
+            window.clearTimeout(timerId);
+        });
+        this.pendingPreviewSyncTimers = [];
+    }
+
+    schedulePreviewScrollSync(force = false) {
+        if (!this.previewArea || !this.previewWrapper) {
+            return;
+        }
+        if (this.scrollSyncFrame) {
+            window.cancelAnimationFrame(this.scrollSyncFrame);
+        }
+        this.scrollSyncFrame = window.requestAnimationFrame(() => {
+            this.scrollSyncFrame = 0;
+            this.syncPreviewScroll(force);
+        });
+    }
+
+    rebuildPreviewLineAnchors() {
+        if (!this.previewArea) {
+            this.previewLineAnchors = [];
+            return;
+        }
+        this.previewLineAnchors = Array.from(
+            this.previewArea.querySelectorAll(".line[data-start][data-end]")
+        )
+            .map((element) => {
+                const start = Number.parseInt(
+                    element.getAttribute("data-start") || "",
+                    10
+                );
+                const end = Number.parseInt(
+                    element.getAttribute("data-end") || "",
+                    10
+                );
+                if (Number.isNaN(start) || Number.isNaN(end)) {
+                    return null;
+                }
+                return {
+                    element,
+                    start,
+                    end,
+                };
+            })
+            .filter(Boolean);
+    }
+
+    isPreviewVisible() {
+        if (!this.previewArea || !this.previewWrapper) {
+            return false;
+        }
+        const style = window.getComputedStyle(this.previewWrapper);
+        return style.display !== "none" && style.visibility !== "hidden";
+    }
+
+    getTextareaLineHeight() {
+        const textareaElement = this.textarea.getInstance();
+        const style = window.getComputedStyle(textareaElement);
+        let lineHeight = Number.parseFloat(style.lineHeight);
+        if (Number.isNaN(lineHeight)) {
+            const fontSize = Number.parseFloat(style.fontSize) || 16;
+            lineHeight = fontSize * 1.5;
+        }
+        return lineHeight > 0 ? lineHeight : 24;
+    }
+
+    getPreviewScrollContainer() {
+        if (!this.previewWrapper && !this.previewArea) {
+            return null;
+        }
+        const candidates = [this.previewWrapper, this.previewArea].filter(Boolean);
+        let selected = candidates[0] || null;
+        let maxScrollableHeight = -1;
+
+        candidates.forEach((element) => {
+            const scrollableHeight = element.scrollHeight - element.clientHeight;
+            if (scrollableHeight > maxScrollableHeight) {
+                maxScrollableHeight = scrollableHeight;
+                selected = element;
+            }
+        });
+
+        return selected;
+    }
+
+    getSourceScrollState() {
+        const textareaElement = this.textarea.getInstance();
+        const innerScrollMax = Math.max(
+            textareaElement.scrollHeight - textareaElement.clientHeight,
+            0
+        );
+        if (innerScrollMax > 0) {
+            return {
+                top: textareaElement.scrollTop,
+                max: innerScrollMax,
+            };
+        }
+
+        const rect = textareaElement.getBoundingClientRect();
+        const docTop = window.scrollY + rect.top;
+        const pageScrollTop = Math.max(window.scrollY - docTop, 0);
+        const pageScrollMax = Math.max(
+            textareaElement.offsetHeight - window.innerHeight,
+            0
+        );
+
+        return {
+            top: Math.min(pageScrollTop, pageScrollMax),
+            max: pageScrollMax,
+        };
+    }
+
+    getSourceLineState() {
+        const sourceScrollState = this.getSourceScrollState();
+        const lineHeight = this.getTextareaLineHeight();
+        const rawLine = sourceScrollState.top / lineHeight;
+        const lineNumber = Math.max(0, Math.floor(rawLine));
+        return {
+            lineHeight,
+            lineNumber,
+            lineOffset: sourceScrollState.top - lineNumber * lineHeight,
+            sourceMaxScroll: sourceScrollState.max,
+        };
+    }
+
+    getPreviewContainerOffsetTop(anchorElement, scrollContainer) {
+        if (!anchorElement || !scrollContainer) {
+            return 0;
+        }
+        let offsetTop = anchorElement.offsetTop;
+        let current = anchorElement.offsetParent;
+
+        while (current && current !== scrollContainer) {
+            offsetTop += current.offsetTop;
+            current = current.offsetParent;
+        }
+
+        return offsetTop;
+    }
+
+    getPreviewScrollableHeight() {
+        const scrollContainer = this.getPreviewScrollContainer();
+        if (!scrollContainer) {
+            return 0;
+        }
+        return Math.max(scrollContainer.scrollHeight - scrollContainer.clientHeight, 0);
+    }
+
+    findAnchorForLine(lineNumber) {
+        if (!this.previewLineAnchors.length) {
+            return null;
+        }
+
+        let nearest = this.previewLineAnchors[0];
+        for (const anchor of this.previewLineAnchors) {
+            if (lineNumber >= anchor.start && lineNumber <= anchor.end) {
+                return anchor;
+            }
+            if (anchor.start > lineNumber) {
+                return nearest;
+            }
+            nearest = anchor;
+        }
+
+        return nearest;
+    }
+
+    setPreviewScrollTop(scrollTop) {
+        const scrollContainer = this.getPreviewScrollContainer();
+        if (!scrollContainer) {
+            return;
+        }
+        const maxScrollTop = this.getPreviewScrollableHeight();
+        const nextScrollTop = Math.max(0, Math.min(scrollTop, maxScrollTop));
+        this.scrollSyncLock = true;
+        scrollContainer.scrollTop = nextScrollTop;
+        if (this.previewWrapper && this.previewWrapper !== scrollContainer) {
+            this.previewWrapper.scrollTop = nextScrollTop;
+        }
+        if (this.previewArea && this.previewArea !== scrollContainer) {
+            this.previewArea.scrollTop = nextScrollTop;
+        }
+        window.requestAnimationFrame(() => {
+            this.scrollSyncLock = false;
+        });
+    }
+
+    syncPreviewByRatio() {
+        const sourceScrollState = this.getSourceScrollState();
+        const targetMaxScroll = this.getPreviewScrollableHeight();
+        if (targetMaxScroll <= 0) {
+            this.setPreviewScrollTop(0);
+            return;
+        }
+        const ratio = sourceScrollState.max <= 0 ? 0 : sourceScrollState.top / sourceScrollState.max;
+        this.setPreviewScrollTop(targetMaxScroll * ratio);
+    }
+
+    syncPreviewScroll(force = false) {
+        if (
+            !this.previewArea ||
+            !this.previewWrapper ||
+            !this.isPreviewVisible() ||
+            this.scrollSyncLock
+        ) {
+            return;
+        }
+
+        const scrollContainer = this.getPreviewScrollContainer();
+        if (!scrollContainer) {
+            return;
+        }
+
+        const sourceLineState = this.getSourceLineState();
+        const sourceMaxScroll = sourceLineState.sourceMaxScroll;
+        const targetMaxScroll = this.getPreviewScrollableHeight();
+
+        if (targetMaxScroll <= 0) {
+            this.setPreviewScrollTop(0);
+            return;
+        }
+
+        if (!this.previewLineAnchors.length || force) {
+            this.rebuildPreviewLineAnchors();
+        }
+
+        const {lineHeight, lineNumber, lineOffset} = sourceLineState;
+        const anchor = this.findAnchorForLine(lineNumber);
+
+        if (!anchor) {
+            this.syncPreviewByRatio();
+            return;
+        }
+
+        const span = Math.max(anchor.end - anchor.start, 0);
+        const anchorHeight =
+            anchor.element.offsetHeight ||
+            Number.parseFloat(window.getComputedStyle(anchor.element).height) ||
+            lineHeight;
+        const anchorTop = this.getPreviewContainerOffsetTop(
+            anchor.element,
+            scrollContainer
+        );
+        const lineRatio = span > 0 ? (lineNumber - anchor.start) / (span + 1) : 0;
+        const intraAnchorOffset = anchorHeight * lineRatio;
+        const lineOffsetRatio = lineHeight > 0 ? lineOffset / lineHeight : 0;
+        const targetScrollTop =
+            anchorTop + intraAnchorOffset + anchorHeight * lineOffsetRatio;
+
+        if (!Number.isFinite(targetScrollTop)) {
+            this.syncPreviewByRatio();
+            return;
+        }
+
+        this.setPreviewScrollTop(targetScrollTop);
     }
 
     initToolbar() {
@@ -266,6 +551,15 @@ class XEditor {
     }
 
     handlePreviewEnd() {
+        this.rebuildPreviewLineAnchors();
+        this.schedulePreviewScrollSync(true);
+        this.clearPendingPreviewSyncTimers();
+        [60, 180, 360].forEach((delay) => {
+            const timerId = window.setTimeout(() => {
+                this.schedulePreviewScrollSync(true);
+            }, delay);
+            this.pendingPreviewSyncTimers.push(timerId);
+        });
     }
 
     /**
