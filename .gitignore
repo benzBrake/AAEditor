@@ -5,6 +5,7 @@ node_modules/
 assets/dist/
 pack/
 .npm-cache/
+*.map
 
 # IDE 和编辑器
 .idea/
