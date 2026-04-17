@@ -1,4 +1,12 @@
-import {$C, isElement, isObject, isString, sprintf} from "./utils/functions";
+import {
+    $C,
+    escapeAttribute,
+    escapeHtml,
+    isElement,
+    isObject,
+    isString,
+    sprintf,
+} from "./utils/functions";
 import TextAreaUtils from "./utils/textarea";
 
 class XEditor {
@@ -814,6 +822,249 @@ class XEditor {
         }
     }
 
+    getInitialFormValues(fields = [], initialValues = {}) {
+        const values = {};
+        fields.forEach((field) => {
+            if (!field?.name) {
+                return;
+            }
+            let value = initialValues[field.name];
+            if (value === undefined && "value" in field) {
+                value = field.value;
+            }
+            if (field.type === "checkbox") {
+                values[field.name] = Boolean(value);
+                return;
+            }
+            values[field.name] = value ?? "";
+        });
+        return values;
+    }
+
+    resolveFieldHidden(field = {}, values = {}) {
+        if (typeof field.hidden === "function") {
+            return Boolean(field.hidden(values));
+        }
+        return Boolean(field.hidden);
+    }
+
+    renderFormField(field = {}, rawValue) {
+        if (!field?.name) {
+            return "";
+        }
+        const value = rawValue ?? "";
+        const fieldName = escapeAttribute(field.name);
+        const fieldId = escapeAttribute(
+            field.id || `aa-modal-field-${field.name.replace(/[^a-zA-Z0-9_-]/g, "-")}`
+        );
+        const wrapperClasses = ["form-item"];
+        if (field.type === "textarea") {
+            wrapperClasses.push("for-textarea");
+        }
+        if (field.className) {
+            wrapperClasses.push(field.className);
+        }
+        const labelClasses = [];
+        if (field.labelClass) {
+            labelClasses.push(field.labelClass);
+        }
+        if (field.required) {
+            labelClasses.push("required");
+        }
+        const hiddenAttr = field.hidden ? ' hidden="true"' : "";
+        const requiredAttr = field.required ? " required" : "";
+        const placeholderAttr = field.placeholder
+            ? ` placeholder="${escapeAttribute(field.placeholder)}"`
+            : "";
+        const minAttr =
+            field.type === "number" && field.min !== undefined
+                ? ` min="${escapeAttribute(field.min)}"`
+                : "";
+        const inputClassAttr = field.inputClass
+            ? ` class="${escapeAttribute(field.inputClass)}"`
+            : "";
+        const label = field.label === false
+            ? ""
+            : `<label for="${fieldId}"${
+                labelClasses.length
+                    ? ` class="${escapeAttribute(labelClasses.join(" "))}"`
+                    : ""
+            }>${escapeHtml(field.label || "")}</label>`;
+
+        if (field.type === "select") {
+            const options = (field.options || [])
+                .map((option) => {
+                    const optionValue = isObject(option) ? option.value : option;
+                    const optionLabel = isObject(option)
+                        ? option.label ?? option.value
+                        : option;
+                    const selectedAttr =
+                        String(optionValue) === String(value) ? " selected" : "";
+                    return `<option value="${escapeAttribute(optionValue)}"${selectedAttr}>${escapeHtml(optionLabel)}</option>`;
+                })
+                .join("");
+            return `<div class="${escapeAttribute(wrapperClasses.join(" "))}" data-field-name="${fieldName}"${hiddenAttr}>${label}<select id="${fieldId}" name="${fieldName}"${requiredAttr}${inputClassAttr}>${options}</select></div>`;
+        }
+
+        if (field.type === "textarea") {
+            const rowsAttr = field.rows ? ` rows="${escapeAttribute(field.rows)}"` : "";
+            return `<div class="${escapeAttribute(wrapperClasses.join(" "))}" data-field-name="${fieldName}"${hiddenAttr}>${label}<textarea id="${fieldId}" name="${fieldName}"${requiredAttr}${placeholderAttr}${rowsAttr}${inputClassAttr}>${escapeHtml(value)}</textarea></div>`;
+        }
+
+        if (field.type === "checkbox") {
+            const checkedAttr = value ? " checked" : "";
+            if (field.switch) {
+                return `<div class="${escapeAttribute(wrapperClasses.join(" "))}" data-field-name="${fieldName}"${hiddenAttr}>${label}<input type="checkbox" id="${fieldId}" name="${fieldName}" switch${checkedAttr}${requiredAttr}${inputClassAttr}><label class="form-switcher" for="${fieldId}"></label></div>`;
+            }
+            return `<div class="${escapeAttribute(wrapperClasses.join(" "))}" data-field-name="${fieldName}"${hiddenAttr}>${label}<input type="checkbox" id="${fieldId}" name="${fieldName}"${checkedAttr}${requiredAttr}${inputClassAttr}></div>`;
+        }
+
+        const inputType = field.type || "text";
+        const valueAttr = ` value="${escapeAttribute(value)}"`;
+        return `<div class="${escapeAttribute(wrapperClasses.join(" "))}" data-field-name="${fieldName}"${hiddenAttr}>${label}<input type="${escapeAttribute(inputType)}" id="${fieldId}" name="${fieldName}"${valueAttr}${requiredAttr}${placeholderAttr}${minAttr}${inputClassAttr}></div>`;
+    }
+
+    collectFormValues(formElm) {
+        const values = {};
+        if (!formElm) {
+            return values;
+        }
+        const elements = Array.from(formElm.querySelectorAll("[name]"));
+        const processedNames = new Set();
+
+        elements.forEach((element) => {
+            const {name} = element;
+            if (!name || processedNames.has(name)) {
+                return;
+            }
+            processedNames.add(name);
+
+            if (element instanceof HTMLInputElement && element.type === "checkbox") {
+                values[name] = element.checked;
+                return;
+            }
+
+            if (element instanceof HTMLInputElement && element.type === "number") {
+                values[name] = element.value === "" ? "" : Number(element.value);
+                return;
+            }
+
+            values[name] = element.value;
+        });
+
+        return values;
+    }
+
+    animateRequiredField(element) {
+        if (!element) {
+            return;
+        }
+        element.classList.add("required-animate");
+        window.setTimeout(() => {
+            element.classList.remove("required-animate");
+        }, 800);
+    }
+
+    validateForm(formElm) {
+        if (!formElm) {
+            return true;
+        }
+        let isValid = true;
+        const elements = Array.from(formElm.querySelectorAll("[name]"));
+
+        elements.forEach((element) => {
+            if (!element.required || element.closest('.form-item[hidden="true"]')) {
+                return;
+            }
+
+            const isCheckbox =
+                element instanceof HTMLInputElement && element.type === "checkbox";
+            const hasValue = isCheckbox
+                ? element.checked
+                : String(element.value || "").trim() !== "";
+
+            if (!hasValue) {
+                isValid = false;
+                this.animateRequiredField(element);
+            }
+        });
+
+        return isValid;
+    }
+
+    syncFormFieldVisibility(modalElm, fields = [], values = {}) {
+        fields.forEach((field) => {
+            if (!field?.name) {
+                return;
+            }
+            const wrapper = Array.from(modalElm.querySelectorAll(".form-item")).find(
+                (item) => item.dataset.fieldName === field.name
+            );
+            if (!wrapper) {
+                return;
+            }
+            const isHidden = this.resolveFieldHidden(field, values);
+            wrapper.setAttribute("hidden", isHidden ? "true" : "false");
+            wrapper.classList.toggle("hidden", isHidden);
+        });
+    }
+
+    openFormModal(options = {}) {
+        const modalOptions = Object.assign(
+            {
+                title: "标题",
+                fields: [],
+                initialValues: {},
+                onSubmit: function () {
+                    return true;
+                },
+                onChange: function () {
+                },
+                validate: function () {
+                    return true;
+                },
+                showFooter: true,
+            },
+            options
+        );
+        const initialValues = this.getInitialFormValues(
+            modalOptions.fields,
+            modalOptions.initialValues
+        );
+        const innerHTML = modalOptions.fields
+            .map((field) => {
+                return this.renderFormField(
+                    {
+                        ...field,
+                        hidden: this.resolveFieldHidden(field, initialValues),
+                    },
+                    initialValues[field.name]
+                );
+            })
+            .join("");
+
+        this.openModal({
+            title: modalOptions.title,
+            innerHTML,
+            showFooter: modalOptions.showFooter,
+            checkEmptyOnConfirm: true,
+            handle: (modalElm) => {
+                this.syncFormFieldVisibility(modalElm, modalOptions.fields, initialValues);
+                modalOptions.onChange.call(this, modalElm, {...initialValues});
+            },
+            change: (modalElm, values) => {
+                this.syncFormFieldVisibility(modalElm, modalOptions.fields, values);
+                modalOptions.onChange.call(this, modalElm, values);
+            },
+            confirm: (modalElm, values) => {
+                if (modalOptions.validate.call(this, modalElm, values) === false) {
+                    return false;
+                }
+                return modalOptions.onSubmit.call(this, modalElm, values);
+            },
+        });
+    }
+
     /**
      * 打开模态框 (参考 Joe 主题)
      * @param options
@@ -855,11 +1106,21 @@ class XEditor {
 </div>
 </div>`);
         }
-        $(".aa-modal-header-title").html(modalOptions.title);
+        $(".aa-modal-header-title").text(modalOptions.title);
         if (modalOptions.checkEmptyOnConfirm) {
-            $(".aa-modal-body .params").html(modalOptions.innerHTML);
+            const form = $(".aa-modal-body .params").empty();
+            if (isElement(modalOptions.innerHTML)) {
+                form.append(modalOptions.innerHTML);
+            } else {
+                form.html(modalOptions.innerHTML);
+            }
         } else {
-            $(".aa-modal-body").html(modalOptions.innerHTML);
+            const body = $(".aa-modal-body").empty();
+            if (isElement(modalOptions.innerHTML)) {
+                body.append(modalOptions.innerHTML);
+            } else {
+                body.html(modalOptions.innerHTML);
+            }
         }
         let modalElm = $("#aa-modal").get(0);
         modalOptions.showFooter
@@ -868,23 +1129,14 @@ class XEditor {
         $("body").addClass("no-scroll");
         modalOptions.handle.call(this, modalElm);
         $(".aa-modal-footer-confirm").on("click", () => {
+            let params = {};
             let flag = true;
             if (modalOptions.checkEmptyOnConfirm) {
-                // 检查必填输入框
-                const form = $("#aa-modal .aa-modal-body .params");
-                let params = form.serializeArray();
-                $.each(params, function (i, param) {
-                    let element = $(`#aa-modal .params [name=${param.name}]`);
-                    if (element.prop("required") && param.value === "") {
-                        flag = false;
-                        element.addClass("required-animate");
-                        setTimeout(function () {
-                            element.removeClass("required-animate");
-                        }, 800);
-                    }
-                });
+                const formElm = $("#aa-modal .aa-modal-body .params").get(0);
+                params = this.collectFormValues(formElm);
+                flag = this.validateForm(formElm);
             }
-            if (flag && modalOptions.confirm.call(this, modalElm)) {
+            if (flag && modalOptions.confirm.call(this, modalElm, params)) {
                 $("#aa-modal").remove();
                 $("body").removeClass("no-scroll");
                 modalOptions.callback.call(this, modalElm);
@@ -908,11 +1160,7 @@ class XEditor {
         });
         let form = $(".params", modalElm);
         $("input,select,textarea", form).on("change input", () => {
-            let data = form.serializeArray(),
-                params = {};
-            data.forEach((item) => {
-                params[item.name] = item.value;
-            });
+            let params = this.collectFormValues(form.get(0));
             modalOptions.change.call(this, modalElm, params);
         });
         $("#aa-modal").addClass("active");

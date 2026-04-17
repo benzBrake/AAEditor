@@ -141,23 +141,32 @@
                 }
             }
 
-            this.openModal({
+            this.openFormModal({
                 title: '<?php _e("插入链接"); ?>',
-                innerHTML: `
-                    <div class="form-item">
-                        <label><?php _e("标题"); ?></label>
-                        <input type="text" name="title" placeholder="<?php _e("请输入标题"); ?>" value="${title}" />
-                    </div>
-                    <div class="form-item">
-                        <label class="required"><?php _e("链接"); ?></label>
-                        <input required type="text" name="url" placeholder="<?php _e("请输入链接"); ?>" value="${url}" />
-                    </div>
-                `,
-                confirm(modal) {
-                    let url = $('[name="url"]', modal).val();
-                    let title = $('[name="title"]', modal).val() || url;
+                initialValues: {
+                    title,
+                    url
+                },
+                fields: [{
+                    name: 'title',
+                    type: 'text',
+                    label: '<?php _e("标题"); ?>',
+                    placeholder: '<?php _e("请输入标题"); ?>',
+                }, {
+                    name: 'url',
+                    type: 'text',
+                    label: '<?php _e("链接"); ?>',
+                    placeholder: '<?php _e("请输入链接"); ?>',
+                    required: true,
+                }],
+                onSubmit(modal, values) {
+                    const url = values.url;
+                    const title = values.title || url;
                     this.textarea.setSelection(lastSelection.start, lastSelection.end);
-                    this.textarea.executeAndAddUndoStack('replaceSelectionText', `[${title}](${url})`);
+                    this.textarea.executeAndAddUndoStack(
+                        'replaceSelectionText',
+                        `[${title}](${url})`
+                    );
                     lastSelection = this.textarea.getSelection();
                     this.textarea.setSelection(lastSelection.end, lastSelection.end);
                     return true;
@@ -197,31 +206,45 @@
                 }
             }
 
-            this.openModal({
+            this.openFormModal({
                 title: '<?php _e("插入图片"); ?>',
-                innerHTML: `
-            <div class="form-item">
-                <label><?php _e("图片标题"); ?></label>
-                <input type="text" name="title" placeholder="<?php _e("请输入标题"); ?>" value="${title}" />
-            </div>
-            <div class="form-item">
-                <label><?php _e("替代文字"); ?></label>
-                <input type="text" name="alt" placeholder="<?php _e("图片无法显示时的代替文字"); ?>" value="${alt}" />
-            </div>
-            <div class="form-item">
-                <label class="required"><?php _e("图片链接"); ?></label>
-                <input required type="text" name="url" placeholder="<?php _e("请输入链接"); ?>" value="${url}" />
-            </div>
-        `,
-                confirm(modal) {
-                    let alt = $('[name="alt"]', modal).val() || ""; // 获取 alt 文本
-                    let url = $('[name="url"]', modal).val();
-                    let title = $('[name="title"]', modal).val() || "";
+                initialValues: {
+                    title,
+                    alt,
+                    url
+                },
+                fields: [{
+                    name: 'title',
+                    type: 'text',
+                    label: '<?php _e("图片标题"); ?>',
+                    placeholder: '<?php _e("请输入标题"); ?>',
+                }, {
+                    name: 'alt',
+                    type: 'text',
+                    label: '<?php _e("替代文字"); ?>',
+                    placeholder: '<?php _e("图片无法显示时的代替文字"); ?>',
+                }, {
+                    name: 'url',
+                    type: 'text',
+                    label: '<?php _e("图片链接"); ?>',
+                    placeholder: '<?php _e("请输入链接"); ?>',
+                    required: true,
+                }],
+                onSubmit(modal, values) {
+                    const alt = values.alt || "";
+                    const url = values.url;
+                    const title = values.title || "";
                     this.textarea.setSelection(lastSelection.start, lastSelection.end);
                     if (title) {
-                        this.textarea.executeAndAddUndoStack('replaceSelectionText', `![${alt}](${url} "${title}")`); // 有 title 时的插入格式
+                        this.textarea.executeAndAddUndoStack(
+                            'replaceSelectionText',
+                            `![${alt}](${url} "${title}")`
+                        );
                     } else {
-                        this.textarea.executeAndAddUndoStack('replaceSelectionText', `![${alt}](${url})`); // 没有 title 时的插入格式
+                        this.textarea.executeAndAddUndoStack(
+                            'replaceSelectionText',
+                            `![${alt}](${url})`
+                        );
                     }
                     lastSelection = this.textarea.getSelection();
                     this.textarea.setSelection(lastSelection.end, lastSelection.end);
@@ -262,30 +285,37 @@
         icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="20" height="20"><path d="m1.96877,4.30731l0,23.38538l28.06246,0l0,-23.38538l-28.06246,0zm2.33854,2.33854l5.84635,0l0,4.67708l-5.84635,0l0,-4.67708zm8.18488,0l15.2005,0l0,4.67708l-15.2005,0l0,-4.67708zm-8.18488,7.01561l5.84635,0l0,4.67708l-5.84635,0l0,-4.67708zm8.18488,0l15.2005,0l0,4.67708l-15.2005,0l0,-4.67708zm-8.18488,7.01561l5.84635,0l0,4.67708l-5.84635,0l0,-4.67708zm8.18488,0l15.2005,0l0,4.67708l-15.2005,0l0,-4.67708z"></path></svg>',
         insertAfter: "#wmd-spacer2-aaeditor",
         command() {
-            this.openModal({
+            this.openFormModal({
                 title: "<?php _e("插入表格") ?>",
-                innerHTML: `<div class="form-item">
-<div class="columns-2">
-    <div class="column">
-        <label for="rows"><?php _e("行数") ?></label>
-        <input type="number" name="rows" min="1" value="3" required>
-    </div>
-    <div class="column">
-        <label for="cols"><?php _e("列数") ?></label>
-        <input type="number" name="cols" min="1" value="3" required>
-    </div>
-</div>
-</div>
-<div class="form-item">
-    <label class="no-bg" for="is-center"><?php _e("居中") ?></label>
-    <input type="checkbox" name="is-center" checked>
-</div>`,
-                confirm(modal) {
-                    let rows = parseInt(modal.querySelector("input[name=rows]").value, 10);
+                initialValues: {
+                    rows: 3,
+                    cols: 3,
+                    isCenter: true
+                },
+                fields: [{
+                    name: 'rows',
+                    type: 'number',
+                    label: '<?php _e("行数") ?>',
+                    required: true,
+                    min: 1,
+                }, {
+                    name: 'cols',
+                    type: 'number',
+                    label: '<?php _e("列数") ?>',
+                    required: true,
+                    min: 1,
+                }, {
+                    name: 'isCenter',
+                    type: 'checkbox',
+                    label: '<?php _e("居中") ?>',
+                    labelClass: 'no-bg',
+                }],
+                onSubmit(modal, values) {
+                    let rows = parseInt(values.rows, 10);
                     if (rows < 1) rows = 1;
-                    let cols = parseInt(modal.querySelector("input[name=cols]").value, 10);
+                    let cols = parseInt(values.cols, 10);
                     if (cols < 1) cols = 1;
-                    let isCenter = modal.querySelector("input[name=is-center]").checked;
+                    let isCenter = values.isCenter;
                     let th = "", split = "", td = "";
                     for (let i = 0; i < cols; i++) {
                         th += "| <?php _e("表头") ?> ";
@@ -368,45 +398,43 @@
             const {textarea} = this;
             const lastSelection = textarea.getSelection();
             const selectedText = this.getSelectedText();
-            this.openModal({
+            this.openFormModal({
                 title: '<?php _e("插入自定义容器"); ?>',
-                innerHTML: `<div class="form-item">
-    <label for="type"><?php _e("容器类型"); ?></label>
-    <select name="type">
-        <option value="tip">tip</option>
-        <option value="note">note</option>
-        <option value="info">info</option>
-        <option value="warning">warning</option>
-        <option value="danger">danger</option>
-        <option value="success">success</option>
-        <option value="details">details</option>
-    </select>
-</div>
-<div class="form-item" style="display: none;">
-    <label><?php _e("默认展开"); ?></label>
-    <input type="checkbox" name="open" id="open" switch />
-    <label class="form-switcher" for="open"></span>
-</div>
-<div class="form-item">
-    <label for="title"><?php _e("容器标题"); ?></label>
-    <input name="title" id="title" />
-</div>
-<div class="form-item">
-    <label for="content"><?php _e("容器内容"); ?></label>
-    <textarea rows="3" autocomplete="off" name="content" placeholder="<?php _e("请输入提示内容"); ?>">${selectedText}</textarea>
-</div>`,
-                handle(modal) {
-                    $('[name="type"]', modal).on('change', _ => {
-                        $('[name="open"]', modal).parent().css('display', $('[name="type"]', modal).val() === 'details' ? 'flex' : 'none');
-                    })
+                initialValues: {
+                    type: 'tip',
+                    open: false,
+                    title: '',
+                    content: selectedText,
                 },
-                confirm(modal) {
-                    let type = $('[name="type"]', modal).val(),
-                        title = $('[name="title"]', modal).val(),
-                        content = $('[name="content"]', modal).val() || "<?php _e("这里编辑容器内容"); ?>";
+                fields: [{
+                    name: 'type',
+                    type: 'select',
+                    label: '<?php _e("容器类型"); ?>',
+                    options: ['tip', 'note', 'info', 'warning', 'danger', 'success', 'details'],
+                }, {
+                    name: 'open',
+                    type: 'checkbox',
+                    label: '<?php _e("默认展开"); ?>',
+                    switch: true,
+                    hidden: (values) => values.type !== 'details',
+                }, {
+                    name: 'title',
+                    type: 'text',
+                    label: '<?php _e("容器标题"); ?>',
+                }, {
+                    name: 'content',
+                    type: 'textarea',
+                    label: '<?php _e("容器内容"); ?>',
+                    placeholder: '<?php _e("请输入提示内容"); ?>',
+                    rows: 3,
+                }],
+                onSubmit(modal, values) {
+                    let type = values.type,
+                        title = values.title,
+                        content = values.content || "<?php _e("这里编辑容器内容"); ?>";
 
                     if (title.length) title = " " + title;
-                    if ($('[name="open"]', modal).get(0).checked) type += ":open";
+                    if (values.open) type += ":open";
                     let prefix = `::: ${type}${title}\n`;
                     let postfix = `\n:::`;
                     this.textarea.setSelection(lastSelection.start, lastSelection.end);

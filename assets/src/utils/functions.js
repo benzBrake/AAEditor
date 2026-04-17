@@ -29,6 +29,19 @@ export function sprintf(format, ...args) {
     });
 }
 
+export function escapeHtml(value = "") {
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+export function escapeAttribute(value = "") {
+    return escapeHtml(value).replace(/`/g, "&#96;");
+}
+
 export function $C(tag, attrs, skipAttrs = []) {
     let el = document.createElement(tag);
     return $A(el, attrs, skipAttrs);

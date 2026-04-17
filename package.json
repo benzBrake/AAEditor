@@ -31,6 +31,7 @@
     "autoprefixer": "^10.3.1",
     "babel-loader": "^8.2.2",
     "browser-sync": "^3.0.3",
+    "browser-sync-webpack-plugin": "^2.4.0",
     "clean-webpack-plugin": "^4.0.0",
     "css-loader": "^5.2.6",
     "expose-loader": "^3.0.0",
