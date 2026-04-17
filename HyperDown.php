@@ -911,24 +911,34 @@ class HyperDown
      */
     private function parseBlockFence(?array $block, int $key, string $line): bool
     {
-        // 匹配 ::: 开始或结束
         if (preg_match('/^(\s*):{3,}(.*)$/', $line, $matches)) {
+            $info = trim($matches[2]);
+
             if ($this->isBlock('fence')) {
-                // 如果当前已经在 fence 块中，则这是结束标记
-                $this->setBlock($key)->endBlock();
+                $fenceState = is_array($block[3] ?? null)
+                    ? $block[3]
+                    : ['info' => (string) ($block[3] ?? ''), 'depth' => 1];
+
+                if ($info !== '') {
+                    $fenceState['depth']++;
+                    $this->setBlock($key, $fenceState);
+                } elseif (($fenceState['depth'] ?? 1) > 1) {
+                    $fenceState['depth']--;
+                    $this->setBlock($key, $fenceState);
+                } else {
+                    $this->setBlock($key)->endBlock();
+                }
             } else {
-                // 否则，这是一个新的 fence 块的开始
-                // 将 ::: 后面的信息字符串存起来，供 parseFence 方法使用
-                $info = trim($matches[2]);
-                $this->startBlock('fence', $key, $info);
+                $this->startBlock('fence', $key, ['info' => $info, 'depth' => 1]);
             }
-            return false; // 该行已处理
+
+            return false;
         } elseif ($this->isBlock('fence')) {
-            // 如果当前在 fence 块中，并且不是结束标记，则将当前行设为块的一部分
             $this->setBlock($key);
-            return false; // 该行已处理
+            return false;
         }
-        return true; // 不是 fence 块，交给其他解析器处理
+
+        return true;
     }
 
     /**
@@ -938,8 +948,12 @@ class HyperDown
      * @param int $start 块的起始行号
      * @return string
      */
-    private function parseFence(array $lines, string $info, int $start): string
+    private function parseFence(array $lines, $info, int $start): string
     {
+        if (is_array($info)) {
+            $info = $info['info'] ?? '';
+        }
+
         $content = trim(implode("\n", array_slice($lines, 1, -1)));
         $type = 'info';
         $variant = '';
