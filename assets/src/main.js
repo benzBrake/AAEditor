@@ -604,7 +604,7 @@ class XEditor {
      */
     replaceSelection(text) {
         if (this.getSelectedText()) {
-            this.textarea.executeAndAddUndoStack("replaceSelection", text);
+            this.textarea.executeAndAddUndoStack("replaceSelectionText", text);
         } else {
             this.textarea.executeAndAddUndoStack("insertText", text);
         }

@@ -20,21 +20,41 @@ export default class TextAreaUtils {
      * @param {...any} args - 操作所需的参数。
      */
     executeAndAddUndoStack(operate, ...args) {
+        const resolvedOperate = this.resolveOperationName(operate);
+        const handler = this.getOperationHandlers()[resolvedOperate];
+
+        if (typeof handler !== 'function') {
+            console.warn(`[TextAreaUtils] Unsupported operation: ${operate}`);
+            return false;
+        }
+
+        let result = false;
         const fn = () => {
-            // 找到对应的函数名并执行
-            if (operate === 'setContent') {
-                this.setContent(...args);
-            } else if (operate === 'insertText') {
-                this.insertText(...args);
-            } else if (operate === 'replaceSelectionText') {
-                this.replaceSelectionText(...args);
-            } // 添加其他支持的命令
+            result = handler(...args);
+            return result;
         };
         if (this.textarea.pagedown) {
             this.textarea.pagedown.textOperation(fn);
+            return result;
         } else {
-            fn();
+            return fn();
         }
+    }
+
+    getOperationHandlers() {
+        return {
+            setContent: (...args) => this.setContent(...args),
+            insertText: (...args) => this.insertText(...args),
+            replaceSelectionText: (...args) => this.replaceSelectionText(...args)
+        };
+    }
+
+    resolveOperationName(operate) {
+        const aliases = {
+            replaceSelection: 'replaceSelectionText'
+        };
+
+        return aliases[operate] || operate;
     }
 
     /**
@@ -76,12 +96,11 @@ export default class TextAreaUtils {
      * @param {string} content - 要设置的新内容。
      */
     setContent(content) {
-        if (!this.locked) {
-            this.textarea.value = content;
-            this.afterOperate(); // 触发 input 事件
-            return true;
-        }
-        return false;
+        if (this.locked) return false;
+
+        this.textarea.value = content;
+        this.afterOperate(); // 触发 input 事件
+        return true;
     }
 
     /**
@@ -109,14 +128,9 @@ export default class TextAreaUtils {
         if (this.locked) return false;
         const startPos = this.textarea.selectionStart;
         const endPos = this.textarea.selectionEnd;
-        const currentText = this.textarea.value;
+        const cursorPos = startPos + text.length;
 
-        this.textarea.value = currentText.slice(0, startPos) + text + currentText.slice(endPos);
-        this.textarea.selectionStart = startPos + text.length;
-        this.textarea.selectionEnd = startPos + text.length;
-
-        this.afterOperate(); // 触发 input 事件
-        return true;
+        return this.replaceRange(startPos, endPos, text, cursorPos, cursorPos);
     }
 
     /**
@@ -128,14 +142,8 @@ export default class TextAreaUtils {
         if (this.locked) return false;
         const startPos = this.textarea.selectionStart;
         const endPos = this.textarea.selectionEnd;
-        const currentText = this.textarea.value;
 
-        this.textarea.value = currentText.slice(0, startPos) + text + currentText.slice(endPos);
-        this.textarea.selectionStart = startPos;
-        this.textarea.selectionEnd = startPos + text.length;
-
-        this.afterOperate(); // 触发 input 事件
-        return true
+        return this.replaceRange(startPos, endPos, text, startPos, startPos + text.length);
     }
 
     /**
@@ -231,27 +239,9 @@ export default class TextAreaUtils {
         if (this.locked) return false;
         const startPos = this.textarea.selectionStart;
         const endPos = this.textarea.selectionEnd;
-        const text = this.textarea.value;
+        const {start, end} = this.getLineRange(startPos, endPos);
 
-        let lineStart = startPos;
-        let lineEnd = endPos;
-
-        while (lineStart > 0 && text[lineStart - 1] !== '\n') {
-            lineStart--;
-        }
-
-        while (lineEnd < text.length && text[lineEnd] !== '\n') {
-            lineEnd++;
-        }
-
-        const newTextBefore = text.substring(0, lineStart);
-        const newTextAfter = text.substring(lineEnd);
-
-        this.textarea.value = newTextBefore + newText + newTextAfter;
-        this.textarea.selectionStart = lineStart;
-        this.textarea.selectionEnd = lineStart + newText.length;
-        this.afterOperate(); // 触发 input 事件
-        return true;
+        return this.replaceRange(start, end, newText, start, start + newText.length);
     }
 
     /**
@@ -274,6 +264,25 @@ export default class TextAreaUtils {
         }
 
         return {line: lineCount, column: columnCount};
+    }
+
+    getLineRange(start = this.textarea.selectionStart, end = this.textarea.selectionEnd) {
+        const text = this.textarea.value;
+        let lineStart = start;
+        let lineEnd = end;
+
+        while (lineStart > 0 && text[lineStart - 1] !== '\n') {
+            lineStart--;
+        }
+
+        while (lineEnd < text.length && text[lineEnd] !== '\n') {
+            lineEnd++;
+        }
+
+        return {
+            start: lineStart,
+            end: lineEnd
+        };
     }
 
     /**
@@ -327,6 +336,16 @@ export default class TextAreaUtils {
     afterOperate() {
         $(this.textarea).trigger('input');
         this.textarea.focus();
+    }
+
+    replaceRange(start, end, text, selectionStart, selectionEnd) {
+        const currentText = this.textarea.value;
+
+        this.textarea.value = currentText.slice(0, start) + text + currentText.slice(end);
+        this.textarea.selectionStart = selectionStart;
+        this.textarea.selectionEnd = selectionEnd;
+        this.afterOperate(); // 触发 input 事件
+        return true;
     }
 
     /**
