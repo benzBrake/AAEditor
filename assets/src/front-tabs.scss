@@ -1,0 +1,21 @@
+@import "variables";
+@import "editor/fence-tabs";
+
+.post-content,
+[itemprop="articleBody"] {
+  .fence-tabs {
+    @include fence-tabs-styles;
+  }
+
+  .fence p {
+    margin-top: 0;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .fence-content.text-center {
+    text-align: center;
+  }
+}

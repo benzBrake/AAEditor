@@ -1,0 +1,8 @@
+@import "variables";
+
+.post-content,
+[itemprop="articleBody"] {
+  background-color: var(--aaeditor-bg-color, transparent);
+
+  @import "editor/content";
+}

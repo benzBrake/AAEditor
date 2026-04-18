@@ -1,0 +1,21 @@
+@import "variables";
+@import "editor/fence-blocks";
+
+.post-content,
+[itemprop="articleBody"] {
+  .fence {
+    @include fence-block-styles;
+
+    p {
+      margin-top: 0;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  .fence-content.text-center {
+    text-align: center;
+  }
+}
