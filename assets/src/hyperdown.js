@@ -19,6 +19,7 @@
                 this.line = false;
                 this.blockParsers = [['code', 10], ['shtml', 20], ['pre', 30], ['ahtml', 40], ['shr', 50], ['list', 60], ['math', 70], ['fence', 75], ['html', 80], ['footnote', 90], ['definition', 100], ['quote', 110], ['table', 120], ['sh', 130], ['mh', 140], ['dhr', 150], ['default', 9999]];
                 this.parsers = {};
+                this.fenceTabsId = 0;
             }
 
 
@@ -30,6 +31,7 @@
                 this.holders = {};
                 this.uniqid = (Math.ceil(Math.random() * 10000000)) + (Math.ceil(Math.random() * 10000000));
                 this.id = 0;
+                this.fenceTabsId = 0;
                 this.blockParsers.sort(function (a, b) {
                     if (a[1] < b[1]) {
                         return -1;
@@ -513,21 +515,29 @@
             parseBlockFence(block, key, line, state) {
                 var info, matches;
                 if (!!(matches = line.match(/^(\s*):{3,}(.*)$/))) {
+                    info = trim(matches[2]);
                     if (this.isBlock('fence')) {
-                        // 如果当前已经在 fence 块中，则这是结束标记
-                        this.setBlock(key).endBlock();
+                        let fenceState = Array.isArray(block[3]) || typeof block[3] === "string"
+                            ? {info: block[3], depth: 1}
+                            : block[3];
+                        if (info !== '') {
+                            fenceState.depth = (fenceState.depth || 1) + 1;
+                            this.setBlock(key, fenceState);
+                        } else if ((fenceState.depth || 1) > 1) {
+                            fenceState.depth -= 1;
+                            this.setBlock(key, fenceState);
+                        } else {
+                            this.setBlock(key).endBlock();
+                        }
                     } else {
-                        // 否则，这是一个新的 fence 块的开始
-                        info = trim(matches[2]);
-                        this.startBlock('fence', key, info);
+                        this.startBlock('fence', key, {info, depth: 1});
                     }
-                    return false; // 该行已处理
+                    return false;
                 } else if (this.isBlock('fence')) {
-                    // 如果当前在 fence 块中，并且不是结束标记，则将当前行设为块的一部分
                     this.setBlock(key);
-                    return false; // 该行已处理
+                    return false;
                 }
-                return true; // 不是 fence 块，交给其他解析器处理
+                return true;
             }
 
             parseBlockPre(block, key, line, state) {
@@ -788,74 +798,239 @@
                 }
             }
 
-            parseFence(lines, info, start) {
-                var attr_key, attr_val, attr_matches, attr_regex, attrs_str, classes, content, details_attrs, html, html_attrs, match, parsedContent, parts, pattern, summary_text, title, type, variant;
-                content = lines.slice(1, -1).join("\n");
-                type = 'info';
-                variant = '';
-                attrs_str = '';
-                title = '';
-                html_attrs = '';
-                pattern = /^(?<type>\w+)(?::(?<variant>\w+))?\s*(?:\{(?<attrs>[^}]+)\})?\s*(?<title>.*)?$/;
-                var matches;
+            parseFenceInfo(info = '') {
+                let type = 'info';
+                let variant = '';
+                let attrsStr = '';
+                let title = '';
+                const pattern = /^(?<type>\w+)(?::(?<variant>\w+))?\s*(?:\{(?<attrs>[^}]+)\})?\s*(?<title>.*)?$/;
+                let matches;
                 if (!!(matches = info.match(pattern))) {
                     type = matches.groups.type != null ? matches.groups.type : 'info';
                     variant = matches.groups.variant != null ? matches.groups.variant : '';
-                    attrs_str = matches.groups.attrs != null ? matches.groups.attrs : '';
+                    attrsStr = matches.groups.attrs != null ? matches.groups.attrs : '';
                     title = matches.groups.title != null ? matches.groups.title : '';
                 } else if (info) {
-                    parts = info.split(' ', 2);
+                    const parts = info.split(' ', 2);
                     type = parts[0];
                     title = parts[1] != null ? parts[1] : '';
                 }
-                if (attrs_str) {
-                    attr_matches = [];
-                    attr_regex = /([\w-]+)\s*:\s*([^,]+)/g;
-                    while (match = attr_regex.exec(attrs_str)) {
-                        attr_matches.push(match);
-                    }
-                    for (var i = 0, len = attr_matches.length; i < len; i++) {
-                        match = attr_matches[i];
-                        if (match.length === 3) {
-                            attr_key = htmlspecialchars(trim(match[1]));
-                            attr_val = htmlspecialchars(trim(match[2]));
-                            html_attrs += " data-" + attr_key + "=\"" + attr_val + "\"";
-                        }
+                return {type, variant, attrsStr, title};
+            }
+
+            parseFenceAttributes(attrsStr = '') {
+                const attrs = {};
+                if (!attrsStr) {
+                    return attrs;
+                }
+                const attrRegex = /([\w-]+)\s*:\s*([^,]+)/g;
+                let match;
+                while ((match = attrRegex.exec(attrsStr))) {
+                    if (match.length === 3) {
+                        attrs[trim(match[1])] = trim(match[2]);
                     }
                 }
-                html = '';
-                // -- START: NEW TITLE LOGIC --
-                var final_title = trim(title);
-                if (!final_title) { // 如果标题为空
-                    if (type === 'details') {
-                        final_title = 'Details';
-                    } else {
-                        final_title = type.toUpperCase();
-                    }
+                return attrs;
+            }
+
+            buildFenceDataAttributes(attrs = {}) {
+                return Object.entries(attrs).reduce((htmlAttrs, [key, value]) => {
+                    return htmlAttrs + ` data-${htmlspecialchars(key)}=\"${htmlspecialchars(value)}\"`;
+                }, '');
+            }
+
+            splitFenceClasses(value = '') {
+                return String(value)
+                    .split(/\s+/)
+                    .map((item) => item.trim())
+                    .filter(Boolean);
+            }
+
+            getFenceDefaultTitle(type, title = '') {
+                const finalTitle = trim(title);
+                if (finalTitle) {
+                    return finalTitle;
                 }
-                // -- END: NEW TITLE LOGIC --
                 if (type === 'details') {
+                    return 'Details';
+                }
+                return type.toUpperCase();
+            }
+
+            extractTabsItems(lines, start) {
+                const tabs = [];
+                let currentTab = null;
+                let nestedDepth = 0;
+                let hasOutsideContent = false;
+
+                const finalizeCurrentTab = () => {
+                    if (!currentTab) {
+                        return;
+                    }
+                    currentTab.content = currentTab.lines.join("\n");
+                    tabs.push(currentTab);
+                    currentTab = null;
+                };
+
+                lines.forEach((line, index) => {
+                    const matches = line.match(/^(\s*):{3,}(.*)$/);
+                    if (!matches) {
+                        if (currentTab) {
+                            currentTab.lines.push(line);
+                        } else if (trim(line) !== '') {
+                            hasOutsideContent = true;
+                        }
+                        return;
+                    }
+
+                    const markerInfo = trim(matches[2]);
+                    if (!currentTab) {
+                        if (!markerInfo) {
+                            hasOutsideContent = true;
+                            return;
+                        }
+                        const {type, title} = this.parseFenceInfo(markerInfo);
+                        if (type !== 'tab') {
+                            hasOutsideContent = true;
+                            return;
+                        }
+                        currentTab = {
+                            title: this.getFenceDefaultTitle('tab', title || `Tab ${tabs.length + 1}`),
+                            lines: [],
+                            contentStart: start + index + 2,
+                        };
+                        nestedDepth = 0;
+                        return;
+                    }
+
+                    if (markerInfo !== '') {
+                        nestedDepth += 1;
+                        currentTab.lines.push(line);
+                        return;
+                    }
+
+                    if (nestedDepth > 0) {
+                        nestedDepth -= 1;
+                        currentTab.lines.push(line);
+                        return;
+                    }
+
+                    finalizeCurrentTab();
+                });
+
+                if (currentTab || hasOutsideContent || !tabs.length) {
+                    return null;
+                }
+
+                return tabs;
+            }
+
+            parseTabsFence(lines, attrs, htmlAttrs, start) {
+                const tabs = this.extractTabsItems(lines, start);
+                if (!tabs) {
+                    return null;
+                }
+
+                const tabsId = `aaeditor-tabs-${++this.fenceTabsId}`;
+                const navClasses = ['fence-tabs-nav'];
+                const panelWrapperClasses = ['fence-tabs-panels'];
+                const tabClasses = ['fence-tabs-tab'];
+                const panelClasses = ['fence-tabs-panel'];
+
+                if (attrs['tabs-wrapper-classes']) {
+                    navClasses.push(attrs['tabs-wrapper-classes']);
+                }
+                if (attrs['panels-wrapper-classes']) {
+                    panelWrapperClasses.push(attrs['panels-wrapper-classes']);
+                }
+                if (attrs['tab-classes']) {
+                    tabClasses.push(attrs['tab-classes']);
+                }
+                if (attrs['panel-classes']) {
+                    panelClasses.push(attrs['panel-classes']);
+                }
+
+                const activeClasses = attrs['tab-active-classes']
+                    ? this.splitFenceClasses(attrs['tab-active-classes'])
+                    : [];
+                const inactiveClasses = attrs['tab-inactive-classes']
+                    ? this.splitFenceClasses(attrs['tab-inactive-classes'])
+                    : [];
+
+                let html = `<div class=\"fence fence-tabs\"${htmlAttrs}>`;
+                html += `<div class=\"${navClasses.join(' ')}\" role=\"tablist\">`;
+                tabs.forEach((tab, index) => {
+                    const isActive = index === 0;
+                    const currentTabClasses = tabClasses.slice(0);
+                    const stateClasses = isActive ? activeClasses : inactiveClasses;
+                    if (stateClasses.length) {
+                        currentTabClasses.push(...stateClasses);
+                    }
+                    html += `<button type=\"button\" class=\"${currentTabClasses.join(' ')}\" role=\"tab\" id=\"${tabsId}-tab-${index}\" aria-selected=\"${isActive ? 'true' : 'false'}\" aria-controls=\"${tabsId}-panel-${index}\" tabindex=\"${isActive ? '0' : '-1'}\">${this.parseInline(tab.title)}</button>`;
+                });
+                html += '</div>';
+
+                html += `<div class=\"${panelWrapperClasses.join(' ')}\">`;
+                tabs.forEach((tab, index) => {
+                    const isActive = index === 0;
+                    const hiddenAttr = isActive ? '' : ' hidden';
+                    const parsedContent = this.parse(trim(tab.content), false, tab.contentStart);
+                    html += `<div class=\"${panelClasses.join(' ')}\" role=\"tabpanel\" id=\"${tabsId}-panel-${index}\" aria-labelledby=\"${tabsId}-tab-${index}\" aria-hidden=\"${isActive ? 'false' : 'true'}\"${hiddenAttr}>${parsedContent}</div>`;
+                });
+                html += '</div>';
+                html += '</div>';
+
+                return html;
+            }
+
+            parseFence(lines, info, start) {
+                var attrs, classes, content, details_attrs, html, html_attrs, parsedContent;
+                if (info != null && typeof info === 'object') {
+                    info = info.info != null ? info.info : '';
+                }
+                content = lines.slice(1, -1).join("\n");
+                const {type, variant, attrsStr, title} = this.parseFenceInfo(info || '');
+                attrs = this.parseFenceAttributes(attrsStr);
+                html_attrs = this.buildFenceDataAttributes(attrs);
+                html = '';
+                if (type === 'raw') {
+                    classes = "fence fence-raw";
+                    if (variant) {
+                        classes += " variant-" + variant;
+                    }
+                    html = "<div class=\"" + classes + "\"" + html_attrs + ">";
+                    html += content;
+                    html += '</div>';
+                    return html;
+                }
+                if (type === 'details') {
+                    const finalTitle = this.getFenceDefaultTitle(type, title);
                     details_attrs = '';
                     if (variant === 'open') {
                         details_attrs += ' open';
                     }
                     details_attrs += html_attrs;
                     html = "<details class=\"fence fence-details\"" + details_attrs + ">";
-                    // 使用 final_title
-                    html += "<summary>" + (this.parseInline(final_title)) + "</summary>";
-
+                    html += "<summary>" + (this.parseInline(finalTitle)) + "</summary>";
                     parsedContent = this.parse(trim(content), false, start + 1);
                     html += "<div class=\"details-content\">" + parsedContent + "</div>";
                     html += '</details>';
                 } else {
-                    classes = "fence fence-" + type;
-                    if (variant) {
-                        classes += ` fence-${type}-` + variant;
+                    let renderType = type;
+                    if (type === 'tabs') {
+                        const tabsHtml = this.parseTabsFence(lines.slice(1, -1), attrs, html_attrs, start);
+                        if (tabsHtml) {
+                            return tabsHtml;
+                        }
+                        renderType = 'info';
+                    }
+                    const finalTitle = this.getFenceDefaultTitle(type, title);
+                    classes = "fence fence-" + renderType;
+                    if (variant && renderType !== 'info') {
+                        classes += ` fence-${renderType}-` + variant;
                     }
                     html = "<div class=\"" + classes + "\"" + html_attrs + ">";
-                    // 使用 final_title
-                    html += "<div class=\"fence-title\">" + (this.parseInline(final_title)) + "</div>";
-
+                    html += "<div class=\"fence-title\">" + (this.parseInline(finalTitle)) + "</div>";
                     parsedContent = this.parse(trim(content), false, start + 1);
                     html += "<div class=\"fence-content\">" + parsedContent + "</div>";
                     html += '</div>';

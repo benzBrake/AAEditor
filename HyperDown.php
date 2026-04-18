@@ -124,6 +124,11 @@ class HyperDown
     private $_id;
 
     /**
+     * @var int
+     */
+    private $_fenceTabsId = 0;
+
+    /**
      * @var array
      */
     private $_parsers = [];
@@ -142,6 +147,7 @@ class HyperDown
         $this->_holders = [];
         $this->_uniqid = md5(uniqid());
         $this->_id = 0;
+        $this->_fenceTabsId = 0;
 
         usort($this->blockParsers, function ($a, $b) {
             return $a[1] < $b[1] ? -1 : 1;
@@ -955,37 +961,10 @@ class HyperDown
         }
 
         $content = trim(implode("\n", array_slice($lines, 1, -1)));
-        $type = 'info';
-        $variant = '';
-        $attrs_str = '';
-        $title = '';
-        $html_attrs = '';
-        // New, more robust regex to parse all parts of the info string
-        $pattern = '/^(?<type>\w+)(?::(?<variant>\w+))?\s*(?:\{(?<attrs>[^}]+)\})?\s*(?<title>.*)?$/';
-        if (preg_match($pattern, $info, $matches)) {
-            $type = $matches['type'] ?? 'info';
-            $variant = $matches['variant'] ?? '';
-            $attrs_str = $matches['attrs'] ?? '';
-            $title = $matches['title'] ?? '';
-        } elseif ($info) {
-            $parts = explode(' ', $info, 2);
-            $type = $parts[0];
-            $title = $parts[1] ?? '';
-        }
-        if ($attrs_str) {
-            $attr_regex = '/([\w-]+)\s*:\s*([^,]+)/';
-            if (preg_match_all($attr_regex, $attrs_str, $attr_matches, PREG_SET_ORDER)) {
-                foreach ($attr_matches as $match) {
-                    if (count($match) === 3) {
-                        $attr_key = htmlspecialchars(trim($match[1]));
-                        $attr_val = htmlspecialchars(trim($match[2]));
-                        $html_attrs .= " data-{$attr_key}=\"{$attr_val}\"";
-                    }
-                }
-            }
-        }
+        ['type' => $type, 'variant' => $variant, 'attrs_str' => $attrs_str, 'title' => $title] = $this->parseFenceInfo((string) $info);
+        $attrs = $this->parseFenceAttributes($attrs_str);
+        $html_attrs = $this->buildFenceDataAttributes($attrs);
 
-        // --- START: RAW TYPE LOGIC ---
         if ($type === 'raw') {
             $classes = "fence fence-raw";
             if ($variant) {
@@ -997,19 +976,9 @@ class HyperDown
             $html .= '</div>';
             return $html;
         }
-        // --- END: RAW TYPE LOGIC ---
-        // --- START: DEFAULT TITLE LOGIC ---
-        $final_title = trim($title);
-        if (!$final_title) { // If no title is provided
-            if ($type === 'details') {
-                $final_title = 'Details';
-            } else {
-                // Default title is the type, with first letter capitalized
-                $final_title = strtoupper($type);
-            }
-        }
-        // --- END: DEFAULT TITLE LOGIC ---
+
         if ($type === 'details') {
+            $final_title = $this->getFenceDefaultTitle($type, $title);
             $details_attrs = '';
             if ($variant === 'open') {
                 $details_attrs .= ' open';
@@ -1021,9 +990,18 @@ class HyperDown
             $html .= "<div class=\"details-content\">{$parsedContent}</div>";
             $html .= '</details>';
         } else {
-            $classes = "fence fence-{$type}";
-            if ($variant) {
-                $classes .= " fence-{$type}-{$variant}";
+            $renderType = $type;
+            if ($type === 'tabs') {
+                $tabsHtml = $this->parseTabsFence(array_slice($lines, 1, -1), $attrs, $html_attrs, $start);
+                if ($tabsHtml !== null) {
+                    return $tabsHtml;
+                }
+                $renderType = 'info';
+            }
+            $final_title = $this->getFenceDefaultTitle($type, $title);
+            $classes = "fence fence-{$renderType}";
+            if ($variant && $renderType !== 'info') {
+                $classes .= " fence-{$renderType}-{$variant}";
             }
             $html = "<div class=\"{$classes}\"{$html_attrs}>";
             $html .= "<div class=\"fence-title\">" . $this->parseInline($final_title) . "</div>";
@@ -1031,6 +1009,211 @@ class HyperDown
             $html .= "<div class=\"fence-content\">{$parsedContent}</div>";
             $html .= '</div>';
         }
+        return $html;
+    }
+
+    private function parseFenceInfo(string $info): array
+    {
+        $type = 'info';
+        $variant = '';
+        $attrs_str = '';
+        $title = '';
+        $pattern = '/^(?<type>\w+)(?::(?<variant>\w+))?\s*(?:\{(?<attrs>[^}]+)\})?\s*(?<title>.*)?$/';
+        if (preg_match($pattern, $info, $matches)) {
+            $type = $matches['type'] ?? 'info';
+            $variant = $matches['variant'] ?? '';
+            $attrs_str = $matches['attrs'] ?? '';
+            $title = $matches['title'] ?? '';
+        } elseif ($info !== '') {
+            $parts = explode(' ', $info, 2);
+            $type = $parts[0];
+            $title = $parts[1] ?? '';
+        }
+
+        return [
+            'type' => $type,
+            'variant' => $variant,
+            'attrs_str' => $attrs_str,
+            'title' => $title,
+        ];
+    }
+
+    private function parseFenceAttributes(string $attrs_str): array
+    {
+        $attrs = [];
+        if ($attrs_str === '') {
+            return $attrs;
+        }
+
+        $attr_regex = '/([\w-]+)\s*:\s*([^,]+)/';
+        if (preg_match_all($attr_regex, $attrs_str, $attr_matches, PREG_SET_ORDER)) {
+            foreach ($attr_matches as $match) {
+                if (count($match) === 3) {
+                    $attrs[trim($match[1])] = trim($match[2]);
+                }
+            }
+        }
+
+        return $attrs;
+    }
+
+    private function buildFenceDataAttributes(array $attrs): string
+    {
+        $html_attrs = '';
+        foreach ($attrs as $key => $value) {
+            $attr_key = htmlspecialchars((string) $key);
+            $attr_val = htmlspecialchars((string) $value);
+            $html_attrs .= " data-{$attr_key}=\"{$attr_val}\"";
+        }
+        return $html_attrs;
+    }
+
+    private function getFenceDefaultTitle(string $type, string $title): string
+    {
+        $final_title = trim($title);
+        if ($final_title !== '') {
+            return $final_title;
+        }
+        if ($type === 'details') {
+            return 'Details';
+        }
+        return strtoupper($type);
+    }
+
+    private function splitFenceClasses(?string $value): array
+    {
+        if ($value === null || trim($value) === '') {
+            return [];
+        }
+        return preg_split('/\s+/', trim($value)) ?: [];
+    }
+
+    private function extractTabsItems(array $lines, int $start): ?array
+    {
+        $tabs = [];
+        $currentTab = null;
+        $nestedDepth = 0;
+        $hasOutsideContent = false;
+
+        foreach ($lines as $index => $line) {
+            if (!preg_match('/^(\s*):{3,}(.*)$/', $line, $matches)) {
+                if ($currentTab !== null) {
+                    $currentTab['lines'][] = $line;
+                } elseif (trim($line) !== '') {
+                    $hasOutsideContent = true;
+                }
+                continue;
+            }
+
+            $markerInfo = trim($matches[2]);
+
+            if ($currentTab === null) {
+                if ($markerInfo === '') {
+                    $hasOutsideContent = true;
+                    continue;
+                }
+
+                ['type' => $type, 'title' => $title] = $this->parseFenceInfo($markerInfo);
+                if ($type !== 'tab') {
+                    $hasOutsideContent = true;
+                    continue;
+                }
+
+                $fallbackTitle = 'Tab ' . (count($tabs) + 1);
+                $currentTab = [
+                    'title' => $this->getFenceDefaultTitle('tab', $title !== '' ? $title : $fallbackTitle),
+                    'lines' => [],
+                    'content_start' => $start + $index + 2,
+                ];
+                $nestedDepth = 0;
+                continue;
+            }
+
+            if ($markerInfo !== '') {
+                $nestedDepth++;
+                $currentTab['lines'][] = $line;
+                continue;
+            }
+
+            if ($nestedDepth > 0) {
+                $nestedDepth--;
+                $currentTab['lines'][] = $line;
+                continue;
+            }
+
+            $currentTab['content'] = implode("\n", $currentTab['lines']);
+            $tabs[] = $currentTab;
+            $currentTab = null;
+        }
+
+        if ($currentTab !== null || $hasOutsideContent || count($tabs) === 0) {
+            return null;
+        }
+
+        return $tabs;
+    }
+
+    private function parseTabsFence(array $lines, array $attrs, string $html_attrs, int $start): ?string
+    {
+        $tabs = $this->extractTabsItems($lines, $start);
+        if ($tabs === null) {
+            return null;
+        }
+
+        $tabsId = 'aaeditor-tabs-' . (++$this->_fenceTabsId);
+        $navClasses = ['fence-tabs-nav'];
+        $panelWrapperClasses = ['fence-tabs-panels'];
+        $tabClasses = ['fence-tabs-tab'];
+        $panelClasses = ['fence-tabs-panel'];
+
+        if (!empty($attrs['tabs-wrapper-classes'])) {
+            $navClasses[] = $attrs['tabs-wrapper-classes'];
+        }
+        if (!empty($attrs['panels-wrapper-classes'])) {
+            $panelWrapperClasses[] = $attrs['panels-wrapper-classes'];
+        }
+        if (!empty($attrs['tab-classes'])) {
+            $tabClasses[] = $attrs['tab-classes'];
+        }
+        if (!empty($attrs['panel-classes'])) {
+            $panelClasses[] = $attrs['panel-classes'];
+        }
+
+        $activeClasses = $this->splitFenceClasses($attrs['tab-active-classes'] ?? '');
+        $inactiveClasses = $this->splitFenceClasses($attrs['tab-inactive-classes'] ?? '');
+
+        $html = "<div class=\"fence fence-tabs\"{$html_attrs}>";
+        $html .= '<div class="' . htmlspecialchars(implode(' ', $navClasses)) . '" role="tablist">';
+        foreach ($tabs as $index => $tab) {
+            $isActive = $index === 0;
+            $currentTabClasses = $tabClasses;
+            $currentTabClasses = array_merge(
+                $currentTabClasses,
+                $isActive ? $activeClasses : $inactiveClasses
+            );
+            $tabClassAttr = htmlspecialchars(implode(' ', $currentTabClasses));
+            $html .= '<button type="button" class="' . $tabClassAttr . '" role="tab" id="'
+                . $tabsId . '-tab-' . $index . '" aria-selected="' . ($isActive ? 'true' : 'false')
+                . '" aria-controls="' . $tabsId . '-panel-' . $index . '" tabindex="'
+                . ($isActive ? '0' : '-1') . '">'
+                . $this->parseInline($tab['title']) . '</button>';
+        }
+        $html .= '</div>';
+
+        $html .= '<div class="' . htmlspecialchars(implode(' ', $panelWrapperClasses)) . '">';
+        foreach ($tabs as $index => $tab) {
+            $isActive = $index === 0;
+            $panelClassAttr = htmlspecialchars(implode(' ', $panelClasses));
+            $hiddenAttr = $isActive ? '' : ' hidden';
+            $parsedContent = $this->parse(trim($tab['content']), false, $tab['content_start']);
+            $html .= '<div class="' . $panelClassAttr . '" role="tabpanel" id="'
+                . $tabsId . '-panel-' . $index . '" aria-labelledby="' . $tabsId . '-tab-' . $index
+                . '" aria-hidden="' . ($isActive ? 'false' : 'true') . '"' . $hiddenAttr . '>'
+                . $parsedContent . '</div>';
+        }
+        $html .= '</div>';
+        $html .= '</div>';
+
         return $html;
     }
 
