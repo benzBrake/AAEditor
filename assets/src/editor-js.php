@@ -390,6 +390,59 @@
             this.wrapSelection('::: pass:comment\n', '\n:::', '<?php _e("回复可见"); ?>');
         }
     }, {
+        id: 'wmd-tabs-button-aaeditor',
+        name: '<?php _e("Tabs 选项卡"); ?>',
+        icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M4 5C2.89543 5 2 5.89543 2 7V17C2 18.1046 2.89543 19 4 19H20C21.1046 19 22 18.1046 22 17V7C22 5.89543 21.1046 5 20 5H4ZM4 7H8V10H4V7ZM10 7H14V10H10V7ZM16 7H20V10H16V7ZM4 12H20V17H4V12Z"></path></svg>',
+        insertBefore: '#wmd-custom-block-button-aaeditor|#wmd-spacer4-aaeditor',
+        command() {
+            const {textarea} = this;
+            const lastSelection = textarea.getSelection();
+            const selectedText = this.getSelectedText();
+
+            this.openFormModal({
+                title: '<?php _e("插入 Tabs"); ?>',
+                initialValues: {
+                    title1: '<?php _e("概览"); ?>',
+                    title2: '<?php _e("详情"); ?>',
+                },
+                fields: [{
+                    name: 'title1',
+                    type: 'text',
+                    label: '<?php _e("面板 1 标题"); ?>',
+                    required: true,
+                }, {
+                    name: 'title2',
+                    type: 'text',
+                    label: '<?php _e("面板 2 标题"); ?>',
+                    required: true,
+                }],
+                onSubmit(modal, values) {
+                    const title1 = values.title1 || '<?php _e("概览"); ?>';
+                    const title2 = values.title2 || '<?php _e("详情"); ?>';
+                    const content1 = selectedText || '<?php _e("这里编辑第一个面板内容"); ?>';
+                    const content2 = '<?php _e("这里编辑第二个面板内容"); ?>';
+                    let prefix = `::: tabs\n::: tab ${title1}\n`;
+                    const middle = `\n:::\n\n::: tab ${title2}\n`;
+                    let postfix = `\n:::\n:::`;
+
+                    if (!textarea.isAtLineStart()) {
+                        prefix = `\n${prefix}`;
+                    }
+                    if (!textarea.isAtLineEnd()) {
+                        postfix += '\n';
+                    }
+
+                    const template = prefix + content1 + middle + content2 + postfix;
+                    this.textarea.setSelection(lastSelection.start, lastSelection.end);
+                    textarea.executeAndAddUndoStack('replaceSelectionText', template);
+
+                    const contentStart = lastSelection.start + prefix.length;
+                    this.textarea.setSelection(contentStart, contentStart + content1.length);
+                    return true;
+                }
+            });
+        }
+    }, {
         id: 'wmd-custom-block-button-aaeditor',
         icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M1 2v3h2V4h2v5H3.5v2h5V9H7V4h2v1h2V2zm20 1h-7v2h6v14H4v-5H2v6a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1"/></svg>',
         name: '<?php _e("自定义容器"); ?>',

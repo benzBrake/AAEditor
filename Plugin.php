@@ -169,8 +169,30 @@ class Plugin implements PluginInterface
                 'on' => _t('开启（默认）'),
                 'off' => _t('关闭')
             ), 'on',
-            _t('前台是否加载插件自带正文样式'),
-            _t('说明：只适配的默认主题，其他主题需要手动给正文加上<code>post-content</code>类名'));
+            _t('前台是否加载普通正文样式'),
+            _t('说明：主要影响标题、段落、表格、引用等排版；其他主题需要手动给正文加上<code>post-content</code>类名'));
+        $edit->setAttribute('class', 'x-item x-basic');
+        $form->addInput($edit);
+
+        $edit = new Form\Element\Select(
+            'XFrontFenceStyle',
+            array(
+                'on' => _t('开启（默认）'),
+                'off' => _t('关闭')
+            ), 'on',
+            _t('前台是否加载 fence block 样式'),
+            _t('说明：影响 info / note / warning / details / pass 等自定义 fence 容器的外观'));
+        $edit->setAttribute('class', 'x-item x-basic');
+        $form->addInput($edit);
+
+        $edit = new Form\Element\Select(
+            'XFrontFenceTabsStyle',
+            array(
+                'on' => _t('开启（默认）'),
+                'off' => _t('关闭')
+            ), 'on',
+            _t('前台是否加载 fence tabs 样式'),
+            _t('说明：仅影响 `::: tabs` / `::: tab` 生成的 tabs 外观与基础布局'));
         $edit->setAttribute('class', 'x-item x-basic');
         $form->addInput($edit);
 

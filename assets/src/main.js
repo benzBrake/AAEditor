@@ -7,6 +7,7 @@ import {
     isString,
     sprintf,
 } from "./utils/functions";
+import {initFenceTabs} from "./utils/tabs";
 import TextAreaUtils from "./utils/textarea";
 
 class XEditor {
@@ -559,6 +560,7 @@ class XEditor {
     }
 
     handlePreviewEnd() {
+        initFenceTabs(this.previewArea);
         this.rebuildPreviewLineAnchors();
         this.schedulePreviewScrollSync(true);
         this.clearPendingPreviewSyncTimers();

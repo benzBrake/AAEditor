@@ -93,7 +93,19 @@ class Util
         if (Util::pluginOption('XEditorContentStyle', 'off') === 'on') {
             ?>
             <link rel="stylesheet"
-                  href="<?php echo Util::pluginStatic('css', 'front.css'); ?>">
+                  href="<?php echo Util::pluginStatic('css', 'front-content.css'); ?>">
+            <?php
+        }
+        if (Util::pluginOption('XFrontFenceStyle', 'on') === 'on') {
+            ?>
+            <link rel="stylesheet"
+                  href="<?php echo Util::pluginStatic('css', 'front-fence.css'); ?>">
+            <?php
+        }
+        if (Util::pluginOption('XFrontFenceTabsStyle', 'on') === 'on') {
+            ?>
+            <link rel="stylesheet"
+                  href="<?php echo Util::pluginStatic('css', 'front-tabs.css'); ?>">
             <?php
         }
         $lfa = Util::pluginOption('XLoadFontAwesome', 'on');
