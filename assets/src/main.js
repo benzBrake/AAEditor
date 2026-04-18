@@ -12,11 +12,11 @@ import TextAreaUtils from "./utils/textarea";
 
 class XEditor {
     constructor(sel, sel_preview) {
+        this.previewSelector = sel_preview;
         if (document.querySelector(sel)) {
             this.textarea = new TextAreaUtils(sel);
-            this.previewArea = document.querySelector(sel_preview);
-            this.previewWrapper =
-                this.previewArea?.closest("#wmd-preview-wrapper-aaeditor") || null;
+            this.previewArea = null;
+            this.previewWrapper = null;
         } else {
             console.warn(sprintf("element [%s] not e", sel));
         }
@@ -27,8 +27,11 @@ class XEditor {
         this.scrollSyncFrame = 0;
         this.scrollSyncLock = false;
         this.scrollSyncBound = false;
+        this.previewSettleFrame = 0;
+        this.pendingPreviewScrollTop = null;
         this.previewLineAnchors = [];
         this.pendingPreviewSyncTimers = [];
+        this.previewPrefersRatioSync = false;
         $("body")
             .on("XEditorAddButton", (event, ...buttons) => {
                 buttons.forEach((button) => {
@@ -64,6 +67,12 @@ class XEditor {
             });
     }
 
+    refreshPreviewElements() {
+        this.previewArea = document.querySelector(this.previewSelector);
+        this.previewWrapper =
+            this.previewArea?.closest("#wmd-preview-wrapper-aaeditor") || null;
+    }
+
     /**
      * 判断是不是 Markdown 模式
      *
@@ -76,6 +85,7 @@ class XEditor {
     init() {
         if (this.isInit) return;
         this.isInit = true;
+        this.refreshPreviewElements();
         window.XEditor = this;
         $("body")
             .append(`<div id="aa-wrapper"></div>`)
@@ -112,6 +122,29 @@ class XEditor {
             window.clearTimeout(timerId);
         });
         this.pendingPreviewSyncTimers = [];
+    }
+
+    stopPreviewSettle(clearPendingTarget = true) {
+        if (this.previewSettleFrame) {
+            window.cancelAnimationFrame(this.previewSettleFrame);
+            this.previewSettleFrame = 0;
+        }
+        if (clearPendingTarget) {
+            this.pendingPreviewScrollTop = null;
+        }
+    }
+
+    schedulePreviewSettle() {
+        if (this.previewSettleFrame || this.pendingPreviewScrollTop === null) {
+            return;
+        }
+        this.previewSettleFrame = window.requestAnimationFrame(() => {
+            this.previewSettleFrame = 0;
+            if (this.pendingPreviewScrollTop === null) {
+                return;
+            }
+            this.setPreviewScrollTop(this.pendingPreviewScrollTop, {smooth: true});
+        });
     }
 
     schedulePreviewScrollSync(force = false) {
@@ -230,6 +263,7 @@ class XEditor {
             lineHeight,
             lineNumber,
             lineOffset: sourceScrollState.top - lineNumber * lineHeight,
+            sourceScrollTop: sourceScrollState.top,
             sourceMaxScroll: sourceScrollState.max,
         };
     }
@@ -238,15 +272,9 @@ class XEditor {
         if (!anchorElement || !scrollContainer) {
             return 0;
         }
-        let offsetTop = anchorElement.offsetTop;
-        let current = anchorElement.offsetParent;
-
-        while (current && current !== scrollContainer) {
-            offsetTop += current.offsetTop;
-            current = current.offsetParent;
-        }
-
-        return offsetTop;
+        const anchorRect = anchorElement.getBoundingClientRect();
+        const containerRect = scrollContainer.getBoundingClientRect();
+        return anchorRect.top - containerRect.top + scrollContainer.scrollTop;
     }
 
     getPreviewScrollableHeight() {
@@ -255,6 +283,216 @@ class XEditor {
             return 0;
         }
         return Math.max(scrollContainer.scrollHeight - scrollContainer.clientHeight, 0);
+    }
+
+    getRatioPreviewScrollTop(sourceScrollTop, sourceMaxScroll, targetMaxScroll) {
+        if (targetMaxScroll <= 0 || sourceMaxScroll <= 0) {
+            return 0;
+        }
+        return targetMaxScroll * (sourceScrollTop / sourceMaxScroll);
+    }
+
+    shouldPreferRatioPreviewSync() {
+        if (!this.previewArea) {
+            return false;
+        }
+
+        // Complex fence containers can hide or reshape large source ranges,
+        // which makes anchor interpolation jump backwards in the preview.
+        return this.previewArea.querySelector(
+            ".fence, .fence-tabs, .fence-tabs-panel, .fence-details, details"
+        ) !== null;
+    }
+
+    isPreviewAnchorVisible(anchorElement) {
+        if (!(anchorElement instanceof Element)) {
+            return false;
+        }
+
+        const closedDetails = anchorElement.closest("details:not([open])");
+        if (closedDetails) {
+            const summary = closedDetails.querySelector("summary");
+            if (!summary || !summary.contains(anchorElement)) {
+                return false;
+            }
+        }
+
+        let current = anchorElement;
+        while (current instanceof Element) {
+            if (current.hidden || current.getAttribute("aria-hidden") === "true") {
+                return false;
+            }
+
+            const style = window.getComputedStyle(current);
+            if (
+                style.display === "none" ||
+                style.visibility === "hidden" ||
+                style.visibility === "collapse" ||
+                style.contentVisibility === "hidden"
+            ) {
+                return false;
+            }
+
+            if (current === this.previewArea) {
+                break;
+            }
+            current = current.parentElement;
+        }
+
+        const rects = anchorElement.getClientRects();
+        if (!rects.length) {
+            return false;
+        }
+
+        return Array.from(rects).some((rect) => rect.height > 0 || rect.width > 0);
+    }
+
+    getPreviewAnchorMetrics(scrollContainer, fallbackHeight) {
+        return this.previewLineAnchors
+            .filter((anchor) => this.isPreviewAnchorVisible(anchor.element))
+            .map((anchor) => {
+                const height =
+                    anchor.element.offsetHeight ||
+                    Number.parseFloat(window.getComputedStyle(anchor.element).height) ||
+                    fallbackHeight;
+                const top = this.getPreviewContainerOffsetTop(
+                    anchor.element,
+                    scrollContainer
+                );
+                if (!Number.isFinite(top) || !Number.isFinite(height)) {
+                    return null;
+                }
+                return {
+                    ...anchor,
+                    height,
+                    top,
+                    bottom: top + height,
+                    span: Math.max(anchor.end - anchor.start, 0),
+                };
+            })
+            .filter(Boolean);
+    }
+
+    arePreviewAnchorMetricsStable(anchorMetrics) {
+        if (!anchorMetrics.length) {
+            return false;
+        }
+
+        let lastTop = -Infinity;
+        for (const anchor of anchorMetrics) {
+            if (!Number.isFinite(anchor.top) || anchor.top + 1 < lastTop) {
+                return false;
+            }
+            lastTop = anchor.top;
+        }
+
+        return true;
+    }
+
+    getAnchorTargetScrollTop(sourceLineState, anchors, targetMaxScroll) {
+        if (!anchors.length) {
+            return null;
+        }
+
+        const {
+            lineHeight,
+            lineNumber,
+            lineOffset,
+            sourceScrollTop,
+            sourceMaxScroll,
+        } = sourceLineState;
+        const lineProgress = lineHeight > 0 ? lineOffset / lineHeight : 0;
+
+        for (let index = 0; index < anchors.length; index += 1) {
+            const anchor = anchors[index];
+            const nextAnchor = anchors[index + 1] || null;
+
+            if (lineNumber >= anchor.start && lineNumber <= anchor.end) {
+                const anchorRatio = anchor.span > 0
+                    ? (lineNumber - anchor.start + lineProgress) / (anchor.span + 1)
+                    : lineProgress;
+                return {
+                    targetScrollTop: anchor.top + anchor.height * anchorRatio,
+                    mode: "range",
+                    span: anchor.span,
+                    height: anchor.height,
+                };
+            }
+
+            if (
+                nextAnchor &&
+                lineNumber > anchor.end &&
+                lineNumber < nextAnchor.start
+            ) {
+                const gapSpan = Math.max(nextAnchor.start - anchor.end, 1);
+                const gapRatio = (lineNumber - anchor.end + lineProgress) / gapSpan;
+                return {
+                    targetScrollTop:
+                        anchor.bottom + (nextAnchor.top - anchor.bottom) * gapRatio,
+                    mode: "gap",
+                    span: gapSpan,
+                    height: Math.max(nextAnchor.top - anchor.bottom, lineHeight),
+                };
+            }
+        }
+
+        const lastAnchor = anchors[anchors.length - 1];
+        if (lineNumber >= lastAnchor.end) {
+            const remainingSourceScroll = Math.max(
+                lineHeight,
+                sourceMaxScroll - sourceScrollTop
+            );
+            const trailingRatio = Math.min(
+                1,
+                Math.max(
+                    0,
+                    ((lineNumber - lastAnchor.end) * lineHeight + lineOffset) /
+                        remainingSourceScroll
+                )
+            );
+            return {
+                targetScrollTop:
+                    lastAnchor.bottom +
+                    (targetMaxScroll - lastAnchor.bottom) * trailingRatio,
+                mode: "tail",
+                span: 0,
+                height: lastAnchor.height,
+            };
+        }
+
+        return null;
+    }
+
+    getAnchorWeight(anchorTarget, sourceLineState) {
+        if (!anchorTarget) {
+            return 0;
+        }
+
+        if (anchorTarget.mode === "gap") {
+            if (anchorTarget.span >= 24) {
+                return 0.08;
+            }
+            if (anchorTarget.span >= 12) {
+                return 0.16;
+            }
+            return 0.3;
+        }
+        if (anchorTarget.mode === "tail") {
+            return 0.25;
+        }
+
+        const normalizedHeight =
+            anchorTarget.height /
+            Math.max(
+                (anchorTarget.span + 1) * sourceLineState.lineHeight,
+                sourceLineState.lineHeight
+            );
+        const oversizePenalty = Math.min(
+            0.75,
+            Math.max(0, normalizedHeight - 1.5) / 4
+        );
+
+        return Math.max(0.25, 1 - oversizePenalty);
     }
 
     findAnchorForLine(lineNumber) {
@@ -276,13 +514,47 @@ class XEditor {
         return nearest;
     }
 
-    setPreviewScrollTop(scrollTop) {
+    setPreviewScrollTop(scrollTop, options = {}) {
         const scrollContainer = this.getPreviewScrollContainer();
         if (!scrollContainer) {
             return;
         }
+        const {smooth = true} = options;
         const maxScrollTop = this.getPreviewScrollableHeight();
-        const nextScrollTop = Math.max(0, Math.min(scrollTop, maxScrollTop));
+        const targetScrollTop = Math.max(0, Math.min(scrollTop, maxScrollTop));
+        const currentScrollTop = scrollContainer.scrollTop;
+        let nextScrollTop = targetScrollTop;
+
+        if (smooth) {
+            const delta = targetScrollTop - currentScrollTop;
+            const deadZone = 6;
+
+            if (Math.abs(delta) <= deadZone) {
+                this.stopPreviewSettle();
+            } else {
+                const baseStep = Math.max(48, scrollContainer.clientHeight * 0.14);
+                const easedStep = Math.abs(delta) * 0.35;
+                const step = Math.min(
+                    Math.abs(delta),
+                    Math.max(baseStep, easedStep)
+                );
+                nextScrollTop = currentScrollTop + Math.sign(delta) * step;
+
+                if (Math.abs(targetScrollTop - nextScrollTop) <= deadZone) {
+                    nextScrollTop = targetScrollTop;
+                }
+
+                if (nextScrollTop !== targetScrollTop) {
+                    this.pendingPreviewScrollTop = targetScrollTop;
+                    this.schedulePreviewSettle();
+                } else {
+                    this.stopPreviewSettle();
+                }
+            }
+        } else {
+            this.stopPreviewSettle();
+        }
+
         this.scrollSyncLock = true;
         scrollContainer.scrollTop = nextScrollTop;
         if (this.previewWrapper && this.previewWrapper !== scrollContainer) {
@@ -300,11 +572,17 @@ class XEditor {
         const sourceScrollState = this.getSourceScrollState();
         const targetMaxScroll = this.getPreviewScrollableHeight();
         if (targetMaxScroll <= 0) {
-            this.setPreviewScrollTop(0);
+            this.setPreviewScrollTop(0, {smooth: false});
             return;
         }
-        const ratio = sourceScrollState.max <= 0 ? 0 : sourceScrollState.top / sourceScrollState.max;
-        this.setPreviewScrollTop(targetMaxScroll * ratio);
+        this.setPreviewScrollTop(
+            this.getRatioPreviewScrollTop(
+                sourceScrollState.top,
+                sourceScrollState.max,
+                targetMaxScroll
+            ),
+            {smooth: false}
+        );
     }
 
     syncPreviewScroll(force = false) {
@@ -322,12 +600,25 @@ class XEditor {
             return;
         }
 
+        const textareaElement = this.textarea.getInstance();
         const sourceLineState = this.getSourceLineState();
-        const sourceMaxScroll = sourceLineState.sourceMaxScroll;
         const targetMaxScroll = this.getPreviewScrollableHeight();
 
         if (targetMaxScroll <= 0) {
-            this.setPreviewScrollTop(0);
+            this.setPreviewScrollTop(0, {smooth: false});
+            return;
+        }
+
+        if (sourceLineState.sourceScrollTop <= 1) {
+            this.setPreviewScrollTop(0, {smooth: false});
+            return;
+        }
+
+        if (
+            sourceLineState.sourceMaxScroll > 0 &&
+            sourceLineState.sourceScrollTop >= sourceLineState.sourceMaxScroll - 1
+        ) {
+            this.setPreviewScrollTop(targetMaxScroll, {smooth: false});
             return;
         }
 
@@ -335,35 +626,79 @@ class XEditor {
             this.rebuildPreviewLineAnchors();
         }
 
-        const {lineHeight, lineNumber, lineOffset} = sourceLineState;
-        const anchor = this.findAnchorForLine(lineNumber);
+        const ratioTargetScrollTop = this.getRatioPreviewScrollTop(
+            sourceLineState.sourceScrollTop,
+            sourceLineState.sourceMaxScroll,
+            targetMaxScroll
+        );
+        const distanceToBottom = Math.max(
+            0,
+            sourceLineState.sourceMaxScroll - sourceLineState.sourceScrollTop
+        );
+        const bottomSnapThreshold = Math.max(
+            sourceLineState.lineHeight * 2,
+            32
+        );
 
-        if (!anchor) {
-            this.syncPreviewByRatio();
+        if (distanceToBottom <= bottomSnapThreshold) {
+            this.setPreviewScrollTop(targetMaxScroll, {smooth: false});
             return;
         }
 
-        const span = Math.max(anchor.end - anchor.start, 0);
-        const anchorHeight =
-            anchor.element.offsetHeight ||
-            Number.parseFloat(window.getComputedStyle(anchor.element).height) ||
-            lineHeight;
-        const anchorTop = this.getPreviewContainerOffsetTop(
-            anchor.element,
-            scrollContainer
+        if (this.previewPrefersRatioSync) {
+            this.setPreviewScrollTop(ratioTargetScrollTop, {smooth: false});
+            return;
+        }
+
+        const anchorMetrics = this.getPreviewAnchorMetrics(
+            scrollContainer,
+            sourceLineState.lineHeight
         );
-        const lineRatio = span > 0 ? (lineNumber - anchor.start) / (span + 1) : 0;
-        const intraAnchorOffset = anchorHeight * lineRatio;
-        const lineOffsetRatio = lineHeight > 0 ? lineOffset / lineHeight : 0;
-        const targetScrollTop =
-            anchorTop + intraAnchorOffset + anchorHeight * lineOffsetRatio;
+        const shouldUseRatioOnly =
+            anchorMetrics.length !== this.previewLineAnchors.length ||
+            !this.arePreviewAnchorMetricsStable(anchorMetrics);
+
+        if (shouldUseRatioOnly) {
+            this.setPreviewScrollTop(ratioTargetScrollTop, {smooth: false});
+            return;
+        }
+
+        const anchorTarget = this.getAnchorTargetScrollTop(
+            sourceLineState,
+            anchorMetrics,
+            targetMaxScroll
+        );
+
+        let targetScrollTop = ratioTargetScrollTop;
+        if (anchorTarget && Number.isFinite(anchorTarget.targetScrollTop)) {
+            const anchorWeight = this.getAnchorWeight(anchorTarget, sourceLineState);
+            targetScrollTop =
+                ratioTargetScrollTop * (1 - anchorWeight) +
+                anchorTarget.targetScrollTop * anchorWeight;
+        }
+
+        const blendRange = Math.max(
+            80,
+            Math.min(textareaElement.clientHeight * 0.8, 240)
+        );
+        const distanceToTop = sourceLineState.sourceScrollTop;
+
+        if (distanceToTop < blendRange) {
+            const weight = distanceToTop / blendRange;
+            targetScrollTop =
+                ratioTargetScrollTop * (1 - weight) + targetScrollTop * weight;
+        } else if (distanceToBottom < blendRange) {
+            const weight = distanceToBottom / blendRange;
+            targetScrollTop =
+                targetMaxScroll * (1 - weight) + targetScrollTop * weight;
+        }
 
         if (!Number.isFinite(targetScrollTop)) {
             this.syncPreviewByRatio();
             return;
         }
 
-        this.setPreviewScrollTop(targetScrollTop);
+        this.setPreviewScrollTop(targetScrollTop, {smooth: true});
     }
 
     initToolbar() {
@@ -560,13 +895,16 @@ class XEditor {
     }
 
     handlePreviewEnd() {
+        this.refreshPreviewElements();
+        this.stopPreviewSettle();
         initFenceTabs(this.previewArea);
         this.rebuildPreviewLineAnchors();
+        this.previewPrefersRatioSync = this.shouldPreferRatioPreviewSync();
         this.schedulePreviewScrollSync(true);
         this.clearPendingPreviewSyncTimers();
-        [60, 180, 360].forEach((delay) => {
+        [120, 320].forEach((delay) => {
             const timerId = window.setTimeout(() => {
-                this.schedulePreviewScrollSync(true);
+                this.schedulePreviewScrollSync();
             }, delay);
             this.pendingPreviewSyncTimers.push(timerId);
         });

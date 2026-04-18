@@ -696,43 +696,10 @@ class Util
                         converter.enableHtml(true);
                         converter.enableLine(true);
                         debugLog('converter:line-enabled');
-                        reloadScroll = scrollableEditor(textarea, preview);
-                        debugLog('scrollableEditor:init', {
-                            reloadScrollType: typeof reloadScroll
+                        reloadScroll = null;
+                        debugLog('preview-sync:delegated', {
+                            strategy: 'main.js'
                         });
-
-                        var loggedReloadScroll = function () {
-                            var args = Array.prototype.slice.call(arguments);
-                            debugLog('reloadScroll:call', {
-                                args: args,
-                                textareaScrollTop: textarea.scrollTop(),
-                                textareaHeight: textarea.outerHeight(),
-                                textareaScrollHeight: textarea.get(0) ? textarea.get(0).scrollHeight : null,
-                                previewWrapperScrollTop: pWrapper.scrollTop(),
-                                previewWrapperHeight: pWrapper.outerHeight(),
-                                previewWrapperScrollHeight: pWrapper.get(0) ? pWrapper.get(0).scrollHeight : null,
-                                previewScrollTop: preview.scrollTop(),
-                                previewHeight: preview.outerHeight(),
-                                previewScrollHeight: preview.get(0) ? preview.get(0).scrollHeight : null,
-                                lineCount: preview.find('.line[data-start][data-end]').length
-                            });
-                            if (typeof reloadScroll !== 'function') {
-                                debugLog('reloadScroll:missing');
-                                return;
-                            }
-                            try {
-                                var result = reloadScroll.apply(this, args);
-                                debugLog('reloadScroll:done', {
-                                    resultType: typeof result,
-                                    previewWrapperScrollTop: pWrapper.scrollTop(),
-                                    previewScrollTop: preview.scrollTop()
-                                });
-                                return result;
-                            } catch (error) {
-                                console.error(debugPrefix, 'reloadScroll:error', error);
-                                throw error;
-                            }
-                        };
 
                         textarea.on('scroll', createThrottle(200, function () {
                             debugLog('event:textarea-scroll', {
@@ -741,10 +708,6 @@ class Util
                                 clientHeight: textarea.get(0) ? textarea.get(0).clientHeight : null
                             });
                         }));
-
-                        textarea.on('scroll', function () {
-                            schedulePreviewSync('textarea-scroll', false);
-                        });
 
                         pWrapper.on('scroll', createThrottle(200, function () {
                             debugLog('event:preview-wrapper-scroll', {
@@ -824,10 +787,7 @@ class Util
                                 previewHtmlLength: preview.html() ? preview.html().length : 0
                             });
 
-                            if (count == 0) {
-                                loggedReloadScroll(true);
-                                schedulePreviewSync('preview-refresh-no-images', true);
-                            } else {
+                            if (count > 0) {
                                 images.bind('load error', function () {
                                     count--;
                                     debugLog('image:load-or-error', {
@@ -836,8 +796,7 @@ class Util
                                     });
 
                                     if (count == 0) {
-                                        loggedReloadScroll(true);
-                                        schedulePreviewSync('preview-refresh-images-complete', true);
+                                        $('body').trigger('XEditorPreviewEnd');
                                     }
                                 });
                             }
@@ -848,9 +807,6 @@ class Util
                             }
 
                             $('body').trigger('XEditorPreviewEnd');
-                            setTimeout(function () {
-                                schedulePreviewSync('preview-refresh-delayed', true);
-                            }, 50);
                         });
 
                         $('body').on('XEditorPreviewEnd', function () {
@@ -863,11 +819,6 @@ class Util
                                 previewScrollHeight: preview.get(0) ? preview.get(0).scrollHeight : null
                             });
                         });
-
-                        setTimeout(function () {
-                            schedulePreviewSync('init-delayed', true);
-                        }, 100);
-
                         <?php \Typecho\Plugin::factory('admin/editor-js.php')->markdownEditor($content); ?>
 
                         var th = textarea.height(), ph = preview.height(),
