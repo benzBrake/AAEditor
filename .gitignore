@@ -21,6 +21,7 @@ Desktop.ini
 *.log
 cache/
 npminitall-debug.log
+tmp-playwright/
 
 # MCP 插件缓存
 .playwright-mcp/
@@ -32,3 +33,5 @@ npminitall-debug.log
 # 敏感文件
 *.pem
 *.key
+AGENTS.md
+tools/playwright-scroll-repro.js
