@@ -962,10 +962,11 @@ class HyperDown
 
         $content = trim(implode("\n", array_slice($lines, 1, -1)));
         ['type' => $type, 'variant' => $variant, 'attrs_str' => $attrs_str, 'title' => $title] = $this->parseFenceInfo((string) $info);
+        $typeKey = strtolower($type);
         $attrs = $this->parseFenceAttributes($attrs_str);
         $html_attrs = $this->buildFenceDataAttributes($attrs);
 
-        if ($type === 'raw') {
+        if ($typeKey === 'raw') {
             $classes = "fence fence-raw";
             if ($variant) {
                 $classes .= " variant-{$variant}";
@@ -977,10 +978,10 @@ class HyperDown
             return $html;
         }
 
-        if ($type === 'details') {
+        if ($typeKey === 'details') {
             $final_title = $this->getFenceDefaultTitle($type, $title);
             $details_attrs = '';
-            if ($variant === 'open') {
+            if (strtolower($variant) === 'open') {
                 $details_attrs .= ' open';
             }
             $details_attrs .= $html_attrs;
@@ -990,13 +991,15 @@ class HyperDown
             $html .= "<div class=\"details-content\">{$parsedContent}</div>";
             $html .= '</details>';
         } else {
-            $renderType = $type;
-            if ($type === 'tabs') {
+            $renderType = $typeKey;
+            if ($typeKey === 'tabs') {
                 $tabsHtml = $this->parseTabsFence(array_slice($lines, 1, -1), $attrs, $html_attrs, $start);
                 if ($tabsHtml !== null) {
                     return $tabsHtml;
                 }
                 $renderType = 'info';
+            } else {
+                $renderType = $this->normalizeFenceRenderType($typeKey);
             }
             $final_title = $this->getFenceDefaultTitle($type, $title);
             $classes = "fence fence-{$renderType}";
@@ -1078,6 +1081,16 @@ class HyperDown
             return 'Details';
         }
         return strtoupper($type);
+    }
+
+    private function normalizeFenceRenderType(string $type): string
+    {
+        return match ($type) {
+            'note' => 'info',
+            'tip' => 'success',
+            'danger', 'caution' => 'error',
+            default => $type,
+        };
     }
 
     private function splitFenceClasses(?string $value): array

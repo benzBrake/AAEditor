@@ -857,6 +857,20 @@
                 return type.toUpperCase();
             }
 
+            normalizeFenceRenderType(type = '') {
+                switch (type) {
+                    case 'note':
+                        return 'info';
+                    case 'tip':
+                        return 'success';
+                    case 'danger':
+                    case 'caution':
+                        return 'error';
+                    default:
+                        return type;
+                }
+            }
+
             extractTabsItems(lines, start) {
                 const tabs = [];
                 let currentTab = null;
@@ -990,10 +1004,11 @@
                 }
                 content = lines.slice(1, -1).join("\n");
                 const {type, variant, attrsStr, title} = this.parseFenceInfo(info || '');
+                const typeKey = String(type).toLowerCase();
                 attrs = this.parseFenceAttributes(attrsStr);
                 html_attrs = this.buildFenceDataAttributes(attrs);
                 html = '';
-                if (type === 'raw') {
+                if (typeKey === 'raw') {
                     classes = "fence fence-raw";
                     if (variant) {
                         classes += " variant-" + variant;
@@ -1003,10 +1018,10 @@
                     html += '</div>';
                     return html;
                 }
-                if (type === 'details') {
+                if (typeKey === 'details') {
                     const finalTitle = this.getFenceDefaultTitle(type, title);
                     details_attrs = '';
-                    if (variant === 'open') {
+                    if (String(variant).toLowerCase() === 'open') {
                         details_attrs += ' open';
                     }
                     details_attrs += html_attrs;
@@ -1016,13 +1031,15 @@
                     html += "<div class=\"details-content\">" + parsedContent + "</div>";
                     html += '</details>';
                 } else {
-                    let renderType = type;
-                    if (type === 'tabs') {
+                    let renderType = typeKey;
+                    if (typeKey === 'tabs') {
                         const tabsHtml = this.parseTabsFence(lines.slice(1, -1), attrs, html_attrs, start);
                         if (tabsHtml) {
                             return tabsHtml;
                         }
                         renderType = 'info';
+                    } else {
+                        renderType = this.normalizeFenceRenderType(typeKey);
                     }
                     const finalTitle = this.getFenceDefaultTitle(type, title);
                     classes = "fence fence-" + renderType;
