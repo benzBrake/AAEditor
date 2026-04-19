@@ -20,7 +20,6 @@ class Util
     static $manifest;
     private static $staticMap = [
         'https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css' => 'css/font-awesome.min.css',
-        'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js' => 'js/tex-mml-chtml.js',
         'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js' => 'js/highlight.min.js',
         'https://cdn.jsdelivr.net/npm/html-to-md@0.8.5/dist/index.min.js' => 'js/html-to-md.min.js',
         'https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css' => 'css/toastify.min.css',
@@ -141,9 +140,9 @@ class Util
             // 引入 MathJax
             ?>
             <script id="MathJax-script" async
-                    src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'); ?>"></script>
+                    src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js'); ?>"></script>
             <script>
-                // 配置 MathJax
+                // 配置 MathJax SVG 输出，避免依赖额外字体文件
                 MathJax = {
                     tex: {
                         inlineMath: [['$', '$']],
@@ -1251,9 +1250,9 @@ class Util
             if (Util::pluginOption('XMathJaxSupport', 'on') === 'on') {
                 ?>
                 <script id="MathJax-script" async
-                        src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'); ?>"></script>
+                        src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js'); ?>"></script>
                 <script>
-                    // 配置 MathJax
+                    // 配置 MathJax SVG 输出，避免依赖额外字体文件
                     MathJax = {
                         tex: {
                             inlineMath: [['$', '$']],

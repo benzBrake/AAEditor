@@ -203,7 +203,7 @@ class Plugin implements PluginInterface
                 'off' => _t('关闭')
             ], 'on',
             _t('是否开启公式支持'),
-            _t('说明：开启公式支持后前台会引入 JS 解析公式'));
+            _t('说明：开启公式支持后会引入 MathJax SVG 输出脚本解析公式，不依赖额外字体文件'));
         $edit->setAttribute('class', 'x-item x-basic');
         $form->addInput($edit);
 
