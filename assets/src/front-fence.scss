@@ -8,14 +8,20 @@
 
     p {
       margin-top: 0;
+    }
 
-      &:last-child {
-        margin-bottom: 0;
-      }
+    & > *:last-child {
+      margin-bottom: 0;
     }
   }
 
-  .fence-content.text-center {
-    text-align: center;
+  .fence-content {
+    padding: 0.75em 1em;
+    &:empty {
+      display: none;
+    }
+    &.text-center {
+      text-align: center;
+    }
   }
 }
