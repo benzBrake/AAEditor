@@ -44,13 +44,8 @@ body {
     }
 
     pre {
-      border-radius: .5em;
-      border: 1px solid #ccc;
-
       > code {
-        border-radius: .5em;
-        word-break: break-all;
-        white-space: pre-wrap;
+        min-width: 100%;
       }
 
       &.styled {
@@ -66,12 +61,8 @@ body {
     }
 
     &:not([hljs]) {
-      pre, code {
-        background-color: #f6f8fa;
-      }
-
       pre {
-        padding: .75em;
+        background-color: var(--aaeditor-code-bg, #f8f9fa);
       }
     }
 
