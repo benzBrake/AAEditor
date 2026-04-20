@@ -43,23 +43,6 @@ body {
       max-width: 100%;
     }
 
-    pre {
-      > code {
-        min-width: 100%;
-      }
-
-      &.styled {
-        position: relative;
-
-        .copy {
-          position: absolute;
-          right: 0.5em;
-          top: 0.5em;
-          cursor: pointer;
-        }
-      }
-    }
-
     &:not([hljs]) {
       pre {
         background-color: var(--aaeditor-code-bg, #f8f9fa);
