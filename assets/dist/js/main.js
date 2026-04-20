@@ -1,2 +1,2384 @@
-(()=>{"use strict";var e,t={519:()=>{function e(t){return e="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e},e(t)}function t(e){for(var t=arguments.length,n=new Array(t>1?t-1:0),r=1;r<t;r++)n[r-1]=arguments[r];var i=0;return e.replace(/%[sd]/g,(function(e){if(i>=n.length)return e;var t=n[i++];if("%s"===e)return String(t);if("%d"===e){if("number"==typeof t)return String(t);throw new Error("Argument ".concat(i," is not a number."))}return e}))}function n(){return String(arguments.length>0&&void 0!==arguments[0]?arguments[0]:"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;")}function r(){return n(arguments.length>0&&void 0!==arguments[0]?arguments[0]:"").replace(/`/g,"&#96;")}function i(t,n){var r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:[];return function(t){var n,r,i,a=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{},o=arguments.length>2&&void 0!==arguments[2]?arguments[2]:[];"attr"in t?(n=function(e,n){t.attr(e,""+n)},r=function(e){t.text(e)},i=function(e){t.html(e)}):(n=function(e,n){t.setAttribute(e,""+n)},r=function(e){t.innerText=e},i=function(e){t.innerHTML=e});for(var l in a)if(!o.includes(l)){var c=a[l];switch("function"==typeof c&&(c=c.toString()),l){case"innerText":r(c);break;case"innerHTML":i(c);break;case"style":if("object"===e(c))n("style",Object.entries(c).map((function(e){return e.join(":")})).join("; "));else n("style",c);break;default:n(l,c)}}return t}(document.createElement(t),n,r)}function a(e){return"[object Object]"===Object.prototype.toString.call(e)}function o(e){return"string"==typeof e}function l(e){return e instanceof HTMLElement}function c(e){return function(e){if(Array.isArray(e))return s(e)}(e)||function(e){if("undefined"!=typeof Symbol&&null!=e[Symbol.iterator]||null!=e["@@iterator"])return Array.from(e)}(e)||function(e,t){if(e){if("string"==typeof e)return s(e,t);var n={}.toString.call(e).slice(8,-1);return"Object"===n&&e.constructor&&(n=e.constructor.name),"Map"===n||"Set"===n?Array.from(e):"Arguments"===n||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)?s(e,t):void 0}}(e)||function(){throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}()}function s(e,t){(null==t||t>e.length)&&(t=e.length);for(var n=0,r=Array(t);n<t;n++)r[n]=e[n];return r}function u(){return String(arguments.length>0&&void 0!==arguments[0]?arguments[0]:"").split(/\s+/).map((function(e){return e.trim()})).filter(Boolean)}function d(e,t){return e instanceof Element&&Array.from(e.children).find((function(e){return e.classList.contains(t)}))||null}function h(e){var t=arguments.length>2&&void 0!==arguments[2]?arguments[2]:[],n=arguments.length>3&&void 0!==arguments[3]&&arguments[3];e instanceof Element&&((arguments.length>1&&void 0!==arguments[1]?arguments[1]:[]).forEach((function(t){e.classList.toggle(t,n)})),t.forEach((function(t){e.classList.toggle(t,!n)})))}function v(){(function(){var e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:document,t=[];return e instanceof Element&&e.classList.contains("fence-tabs")&&t.push(e),"function"==typeof e.querySelectorAll&&t.push.apply(t,c(e.querySelectorAll(".fence-tabs"))),Array.from(new Set(t))})(arguments.length>0&&void 0!==arguments[0]?arguments[0]:document).forEach((function(e){!function(e){var t,n;if(e instanceof Element){var r=d(e,"fence-tabs-nav"),i=d(e,"fence-tabs-panels");if(r&&i){var a=Array.from(r.querySelectorAll(".fence-tabs-tab")),o=Array.from(i.querySelectorAll(".fence-tabs-panel"));if(a.length&&a.length===o.length){var l=u(e.dataset.tabActiveClasses),c=u(e.dataset.tabInactiveClasses),s=["fence-tabs-panel-active","tab-panel-active"],v=["fence-tabs-panel-inactive","tab-panel-inactive"],f=null===(t=(n=window).matchMedia)||void 0===t||null===(t=t.call(n,"(prefers-reduced-motion: reduce)"))||void 0===t?void 0:t.matches,p=function(t){var n=arguments.length>1&&void 0!==arguments[1]&&arguments[1],r=!(arguments.length>2&&void 0!==arguments[2])||arguments[2],i=Number.parseInt(e.dataset.tabsActiveIndex||"",10),u=r&&!f&&i!==t&&"true"===e.dataset.tabsReady;a.forEach((function(e,r){var i=r===t;e.setAttribute("aria-selected",i?"true":"false"),e.setAttribute("tabindex",i?"0":"-1"),h(e,l,c,i),n&&i&&e.focus()})),o.forEach((function(e,n){var r=n===t;e.classList.remove("fence-tabs-panel-no-animation"),e.hidden=!r,e.setAttribute("aria-hidden",r?"false":"true"),h(e,s,v,r),r&&!u&&e.classList.add("fence-tabs-panel-no-animation")})),e.dataset.tabsActiveIndex=String(t)};a.forEach((function(e,t){"true"!==e.dataset.tabsBound&&(e.dataset.tabsBound="true",e.addEventListener("click",(function(){p(t,!1)})))}));var m=Number.parseInt(e.dataset.tabsActiveIndex||"",10);(Number.isNaN(m)||m<0||m>=a.length)&&(m=a.findIndex((function(e){return"true"===e.getAttribute("aria-selected")}))),m<0&&(m=0),p(m,!1,!1),e.dataset.tabsReady="true",e.dataset.tabsInitialized="true"}}}}(e)}))}function f(e){return f="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e},f(e)}function p(e,t){for(var n=0;n<t.length;n++){var r=t[n];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(e,m(r.key),r)}}function m(e){var t=function(e,t){if("object"!=f(e)||!e)return e;var n=e[Symbol.toPrimitive];if(void 0!==n){var r=n.call(e,t||"default");if("object"!=f(r))return r;throw new TypeError("@@toPrimitive must return a primitive value.")}return("string"===t?String:Number)(e)}(e,"string");return"symbol"==f(t)?t:t+""}var g=function(){return e=function e(t){!function(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}(this,e),this.textarea=document.querySelector(t),this.textarea.utils=this,this.locked=!1,this.isFocused=!1,this.initFocusEvents()},t=[{key:"executeAndAddUndoStack",value:function(e){for(var t=arguments.length,n=new Array(t>1?t-1:0),r=1;r<t;r++)n[r-1]=arguments[r];var i=this.resolveOperationName(e),a=this.getOperationHandlers()[i];if("function"!=typeof a)return console.warn("[TextAreaUtils] Unsupported operation: ".concat(e)),!1;var o=!1,l=function(){return o=a.apply(void 0,n)};return this.textarea.pagedown?(this.textarea.pagedown.textOperation(l),o):l()}},{key:"getOperationHandlers",value:function(){var e=this;return{setContent:function(){return e.setContent.apply(e,arguments)},insertText:function(){return e.insertText.apply(e,arguments)},replaceSelectionText:function(){return e.replaceSelectionText.apply(e,arguments)}}}},{key:"resolveOperationName",value:function(e){return{replaceSelection:"replaceSelectionText"}[e]||e}},{key:"getInstance",value:function(){return this.textarea}},{key:"on",value:function(e,t){this.textarea.addEventListener(e,t)}},{key:"off",value:function(e,t){this.textarea.removeEventListener(e,t)}},{key:"getContent",value:function(){return this.textarea.value}},{key:"setContent",value:function(e){return!this.locked&&(this.textarea.value=e,this.afterOperate(),!0)}},{key:"lock",value:function(){this.locked=!0,this.textarea.setAttribute("readonly","readonly")}},{key:"unlock",value:function(){this.locked=!1,this.textarea.removeAttribute("readonly")}},{key:"insertText",value:function(e){if(this.locked)return!1;var t=this.textarea.selectionStart,n=this.textarea.selectionEnd,r=t+e.length;return this.replaceRange(t,n,e,r,r)}},{key:"replaceSelectionText",value:function(e){if(this.locked)return!1;var t=this.textarea.selectionStart,n=this.textarea.selectionEnd;return this.replaceRange(t,n,e,t,t+e.length)}},{key:"getSelectedText",value:function(){return this.textarea.value.substring(this.textarea.selectionStart,this.textarea.selectionEnd)}},{key:"getSelection",value:function(){return{start:this.textarea.selectionStart,end:this.textarea.selectionEnd}}},{key:"setSelection",value:function(e,t){return!this.locked&&e>=0&&t>=0&&e<=this.textarea.value.length&&t<=this.textarea.value.length&&(this.textarea.selectionStart=e,this.textarea.selectionEnd=t,!0)}},{key:"getLineText",value:function(e){var t=this.textarea.value.split("\n");return e>=0&&e<t.length?t[e]:""}},{key:"getTextInRange",value:function(e,t){return this.textarea.value.substring(e,t)}},{key:"getCurrentLineText",value:function(){for(var e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:0,t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:this.textarea.selectionStart,n=this.textarea.value,r=e,i=t;r>0&&"\n"!==n[r-1];)r--;for(;i<n.length&&"\n"!==n[i];)i++;return n.substring(r,i)}},{key:"replaceCurrentLine",value:function(e){if(this.locked)return!1;var t=this.textarea.selectionStart,n=this.textarea.selectionEnd,r=this.getLineRange(t,n),i=r.start,a=r.end;return this.replaceRange(i,a,e,i,i+e.length)}},{key:"getCursorPosition",value:function(){for(var e=this.textarea.selectionStart,t=this.textarea.value,n=1,r=1,i=0;i<e;i++)"\n"===t[i]?(n++,r=1):r++;return{line:n,column:r}}},{key:"getLineRange",value:function(){for(var e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:this.textarea.selectionStart,t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:this.textarea.selectionEnd,n=this.textarea.value,r=e,i=t;r>0&&"\n"!==n[r-1];)r--;for(;i<n.length&&"\n"!==n[i];)i++;return{start:r,end:i}}},{key:"isAtLineStart",value:function(){var e=this.textarea.selectionStart,t=this.textarea.value;return 0===e||"\n"===t[e-1]}},{key:"isAtLineEnd",value:function(){var e=this.textarea.selectionEnd,t=this.textarea.value;return e===t.length||"\n"===t[e]}},{key:"isAtStart",value:function(){return 0===this.textarea.selectionStart}},{key:"isAtEnd",value:function(){return this.textarea.selectionEnd===this.textarea.value.length}},{key:"initFocusEvents",value:function(){var e=this;this.textarea.addEventListener("focus",(function(){e.isFocused=!0})),this.textarea.addEventListener("blur",(function(){e.isFocused=!1}))}},{key:"afterOperate",value:function(){$(this.textarea).trigger("input"),this.textarea.focus()}},{key:"replaceRange",value:function(e,t,n,r,i){var a=this.textarea.value;return this.textarea.value=a.slice(0,e)+n+a.slice(t),this.textarea.selectionStart=r,this.textarea.selectionEnd=i,this.afterOperate(),!0}},{key:"getScrollPosition",value:function(){return{top:this.textarea.scrollTop,left:this.textarea.scrollLeft}}},{key:"setScrollPosition",value:function(e,t){this.textarea.scrollTop=e,this.textarea.scrollLeft=t}}],t&&p(e.prototype,t),n&&p(e,n),Object.defineProperty(e,"prototype",{writable:!1}),e;var e,t,n}();function y(e){return y="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e},y(e)}function S(e,t){var n="undefined"!=typeof Symbol&&e[Symbol.iterator]||e["@@iterator"];if(!n){if(Array.isArray(e)||(n=function(e,t){if(e){if("string"==typeof e)return b(e,t);var n={}.toString.call(e).slice(8,-1);return"Object"===n&&e.constructor&&(n=e.constructor.name),"Map"===n||"Set"===n?Array.from(e):"Arguments"===n||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)?b(e,t):void 0}}(e))||t&&e&&"number"==typeof e.length){n&&(e=n);var r=0,i=function(){};return{s:i,n:function(){return r>=e.length?{done:!0}:{done:!1,value:e[r++]}},e:function(e){throw e},f:i}}throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}var a,o=!0,l=!1;return{s:function(){n=n.call(e)},n:function(){var e=n.next();return o=e.done,e},e:function(e){l=!0,a=e},f:function(){try{o||null==n.return||n.return()}finally{if(l)throw a}}}}function b(e,t){(null==t||t>e.length)&&(t=e.length);for(var n=0,r=Array(t);n<t;n++)r[n]=e[n];return r}function w(e,t){var n=Object.keys(e);if(Object.getOwnPropertySymbols){var r=Object.getOwnPropertySymbols(e);t&&(r=r.filter((function(t){return Object.getOwnPropertyDescriptor(e,t).enumerable}))),n.push.apply(n,r)}return n}function x(e){for(var t=1;t<arguments.length;t++){var n=null!=arguments[t]?arguments[t]:{};t%2?w(Object(n),!0).forEach((function(t){k(e,t,n[t])})):Object.getOwnPropertyDescriptors?Object.defineProperties(e,Object.getOwnPropertyDescriptors(n)):w(Object(n)).forEach((function(t){Object.defineProperty(e,t,Object.getOwnPropertyDescriptor(n,t))}))}return e}function k(e,t,n){return(t=T(t))in e?Object.defineProperty(e,t,{value:n,enumerable:!0,configurable:!0,writable:!0}):e[t]=n,e}function A(e,t){for(var n=0;n<t.length;n++){var r=t[n];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(e,T(r.key),r)}}function T(e){var t=function(e,t){if("object"!=y(e)||!e)return e;var n=e[Symbol.toPrimitive];if(void 0!==n){var r=n.call(e,t||"default");if("object"!=y(r))return r;throw new TypeError("@@toPrimitive must return a primitive value.")}return("string"===t?String:Number)(e)}(e,"string");return"symbol"==y(t)?t:t+""}new(function(){return e=function e(n,r){var i=this;!function(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}(this,e),this.previewSelector=r,document.querySelector(n)?(this.textarea=new g(n),this.previewArea=null,this.previewWrapper=null):console.warn(t("element [%s] not e",n)),this.isInit=!1,this.buttons=[],this.insertProcessors=[],this.scrollSyncFrame=0,this.scrollSyncLock=!1,this.scrollSyncBound=!1,this.previewSettleFrame=0,this.pendingPreviewScrollTop=null,this.previewLineAnchors=[],this.pendingPreviewSyncTimers=[],this.previewPrefersRatioSync=!1,$("body").on("XEditorAddButton",(function(e){for(var t=arguments.length,n=new Array(t>1?t-1:0),r=1;r<t;r++)n[r-1]=arguments[r];n.forEach((function(e){a(e)?Object.keys(e).length?i.buttons.push(e):i.buttons.push({class:"wmd-spacer"}):o(e)&&"splitter"===e&&i.buttons.push({class:"wmd-spacer"})}))})).on("XEditorInit",(function(){i.init()})).on("XEditorRefresh",(function(){var e=i.textarea.getScrollPosition();i.setContent(i.getContent()),i.textarea.setScrollPosition(e.top,e.left)})).on("XEditorAddInsertProcessor",(function(e){for(var t=arguments.length,n=new Array(t>1?t-1:0),r=1;r<t;r++)n[r-1]=arguments[r];n.forEach((function(e){"function"==typeof e&&i.insertProcessors.push(e)}))}))},c=[{key:"refreshPreviewElements",value:function(){var e;this.previewArea=document.querySelector(this.previewSelector),this.previewWrapper=(null===(e=this.previewArea)||void 0===e?void 0:e.closest("#wmd-preview-wrapper-aaeditor"))||null}},{key:"isMarkdown",value:function(){return"1"===$('[name="markdown"]').val()}},{key:"init",value:function(){var e=this;this.isInit||(this.isInit=!0,this.refreshPreviewElements(),window.XEditor=this,$("body").append('<div id="aa-wrapper"></div>').on("XEditorPreviewEnd",(function(){return e.handlePreviewEnd()})).on("XEditorReplaceSelection",(function(t,n){console.log("replaceSelection",n),e.replaceSelection(n)})),this.initToolbar(),this.initScrollSync(),$("body").trigger("XEditorPreviewEnd"))}},{key:"initScrollSync",value:function(){var e=this;!this.scrollSyncBound&&this.previewArea&&this.previewWrapper&&(this.scrollSyncBound=!0,this.textarea.getInstance().addEventListener("scroll",(function(){e.schedulePreviewScrollSync()})),window.addEventListener("scroll",(function(){e.schedulePreviewScrollSync()})),window.addEventListener("resize",(function(){e.schedulePreviewScrollSync(!0)})))}},{key:"clearPendingPreviewSyncTimers",value:function(){this.pendingPreviewSyncTimers.forEach((function(e){window.clearTimeout(e)})),this.pendingPreviewSyncTimers=[]}},{key:"stopPreviewSettle",value:function(){var e=!(arguments.length>0&&void 0!==arguments[0])||arguments[0];this.previewSettleFrame&&(window.cancelAnimationFrame(this.previewSettleFrame),this.previewSettleFrame=0),e&&(this.pendingPreviewScrollTop=null)}},{key:"schedulePreviewSettle",value:function(){var e=this;this.previewSettleFrame||null===this.pendingPreviewScrollTop||(this.previewSettleFrame=window.requestAnimationFrame((function(){e.previewSettleFrame=0,null!==e.pendingPreviewScrollTop&&e.setPreviewScrollTop(e.pendingPreviewScrollTop,{smooth:!0})})))}},{key:"schedulePreviewScrollSync",value:function(){var e=this,t=arguments.length>0&&void 0!==arguments[0]&&arguments[0];this.previewArea&&this.previewWrapper&&(this.scrollSyncFrame&&window.cancelAnimationFrame(this.scrollSyncFrame),this.scrollSyncFrame=window.requestAnimationFrame((function(){e.scrollSyncFrame=0,e.syncPreviewScroll(t)})))}},{key:"rebuildPreviewLineAnchors",value:function(){this.previewArea?this.previewLineAnchors=Array.from(this.previewArea.querySelectorAll(".line[data-start][data-end]")).map((function(e){var t=Number.parseInt(e.getAttribute("data-start")||"",10),n=Number.parseInt(e.getAttribute("data-end")||"",10);return Number.isNaN(t)||Number.isNaN(n)?null:{element:e,start:t,end:n}})).filter(Boolean):this.previewLineAnchors=[]}},{key:"isPreviewVisible",value:function(){if(!this.previewArea||!this.previewWrapper)return!1;var e=window.getComputedStyle(this.previewWrapper);return"none"!==e.display&&"hidden"!==e.visibility}},{key:"getTextareaLineHeight",value:function(){var e=this.textarea.getInstance(),t=window.getComputedStyle(e),n=Number.parseFloat(t.lineHeight);return Number.isNaN(n)&&(n=1.5*(Number.parseFloat(t.fontSize)||16)),n>0?n:24}},{key:"getPreviewScrollContainer",value:function(){if(!this.previewWrapper&&!this.previewArea)return null;var e=[this.previewWrapper,this.previewArea].filter(Boolean),t=e[0]||null,n=-1;return e.forEach((function(e){var r=e.scrollHeight-e.clientHeight;r>n&&(n=r,t=e)})),t}},{key:"getSourceScrollState",value:function(){var e=this.textarea.getInstance(),t=Math.max(e.scrollHeight-e.clientHeight,0);if(t>0)return{top:e.scrollTop,max:t};var n=e.getBoundingClientRect(),r=window.scrollY+n.top,i=Math.max(window.scrollY-r,0),a=Math.max(e.offsetHeight-window.innerHeight,0);return{top:Math.min(i,a),max:a}}},{key:"getSourceLineState",value:function(){var e=this.getSourceScrollState(),t=this.getTextareaLineHeight(),n=e.top/t,r=Math.max(0,Math.floor(n));return{lineHeight:t,lineNumber:r,lineOffset:e.top-r*t,sourceScrollTop:e.top,sourceMaxScroll:e.max}}},{key:"getPreviewContainerOffsetTop",value:function(e,t){if(!e||!t)return 0;var n=e.getBoundingClientRect(),r=t.getBoundingClientRect();return n.top-r.top+t.scrollTop}},{key:"getPreviewScrollableHeight",value:function(){var e=this.getPreviewScrollContainer();return e?Math.max(e.scrollHeight-e.clientHeight,0):0}},{key:"getRatioPreviewScrollTop",value:function(e,t,n){return n<=0||t<=0?0:n*(e/t)}},{key:"shouldPreferRatioPreviewSync",value:function(){return!!this.previewArea&&null!==this.previewArea.querySelector(".fence, .fence-tabs, .fence-tabs-panel, .fence-details, details")}},{key:"isPreviewAnchorVisible",value:function(e){if(!(e instanceof Element))return!1;var t=e.closest("details:not([open])");if(t){var n=t.querySelector("summary");if(!n||!n.contains(e))return!1}for(var r=e;r instanceof Element;){if(r.hidden||"true"===r.getAttribute("aria-hidden"))return!1;var i=window.getComputedStyle(r);if("none"===i.display||"hidden"===i.visibility||"collapse"===i.visibility||"hidden"===i.contentVisibility)return!1;if(r===this.previewArea)break;r=r.parentElement}var a=e.getClientRects();return!!a.length&&Array.from(a).some((function(e){return e.height>0||e.width>0}))}},{key:"getPreviewAnchorMetrics",value:function(e,t){var n=this;return this.previewLineAnchors.filter((function(e){return n.isPreviewAnchorVisible(e.element)})).map((function(r){var i=r.element.offsetHeight||Number.parseFloat(window.getComputedStyle(r.element).height)||t,a=n.getPreviewContainerOffsetTop(r.element,e);return Number.isFinite(a)&&Number.isFinite(i)?x(x({},r),{},{height:i,top:a,bottom:a+i,span:Math.max(r.end-r.start,0)}):null})).filter(Boolean)}},{key:"arePreviewAnchorMetricsStable",value:function(e){if(!e.length)return!1;var t,n=-1/0,r=S(e);try{for(r.s();!(t=r.n()).done;){var i=t.value;if(!Number.isFinite(i.top)||i.top+1<n)return!1;n=i.top}}catch(e){r.e(e)}finally{r.f()}return!0}},{key:"getAnchorTargetScrollTop",value:function(e,t,n){if(!t.length)return null;for(var r=e.lineHeight,i=e.lineNumber,a=e.lineOffset,o=e.sourceScrollTop,l=e.sourceMaxScroll,c=r>0?a/r:0,s=0;s<t.length;s+=1){var u=t[s],d=t[s+1]||null;if(i>=u.start&&i<=u.end){var h=u.span>0?(i-u.start+c)/(u.span+1):c;return{targetScrollTop:u.top+u.height*h,mode:"range",span:u.span,height:u.height}}if(d&&i>u.end&&i<d.start){var v=Math.max(d.start-u.end,1),f=(i-u.end+c)/v;return{targetScrollTop:u.bottom+(d.top-u.bottom)*f,mode:"gap",span:v,height:Math.max(d.top-u.bottom,r)}}}var p=t[t.length-1];if(i>=p.end){var m=Math.max(r,l-o),g=Math.min(1,Math.max(0,((i-p.end)*r+a)/m));return{targetScrollTop:p.bottom+(n-p.bottom)*g,mode:"tail",span:0,height:p.height}}return null}},{key:"getAnchorWeight",value:function(e,t){if(!e)return 0;if("gap"===e.mode)return e.span>=24?.08:e.span>=12?.16:.3;if("tail"===e.mode)return.25;var n=e.height/Math.max((e.span+1)*t.lineHeight,t.lineHeight),r=Math.min(.75,Math.max(0,n-1.5)/4);return Math.max(.25,1-r)}},{key:"findAnchorForLine",value:function(e){if(!this.previewLineAnchors.length)return null;var t,n=this.previewLineAnchors[0],r=S(this.previewLineAnchors);try{for(r.s();!(t=r.n()).done;){var i=t.value;if(e>=i.start&&e<=i.end)return i;if(i.start>e)return n;n=i}}catch(e){r.e(e)}finally{r.f()}return n}},{key:"setPreviewScrollTop",value:function(e){var t=this,n=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{},r=this.getPreviewScrollContainer();if(r){var i=n.smooth,a=void 0===i||i,o=this.getPreviewScrollableHeight(),l=Math.max(0,Math.min(e,o)),c=r.scrollTop,s=l;if(a){var u=l-c;if(Math.abs(u)<=6)this.stopPreviewSettle();else{var d=Math.max(48,.14*r.clientHeight),h=.35*Math.abs(u),v=Math.min(Math.abs(u),Math.max(d,h));s=c+Math.sign(u)*v,Math.abs(l-s)<=6&&(s=l),s!==l?(this.pendingPreviewScrollTop=l,this.schedulePreviewSettle()):this.stopPreviewSettle()}}else this.stopPreviewSettle();this.scrollSyncLock=!0,r.scrollTop=s,this.previewWrapper&&this.previewWrapper!==r&&(this.previewWrapper.scrollTop=s),this.previewArea&&this.previewArea!==r&&(this.previewArea.scrollTop=s),window.requestAnimationFrame((function(){t.scrollSyncLock=!1}))}}},{key:"syncPreviewByRatio",value:function(){var e=this.getSourceScrollState(),t=this.getPreviewScrollableHeight();t<=0?this.setPreviewScrollTop(0,{smooth:!1}):this.setPreviewScrollTop(this.getRatioPreviewScrollTop(e.top,e.max,t),{smooth:!1})}},{key:"syncPreviewScroll",value:function(){var e=arguments.length>0&&void 0!==arguments[0]&&arguments[0];if(this.previewArea&&this.previewWrapper&&this.isPreviewVisible()&&!this.scrollSyncLock){var t=this.getPreviewScrollContainer();if(t){var n=this.textarea.getInstance(),r=this.getSourceLineState(),i=this.getPreviewScrollableHeight();if(i<=0)this.setPreviewScrollTop(0,{smooth:!1});else if(r.sourceScrollTop<=1)this.setPreviewScrollTop(0,{smooth:!1});else if(r.sourceMaxScroll>0&&r.sourceScrollTop>=r.sourceMaxScroll-1)this.setPreviewScrollTop(i,{smooth:!1});else{this.previewLineAnchors.length&&!e||this.rebuildPreviewLineAnchors();var a=this.getRatioPreviewScrollTop(r.sourceScrollTop,r.sourceMaxScroll,i),o=Math.max(0,r.sourceMaxScroll-r.sourceScrollTop);if(o<=Math.max(2*r.lineHeight,32))this.setPreviewScrollTop(i,{smooth:!1});else if(this.previewPrefersRatioSync)this.setPreviewScrollTop(a,{smooth:!1});else{var l=this.getPreviewAnchorMetrics(t,r.lineHeight);if(l.length===this.previewLineAnchors.length&&this.arePreviewAnchorMetricsStable(l)){var c=this.getAnchorTargetScrollTop(r,l,i),s=a;if(c&&Number.isFinite(c.targetScrollTop)){var u=this.getAnchorWeight(c,r);s=a*(1-u)+c.targetScrollTop*u}var d=Math.max(80,Math.min(.8*n.clientHeight,240)),h=r.sourceScrollTop;if(h<d){var v=h/d;s=a*(1-v)+s*v}else if(o<d){var f=o/d;s=i*(1-f)+s*f}Number.isFinite(s)?this.setPreviewScrollTop(s,{smooth:!0}):this.syncPreviewByRatio()}else this.setPreviewScrollTop(a,{smooth:!1})}}}}}},{key:"initToolbar",value:function(){var e=this,n=function(){var t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},n=i("li",x(x({},t),{},{title:t.name}),["icon","command","onMounted"]);n.classList.add("wmd-button");var r=$(t.icon);return r.length?n.appendChild(r.get(0)):n.innerHTML=t.icon,t.shortcut&&function(t,n,r){var i=/Mac|iPod|iPhone|iPad/.test(navigator.platform);return/^([a-zA-Z0-9]|F[1-9]|10|11|12|\+)+$/.test(n)?(n=n.toLowerCase(),i&&(n=n.replace("ctrl","cmd")),document.addEventListener("keydown",(function(i){if(!e.isFocused())return!1;var a=[];i.ctrlKey&&a.push("ctrl"),i.altKey&&a.push("alt"),i.shiftKey&&a.push("shift"),/[a-zA-Z0-9]/.test(i.key)&&a.length>0&&a.push(i.key.toLowerCase()),a.join("+")===n&&(i.preventDefault(),i.stopPropagation(),i.objectTarget=t,r.call(e,i))})),!0):(console.error("无效的快捷键格式"),!1)}(n,t.shortcut,e.handleHotkey)&&(n.title="".concat(t.name," ").concat(t.shortcut.toUpperCase())),"command"in t&&("function"==typeof t.command?n.addEventListener("click",(function(){t.command.call(e,{target:n})})):n.setAttribute("onclick",t.command)),n},r=function(){var e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:0,n=arguments.length>1?arguments[1]:void 0,r=i("li",x({id:t("wmd-spacer%d-aaeditor",e)},n));return r.classList.add("wmd-spacer"),r.classList.add(t("wmd-spacer%d",e)),r},a=function(){return $("#wmd-button-bar-aaeditor .wmd-spacer").length};this.toolbar=$("#wmd-button-row-aaeditor"),this.buttons.forEach((function(t){var i,l=!1;"id"in t?document.getElementById(t.id)?(i=document.getElementById(t.id),l=!0,"icon"in t&&(i.innerHTML=t.icon)):"name"in t?("icon"in t||(t.icon="<span>".concat(name,"</span>")),i=n(t)):i=r(a()+1,t):i=r(a()+1,t);var c,s=!1,u=function(t,n){if(n||(n=e.toolbar),o(t)){if(!(t.indexOf("|")>-1))return $(t,n);for(var r=t.split("|"),i=0;i<r.length;i++){var a=u(r[i],n);if(a.length)return a}}};"insertBefore"in t?(c=u(t.insertBefore,e.toolbar))&&(c.before(i),s=!0):"insertAfter"in t?(c=u(t.insertAfter,e.toolbar))&&(c.after(i),s=!0):"remove"in t&&t.remove&&i.parentNode&&i.parentNode.removeChild(i),s||l||e.toolbar.append(i),"function"==typeof t.onMounted&&t.onMounted.call(e,{target:i})}))}},{key:"handleHotkey",value:function(e){e.objectTarget.click()}},{key:"handlePreviewEnd",value:function(){var e=this;this.refreshPreviewElements(),this.stopPreviewSettle(),v(this.previewArea),this.rebuildPreviewLineAnchors(),this.previewPrefersRatioSync=this.shouldPreferRatioPreviewSync(),this.schedulePreviewScrollSync(!0),this.clearPendingPreviewSyncTimers(),[120,320].forEach((function(t){var n=window.setTimeout((function(){e.schedulePreviewScrollSync()}),t);e.pendingPreviewSyncTimers.push(n)}))}},{key:"getContent",value:function(){return this.textarea.getContent()}},{key:"setContent",value:function(e){this.textarea.executeAndAddUndoStack("setContent",e)}},{key:"insertText",value:function(e){this.textarea.executeAndAddUndoStack("insertText",e)}},{key:"replaceSelection",value:function(e){this.getSelectedText()?this.textarea.executeAndAddUndoStack("replaceSelectionText",e):this.textarea.executeAndAddUndoStack("insertText",e)}},{key:"getSelectedText",value:function(){return this.textarea.getSelectedText()}},{key:"getSelection",value:function(){return this.textarea.getSelection()}},{key:"setSelection",value:function(e,t){this.textarea.setSelection(e,t)}},{key:"isFocused",value:function(){return this.textarea.isFocused}},{key:"wrapSelection",value:function(e,t){var n=arguments.length>2&&void 0!==arguments[2]?arguments[2]:"",r=this.textarea,i=this.getSelection(),a=this.getSelectedText();if(a){if(a.startsWith(e)&&a.endsWith(t)){var o=a.slice(e.length,a.length-t.length);return r.executeAndAddUndoStack("replaceSelectionText",o),void r.setSelection(i.start,i.start+o.length)}var l=r.getTextInRange(0,i.start),c=r.getTextInRange(i.end,r.getContent().length);if(l.endsWith(e)&&c.startsWith(t)){var s=i.start-e.length,u=i.end+t.length;return r.setSelection(s,u),r.executeAndAddUndoStack("replaceSelectionText",a),void r.setSelection(s,s+a.length)}var d=e+a+t;r.executeAndAddUndoStack("replaceSelectionText",d),r.setSelection(i.start+e.length,i.end+e.length)}else{var h=r.isAtLineStart()?e:"\n"+e,v=h+n+(r.isAtLineEnd()?t:t+"\n");r.executeAndAddUndoStack("insertText",v);var f=r.getSelection().start-v.length;r.setSelection(f+h.length,f+h.length+n.length)}}},{key:"blockPrefix",value:function(e,t){var n=this.textarea,r=n.getSelectedText();if(t||(t=""),r.length){var i=r.split("\n");console.log(i);var a=i.map((function(t,n){return e.replace("%n",n+1)+t})).join("\n");n.isAtLineStart()||(a="\n"+a),n.executeAndAddUndoStack("replaceSelectionText",a+"\n")}else{var o=e.replace("%n",1),l=o+t+"\n",c=0;n.isAtLineStart()||(l="\n"+l,c=1),n.executeAndAddUndoStack("insertText",l),n.setSelection(n.getSelection().start-l.length+o.length+c,n.getSelection().start)}}},{key:"firstSelectionLinePrefix",value:function(e,t){var n=this.textarea,r=n.getSelectedText();if(r.length){var i=r.split("\n"),a=i[0];if(a.startsWith(e))a=a.substring(e.length);else{var o=n.getSelection(),l=o.start,c=o.end;n.getTextInRange(l-e.length,l)===e?n.setSelection(l-e.length,c):a=e+a}i[0]=a;var s=i.join("\n");n.isAtLineStart()||(s="\n"+s),n.executeAndAddUndoStack("replaceSelectionText",s)}else{var u,d=e.replace("%n",1),h=0;n.isAtLineStart()?u=d+t:(u="\n"+d+t,h=1),n.executeAndAddUndoStack("insertText",u),n.setSelection(n.getSelection().start-u.length+d.length+h,n.getSelection().start)}}},{key:"getInitialFormValues",value:function(){var e=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{},t={};return(arguments.length>0&&void 0!==arguments[0]?arguments[0]:[]).forEach((function(n){var r;if(null!=n&&n.name){var i=e[n.name];void 0===i&&"value"in n&&(i=n.value),"checkbox"!==n.type?t[n.name]=null!==(r=i)&&void 0!==r?r:"":t[n.name]=Boolean(i)}})),t}},{key:"resolveFieldHidden",value:function(){var e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:{};return"function"==typeof e.hidden?Boolean(e.hidden(t)):Boolean(e.hidden)}},{key:"renderFormField",value:function(){var e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},t=arguments.length>1?arguments[1]:void 0;if(null==e||!e.name)return"";var i=null!=t?t:"",o=r(e.name),l=r(e.id||"aa-modal-field-".concat(e.name.replace(/[^a-zA-Z0-9_-]/g,"-"))),c=["form-item"];"textarea"===e.type&&c.push("for-textarea"),e.className&&c.push(e.className);var s=[];e.labelClass&&s.push(e.labelClass),e.required&&s.push("required");var u=e.hidden?' hidden="true"':"",d=e.required?" required":"",h=e.placeholder?' placeholder="'.concat(r(e.placeholder),'"'):"",v="number"===e.type&&void 0!==e.min?' min="'.concat(r(e.min),'"'):"",f=e.inputClass?' class="'.concat(r(e.inputClass),'"'):"",p=!1===e.label?"":'<label for="'.concat(l,'"').concat(s.length?' class="'.concat(r(s.join(" ")),'"'):"",">").concat(n(e.label||""),"</label>");if("select"===e.type){var m=(e.options||[]).map((function(e){var t,o=a(e)?e.value:e,l=a(e)?null!==(t=e.label)&&void 0!==t?t:e.value:e,c=String(o)===String(i)?" selected":"";return'<option value="'.concat(r(o),'"').concat(c,">").concat(n(l),"</option>")})).join("");return'<div class="'.concat(r(c.join(" ")),'" data-field-name="').concat(o,'"').concat(u,">").concat(p,'<select id="').concat(l,'" name="').concat(o,'"').concat(d).concat(f,">").concat(m,"</select></div>")}if("textarea"===e.type){var g=e.rows?' rows="'.concat(r(e.rows),'"'):"";return'<div class="'.concat(r(c.join(" ")),'" data-field-name="').concat(o,'"').concat(u,">").concat(p,'<textarea id="').concat(l,'" name="').concat(o,'"').concat(d).concat(h).concat(g).concat(f,">").concat(n(i),"</textarea></div>")}if("checkbox"===e.type){var y=i?" checked":"";return e.switch?'<div class="'.concat(r(c.join(" ")),'" data-field-name="').concat(o,'"').concat(u,">").concat(p,'<input type="checkbox" id="').concat(l,'" name="').concat(o,'" switch').concat(y).concat(d).concat(f,'><label class="form-switcher" for="').concat(l,'"></label></div>'):'<div class="'.concat(r(c.join(" ")),'" data-field-name="').concat(o,'"').concat(u,">").concat(p,'<input type="checkbox" id="').concat(l,'" name="').concat(o,'"').concat(y).concat(d).concat(f,"></div>")}var S=e.type||"text",b=' value="'.concat(r(i),'"');return'<div class="'.concat(r(c.join(" ")),'" data-field-name="').concat(o,'"').concat(u,">").concat(p,'<input type="').concat(r(S),'" id="').concat(l,'" name="').concat(o,'"').concat(b).concat(d).concat(h).concat(v).concat(f,"></div>")}},{key:"collectFormValues",value:function(e){var t={};if(!e)return t;var n=Array.from(e.querySelectorAll("[name]")),r=new Set;return n.forEach((function(e){var n=e.name;n&&!r.has(n)&&(r.add(n),e instanceof HTMLInputElement&&"checkbox"===e.type?t[n]=e.checked:e instanceof HTMLInputElement&&"number"===e.type?t[n]=""===e.value?"":Number(e.value):t[n]=e.value)})),t}},{key:"animateRequiredField",value:function(e){e&&(e.classList.add("required-animate"),window.setTimeout((function(){e.classList.remove("required-animate")}),800))}},{key:"validateForm",value:function(e){var t=this;if(!e)return!0;var n=!0;return Array.from(e.querySelectorAll("[name]")).forEach((function(e){e.required&&!e.closest('.form-item[hidden="true"]')&&((e instanceof HTMLInputElement&&"checkbox"===e.type?e.checked:""!==String(e.value||"").trim())||(n=!1,t.animateRequiredField(e)))})),n}},{key:"syncFormFieldVisibility",value:function(e){var t=this,n=arguments.length>2&&void 0!==arguments[2]?arguments[2]:{};(arguments.length>1&&void 0!==arguments[1]?arguments[1]:[]).forEach((function(r){if(null!=r&&r.name){var i=Array.from(e.querySelectorAll(".form-item")).find((function(e){return e.dataset.fieldName===r.name}));if(i){var a=t.resolveFieldHidden(r,n);i.setAttribute("hidden",a?"true":"false"),i.classList.toggle("hidden",a)}}}))}},{key:"openFormModal",value:function(){var e=this,t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},n=Object.assign({title:"标题",fields:[],initialValues:{},onSubmit:function(){return!0},onChange:function(){},validate:function(){return!0},showFooter:!0},t),r=this.getInitialFormValues(n.fields,n.initialValues),i=n.fields.map((function(t){return e.renderFormField(x(x({},t),{},{hidden:e.resolveFieldHidden(t,r)}),r[t.name])})).join("");this.openModal({title:n.title,innerHTML:i,showFooter:n.showFooter,checkEmptyOnConfirm:!0,handle:function(t){e.syncFormFieldVisibility(t,n.fields,r),n.onChange.call(e,t,x({},r))},change:function(t,r){e.syncFormFieldVisibility(t,n.fields,r),n.onChange.call(e,t,r)},confirm:function(t,r){return!1!==n.validate.call(e,t,r)&&n.onSubmit.call(e,t,r)}})}},{key:"openModal",value:function(){var e=this,t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},n=Object.assign({title:"标题",innerHTML:"内容",showFooter:!0,checkEmptyOnConfirm:!0,change:function(e,t){},confirm:function(e,t){return!0},cancel:function(e){},handle:function(e){},callback:function(e){}},t),r=n.checkEmptyOnConfirm?'<form class="params"></form>':"";if($("#aa-modal").length<1&&$("#aa-wrapper").append('<div id="aa-modal" class="aa-modal">\n    <div class="aa-modal-frame">\n    <div class="aa-modal-header">\n        <div class="aa-modal-header-title"></div><div class="aa-modal-header-close"><i class="close-icon"></i></div>\n</div>\n    <div class="aa-modal-body">\n        '.concat(r,'\n    </div>\n    <div class="aa-modal-footer">\n        <button type="button" class="aa-modal-footer-button aa-modal-footer-cancel">取消</button><button type="button" class="aa-modal-footer-button aa-modal-footer-confirm">确定</button>\n    </div>\n</div>\n</div>')),$(".aa-modal-header-title").text(n.title),n.checkEmptyOnConfirm){var i=$(".aa-modal-body .params").empty();l(n.innerHTML)?i.append(n.innerHTML):i.html(n.innerHTML)}else{var a=$(".aa-modal-body").empty();l(n.innerHTML)?a.append(n.innerHTML):a.html(n.innerHTML)}var o=$("#aa-modal").get(0);n.showFooter?$(".aa-modal-footer").show():$(".aa-modal-footer").hide(),$("body").addClass("no-scroll"),n.handle.call(this,o),$(".aa-modal-footer-confirm").on("click",(function(){var t={},r=!0;if(n.checkEmptyOnConfirm){var i=$("#aa-modal .aa-modal-body .params").get(0);t=e.collectFormValues(i),r=e.validateForm(i)}r&&n.confirm.call(e,o,t)&&($("#aa-modal").remove(),$("body").removeClass("no-scroll"),n.callback.call(e,o))})),$(".aa-modal-header-close").on("click",(function(t){n.cancel.call(e,t),$("#aa-modal").removeClass("active"),setTimeout((function(){$("#aa-modal").remove(),$("body").removeClass("no-scroll")}),300)})),$(".aa-modal-footer-cancel").on("click",(function(e){$("#aa-modal").removeClass("active"),n.cancel.call(o,e),setTimeout((function(){$("#aa-modal").remove(),$("body").removeClass("no-scroll")}),300)}));var c=$(".params",o);$("input,select,textarea",c).on("change input",(function(){var t=e.collectFormValues(c.get(0));n.change.call(e,o,t)})),$("#aa-modal").addClass("active")}},{key:"getShortCodeRegex",value:function(e){return new RegExp("\\[(\\[?)("+e+")(?![\\w-])([^\\]\\/]*(?:\\/(?!\\])[^\\]\\/]*)*?)(?:(\\/)\\]|\\](?:([^\\[]*(?:\\[(?!\\/\\2\\])[^\\[]*)*)(\\[\\/\\2\\]))?)(\\]?)","g")}}],c&&A(e.prototype,c),s&&A(e,s),Object.defineProperty(e,"prototype",{writable:!1}),e;var e,c,s}())("#text","#wmd-preview-aaeditor")},901:()=>{},662:()=>{},591:()=>{},307:()=>{},396:()=>{},67:()=>{},78:()=>{},536:()=>{}},n={};function r(e){var i=n[e];if(void 0!==i)return i.exports;var a=n[e]={exports:{}};return t[e](a,a.exports,r),a.exports}r.m=t,e=[],r.O=(t,n,i,a)=>{if(!n){var o=1/0;for(u=0;u<e.length;u++){for(var[n,i,a]=e[u],l=!0,c=0;c<n.length;c++)(!1&a||o>=a)&&Object.keys(r.O).every((e=>r.O[e](n[c])))?n.splice(c--,1):(l=!1,a<o&&(o=a));if(l){e.splice(u--,1);var s=i();void 0!==s&&(t=s)}}return t}a=a||0;for(var u=e.length;u>0&&e[u-1][2]>a;u--)e[u]=e[u-1];e[u]=[n,i,a]},r.o=(e,t)=>Object.prototype.hasOwnProperty.call(e,t),(()=>{var e={829:0,125:0,992:0,560:0,144:0,552:0,701:0,718:0,650:0};r.O.j=t=>0===e[t];var t=(t,n)=>{var i,a,[o,l,c]=n,s=0;if(o.some((t=>0!==e[t]))){for(i in l)r.o(l,i)&&(r.m[i]=l[i]);if(c)var u=c(r)}for(t&&t(n);s<o.length;s++)a=o[s],r.o(e,a)&&e[a]&&e[a][0](),e[a]=0;return r.O(u)},n=self.webpackChunkaaeditor=self.webpackChunkaaeditor||[];n.forEach(t.bind(null,0)),n.push=t.bind(null,n.push.bind(n))})(),r.O(void 0,[125,992,560,144,552,701,718,650],(()=>r(519))),r.O(void 0,[125,992,560,144,552,701,718,650],(()=>r(307))),r.O(void 0,[125,992,560,144,552,701,718,650],(()=>r(396))),r.O(void 0,[125,992,560,144,552,701,718,650],(()=>r(67))),r.O(void 0,[125,992,560,144,552,701,718,650],(()=>r(78))),r.O(void 0,[125,992,560,144,552,701,718,650],(()=>r(536))),r.O(void 0,[125,992,560,144,552,701,718,650],(()=>r(901))),r.O(void 0,[125,992,560,144,552,701,718,650],(()=>r(662)));var i=r.O(void 0,[125,992,560,144,552,701,718,650],(()=>r(591)));i=r.O(i)})();
-//# sourceMappingURL=main.js.map
+/******/ (() => { // webpackBootstrap
+/******/ 	"use strict";
+/******/ 	var __webpack_modules__ = ({
+
+/***/ "./assets/src/main.js":
+/*!****************************!*\
+  !*** ./assets/src/main.js ***!
+  \****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _utils_functions__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils/functions */ "./assets/src/utils/functions.js");
+/* harmony import */ var _utils_tabs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils/tabs */ "./assets/src/utils/tabs.js");
+/* harmony import */ var _utils_textarea__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./utils/textarea */ "./assets/src/utils/textarea.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
+function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
+function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+
+
+
+var XEditor = /*#__PURE__*/function () {
+  function XEditor(sel, sel_preview) {
+    var _this = this;
+    _classCallCheck(this, XEditor);
+    this.previewSelector = sel_preview;
+    if (document.querySelector(sel)) {
+      this.textarea = new _utils_textarea__WEBPACK_IMPORTED_MODULE_2__["default"](sel);
+      this.previewArea = null;
+      this.previewWrapper = null;
+    } else {
+      console.warn((0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.sprintf)("element [%s] not e", sel));
+    }
+    this.isInit = false;
+    this.buttons = [];
+    this.insertProcessors = [];
+    this.scrollSyncFrame = 0;
+    this.scrollSyncLock = false;
+    this.scrollSyncBound = false;
+    this.previewSettleFrame = 0;
+    this.pendingPreviewScrollTop = null;
+    this.previewLineAnchors = [];
+    this.pendingPreviewSyncTimers = [];
+    this.previewPrefersRatioSync = false;
+    $("body").on("XEditorAddButton", function (event) {
+      for (var _len = arguments.length, buttons = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        buttons[_key - 1] = arguments[_key];
+      }
+      buttons.forEach(function (button) {
+        if ((0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.isObject)(button)) {
+          if (Object.keys(button).length) {
+            _this.buttons.push(button);
+          } else {
+            _this.buttons.push({
+              "class": "wmd-spacer"
+            });
+          }
+        } else if ((0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.isString)(button) && button === "splitter") {
+          _this.buttons.push({
+            "class": "wmd-spacer"
+          });
+        }
+      });
+    }).on("XEditorInit", function () {
+      _this.init();
+    }).on("XEditorRefresh", function () {
+      var sp = _this.textarea.getScrollPosition();
+      _this.setContent(_this.getContent());
+      _this.textarea.setScrollPosition(sp.top, sp.left);
+    }).on("XEditorAddInsertProcessor", function (event) {
+      for (var _len2 = arguments.length, processors = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+        processors[_key2 - 1] = arguments[_key2];
+      }
+      processors.forEach(function (processor) {
+        if (typeof processor === "function") {
+          _this.insertProcessors.push(processor);
+        }
+      });
+    });
+  }
+  return _createClass(XEditor, [{
+    key: "refreshPreviewElements",
+    value: function refreshPreviewElements() {
+      var _this$previewArea;
+      this.previewArea = document.querySelector(this.previewSelector);
+      this.previewWrapper = ((_this$previewArea = this.previewArea) === null || _this$previewArea === void 0 ? void 0 : _this$previewArea.closest("#wmd-preview-wrapper-aaeditor")) || null;
+    }
+
+    /**
+     * 判断是不是 Markdown 模式
+     *
+     * @returns {boolean}
+     */
+  }, {
+    key: "isMarkdown",
+    value: function isMarkdown() {
+      return $('[name="markdown"]').val() === "1";
+    }
+  }, {
+    key: "init",
+    value: function init() {
+      var _this2 = this;
+      if (this.isInit) return;
+      this.isInit = true;
+      this.refreshPreviewElements();
+      window.XEditor = this;
+      $("body").append("<div id=\"aa-wrapper\"></div>").on("XEditorPreviewEnd", function () {
+        return _this2.handlePreviewEnd();
+      }).on("XEditorReplaceSelection", function (e, text) {
+        console.log("replaceSelection", text);
+        _this2.replaceSelection(text);
+      });
+      this.initToolbar();
+      this.initScrollSync();
+      $("body").trigger("XEditorPreviewEnd");
+    }
+  }, {
+    key: "initScrollSync",
+    value: function initScrollSync() {
+      var _this3 = this;
+      if (this.scrollSyncBound || !this.previewArea || !this.previewWrapper) {
+        return;
+      }
+      this.scrollSyncBound = true;
+      var textareaElement = this.textarea.getInstance();
+      textareaElement.addEventListener("scroll", function () {
+        _this3.schedulePreviewScrollSync();
+      });
+      window.addEventListener("scroll", function () {
+        _this3.schedulePreviewScrollSync();
+      });
+      window.addEventListener("resize", function () {
+        _this3.schedulePreviewScrollSync(true);
+      });
+    }
+  }, {
+    key: "clearPendingPreviewSyncTimers",
+    value: function clearPendingPreviewSyncTimers() {
+      this.pendingPreviewSyncTimers.forEach(function (timerId) {
+        window.clearTimeout(timerId);
+      });
+      this.pendingPreviewSyncTimers = [];
+    }
+  }, {
+    key: "stopPreviewSettle",
+    value: function stopPreviewSettle() {
+      var clearPendingTarget = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+      if (this.previewSettleFrame) {
+        window.cancelAnimationFrame(this.previewSettleFrame);
+        this.previewSettleFrame = 0;
+      }
+      if (clearPendingTarget) {
+        this.pendingPreviewScrollTop = null;
+      }
+    }
+  }, {
+    key: "schedulePreviewSettle",
+    value: function schedulePreviewSettle() {
+      var _this4 = this;
+      if (this.previewSettleFrame || this.pendingPreviewScrollTop === null) {
+        return;
+      }
+      this.previewSettleFrame = window.requestAnimationFrame(function () {
+        _this4.previewSettleFrame = 0;
+        if (_this4.pendingPreviewScrollTop === null) {
+          return;
+        }
+        _this4.setPreviewScrollTop(_this4.pendingPreviewScrollTop, {
+          smooth: true
+        });
+      });
+    }
+  }, {
+    key: "schedulePreviewScrollSync",
+    value: function schedulePreviewScrollSync() {
+      var _this5 = this;
+      var force = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+      if (!this.previewArea || !this.previewWrapper) {
+        return;
+      }
+      if (this.scrollSyncFrame) {
+        window.cancelAnimationFrame(this.scrollSyncFrame);
+      }
+      this.scrollSyncFrame = window.requestAnimationFrame(function () {
+        _this5.scrollSyncFrame = 0;
+        _this5.syncPreviewScroll(force);
+      });
+    }
+  }, {
+    key: "rebuildPreviewLineAnchors",
+    value: function rebuildPreviewLineAnchors() {
+      if (!this.previewArea) {
+        this.previewLineAnchors = [];
+        return;
+      }
+      this.previewLineAnchors = Array.from(this.previewArea.querySelectorAll(".line[data-start][data-end]")).map(function (element) {
+        var start = Number.parseInt(element.getAttribute("data-start") || "", 10);
+        var end = Number.parseInt(element.getAttribute("data-end") || "", 10);
+        if (Number.isNaN(start) || Number.isNaN(end)) {
+          return null;
+        }
+        return {
+          element: element,
+          start: start,
+          end: end
+        };
+      }).filter(Boolean);
+    }
+  }, {
+    key: "isPreviewVisible",
+    value: function isPreviewVisible() {
+      if (!this.previewArea || !this.previewWrapper) {
+        return false;
+      }
+      var style = window.getComputedStyle(this.previewWrapper);
+      return style.display !== "none" && style.visibility !== "hidden";
+    }
+  }, {
+    key: "getTextareaLineHeight",
+    value: function getTextareaLineHeight() {
+      var textareaElement = this.textarea.getInstance();
+      var style = window.getComputedStyle(textareaElement);
+      var lineHeight = Number.parseFloat(style.lineHeight);
+      if (Number.isNaN(lineHeight)) {
+        var fontSize = Number.parseFloat(style.fontSize) || 16;
+        lineHeight = fontSize * 1.5;
+      }
+      return lineHeight > 0 ? lineHeight : 24;
+    }
+  }, {
+    key: "getPreviewScrollContainer",
+    value: function getPreviewScrollContainer() {
+      if (!this.previewWrapper && !this.previewArea) {
+        return null;
+      }
+      var candidates = [this.previewWrapper, this.previewArea].filter(Boolean);
+      var selected = candidates[0] || null;
+      var maxScrollableHeight = -1;
+      candidates.forEach(function (element) {
+        var scrollableHeight = element.scrollHeight - element.clientHeight;
+        if (scrollableHeight > maxScrollableHeight) {
+          maxScrollableHeight = scrollableHeight;
+          selected = element;
+        }
+      });
+      return selected;
+    }
+  }, {
+    key: "getSourceScrollState",
+    value: function getSourceScrollState() {
+      var textareaElement = this.textarea.getInstance();
+      var innerScrollMax = Math.max(textareaElement.scrollHeight - textareaElement.clientHeight, 0);
+      if (innerScrollMax > 0) {
+        return {
+          top: textareaElement.scrollTop,
+          max: innerScrollMax
+        };
+      }
+      var rect = textareaElement.getBoundingClientRect();
+      var docTop = window.scrollY + rect.top;
+      var pageScrollTop = Math.max(window.scrollY - docTop, 0);
+      var pageScrollMax = Math.max(textareaElement.offsetHeight - window.innerHeight, 0);
+      return {
+        top: Math.min(pageScrollTop, pageScrollMax),
+        max: pageScrollMax
+      };
+    }
+  }, {
+    key: "getSourceLineState",
+    value: function getSourceLineState() {
+      var sourceScrollState = this.getSourceScrollState();
+      var lineHeight = this.getTextareaLineHeight();
+      var rawLine = sourceScrollState.top / lineHeight;
+      var lineNumber = Math.max(0, Math.floor(rawLine));
+      return {
+        lineHeight: lineHeight,
+        lineNumber: lineNumber,
+        lineOffset: sourceScrollState.top - lineNumber * lineHeight,
+        sourceScrollTop: sourceScrollState.top,
+        sourceMaxScroll: sourceScrollState.max
+      };
+    }
+  }, {
+    key: "getPreviewContainerOffsetTop",
+    value: function getPreviewContainerOffsetTop(anchorElement, scrollContainer) {
+      if (!anchorElement || !scrollContainer) {
+        return 0;
+      }
+      var anchorRect = anchorElement.getBoundingClientRect();
+      var containerRect = scrollContainer.getBoundingClientRect();
+      return anchorRect.top - containerRect.top + scrollContainer.scrollTop;
+    }
+  }, {
+    key: "getPreviewScrollableHeight",
+    value: function getPreviewScrollableHeight() {
+      var scrollContainer = this.getPreviewScrollContainer();
+      if (!scrollContainer) {
+        return 0;
+      }
+      return Math.max(scrollContainer.scrollHeight - scrollContainer.clientHeight, 0);
+    }
+  }, {
+    key: "getRatioPreviewScrollTop",
+    value: function getRatioPreviewScrollTop(sourceScrollTop, sourceMaxScroll, targetMaxScroll) {
+      if (targetMaxScroll <= 0 || sourceMaxScroll <= 0) {
+        return 0;
+      }
+      return targetMaxScroll * (sourceScrollTop / sourceMaxScroll);
+    }
+  }, {
+    key: "shouldPreferRatioPreviewSync",
+    value: function shouldPreferRatioPreviewSync() {
+      if (!this.previewArea) {
+        return false;
+      }
+
+      // Complex fence containers can hide or reshape large source ranges,
+      // which makes anchor interpolation jump backwards in the preview.
+      return this.previewArea.querySelector(".fence, .fence-tabs, .fence-tabs-panel, .fence-details, details") !== null;
+    }
+  }, {
+    key: "isPreviewAnchorVisible",
+    value: function isPreviewAnchorVisible(anchorElement) {
+      if (!(anchorElement instanceof Element)) {
+        return false;
+      }
+      var closedDetails = anchorElement.closest("details:not([open])");
+      if (closedDetails) {
+        var summary = closedDetails.querySelector("summary");
+        if (!summary || !summary.contains(anchorElement)) {
+          return false;
+        }
+      }
+      var current = anchorElement;
+      while (current instanceof Element) {
+        if (current.hidden || current.getAttribute("aria-hidden") === "true") {
+          return false;
+        }
+        var style = window.getComputedStyle(current);
+        if (style.display === "none" || style.visibility === "hidden" || style.visibility === "collapse" || style.contentVisibility === "hidden") {
+          return false;
+        }
+        if (current === this.previewArea) {
+          break;
+        }
+        current = current.parentElement;
+      }
+      var rects = anchorElement.getClientRects();
+      if (!rects.length) {
+        return false;
+      }
+      return Array.from(rects).some(function (rect) {
+        return rect.height > 0 || rect.width > 0;
+      });
+    }
+  }, {
+    key: "getPreviewAnchorMetrics",
+    value: function getPreviewAnchorMetrics(scrollContainer, fallbackHeight) {
+      var _this6 = this;
+      return this.previewLineAnchors.filter(function (anchor) {
+        return _this6.isPreviewAnchorVisible(anchor.element);
+      }).map(function (anchor) {
+        var height = anchor.element.offsetHeight || Number.parseFloat(window.getComputedStyle(anchor.element).height) || fallbackHeight;
+        var top = _this6.getPreviewContainerOffsetTop(anchor.element, scrollContainer);
+        if (!Number.isFinite(top) || !Number.isFinite(height)) {
+          return null;
+        }
+        return _objectSpread(_objectSpread({}, anchor), {}, {
+          height: height,
+          top: top,
+          bottom: top + height,
+          span: Math.max(anchor.end - anchor.start, 0)
+        });
+      }).filter(Boolean);
+    }
+  }, {
+    key: "arePreviewAnchorMetricsStable",
+    value: function arePreviewAnchorMetricsStable(anchorMetrics) {
+      if (!anchorMetrics.length) {
+        return false;
+      }
+      var lastTop = -Infinity;
+      var _iterator = _createForOfIteratorHelper(anchorMetrics),
+        _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var anchor = _step.value;
+          if (!Number.isFinite(anchor.top) || anchor.top + 1 < lastTop) {
+            return false;
+          }
+          lastTop = anchor.top;
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+      return true;
+    }
+  }, {
+    key: "getAnchorTargetScrollTop",
+    value: function getAnchorTargetScrollTop(sourceLineState, anchors, targetMaxScroll) {
+      if (!anchors.length) {
+        return null;
+      }
+      var lineHeight = sourceLineState.lineHeight,
+        lineNumber = sourceLineState.lineNumber,
+        lineOffset = sourceLineState.lineOffset,
+        sourceScrollTop = sourceLineState.sourceScrollTop,
+        sourceMaxScroll = sourceLineState.sourceMaxScroll;
+      var lineProgress = lineHeight > 0 ? lineOffset / lineHeight : 0;
+      for (var index = 0; index < anchors.length; index += 1) {
+        var anchor = anchors[index];
+        var nextAnchor = anchors[index + 1] || null;
+        if (lineNumber >= anchor.start && lineNumber <= anchor.end) {
+          var anchorRatio = anchor.span > 0 ? (lineNumber - anchor.start + lineProgress) / (anchor.span + 1) : lineProgress;
+          return {
+            targetScrollTop: anchor.top + anchor.height * anchorRatio,
+            mode: "range",
+            span: anchor.span,
+            height: anchor.height
+          };
+        }
+        if (nextAnchor && lineNumber > anchor.end && lineNumber < nextAnchor.start) {
+          var gapSpan = Math.max(nextAnchor.start - anchor.end, 1);
+          var gapRatio = (lineNumber - anchor.end + lineProgress) / gapSpan;
+          return {
+            targetScrollTop: anchor.bottom + (nextAnchor.top - anchor.bottom) * gapRatio,
+            mode: "gap",
+            span: gapSpan,
+            height: Math.max(nextAnchor.top - anchor.bottom, lineHeight)
+          };
+        }
+      }
+      var lastAnchor = anchors[anchors.length - 1];
+      if (lineNumber >= lastAnchor.end) {
+        var remainingSourceScroll = Math.max(lineHeight, sourceMaxScroll - sourceScrollTop);
+        var trailingRatio = Math.min(1, Math.max(0, ((lineNumber - lastAnchor.end) * lineHeight + lineOffset) / remainingSourceScroll));
+        return {
+          targetScrollTop: lastAnchor.bottom + (targetMaxScroll - lastAnchor.bottom) * trailingRatio,
+          mode: "tail",
+          span: 0,
+          height: lastAnchor.height
+        };
+      }
+      return null;
+    }
+  }, {
+    key: "getAnchorWeight",
+    value: function getAnchorWeight(anchorTarget, sourceLineState) {
+      if (!anchorTarget) {
+        return 0;
+      }
+      if (anchorTarget.mode === "gap") {
+        if (anchorTarget.span >= 24) {
+          return 0.08;
+        }
+        if (anchorTarget.span >= 12) {
+          return 0.16;
+        }
+        return 0.3;
+      }
+      if (anchorTarget.mode === "tail") {
+        return 0.25;
+      }
+      var normalizedHeight = anchorTarget.height / Math.max((anchorTarget.span + 1) * sourceLineState.lineHeight, sourceLineState.lineHeight);
+      var oversizePenalty = Math.min(0.75, Math.max(0, normalizedHeight - 1.5) / 4);
+      return Math.max(0.25, 1 - oversizePenalty);
+    }
+  }, {
+    key: "findAnchorForLine",
+    value: function findAnchorForLine(lineNumber) {
+      if (!this.previewLineAnchors.length) {
+        return null;
+      }
+      var nearest = this.previewLineAnchors[0];
+      var _iterator2 = _createForOfIteratorHelper(this.previewLineAnchors),
+        _step2;
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          var anchor = _step2.value;
+          if (lineNumber >= anchor.start && lineNumber <= anchor.end) {
+            return anchor;
+          }
+          if (anchor.start > lineNumber) {
+            return nearest;
+          }
+          nearest = anchor;
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+      return nearest;
+    }
+  }, {
+    key: "setPreviewScrollTop",
+    value: function setPreviewScrollTop(scrollTop) {
+      var _this7 = this;
+      var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      var scrollContainer = this.getPreviewScrollContainer();
+      if (!scrollContainer) {
+        return;
+      }
+      var _options$smooth = options.smooth,
+        smooth = _options$smooth === void 0 ? true : _options$smooth;
+      var maxScrollTop = this.getPreviewScrollableHeight();
+      var targetScrollTop = Math.max(0, Math.min(scrollTop, maxScrollTop));
+      var currentScrollTop = scrollContainer.scrollTop;
+      var nextScrollTop = targetScrollTop;
+      if (smooth) {
+        var delta = targetScrollTop - currentScrollTop;
+        var deadZone = 6;
+        if (Math.abs(delta) <= deadZone) {
+          this.stopPreviewSettle();
+        } else {
+          var baseStep = Math.max(48, scrollContainer.clientHeight * 0.14);
+          var easedStep = Math.abs(delta) * 0.35;
+          var step = Math.min(Math.abs(delta), Math.max(baseStep, easedStep));
+          nextScrollTop = currentScrollTop + Math.sign(delta) * step;
+          if (Math.abs(targetScrollTop - nextScrollTop) <= deadZone) {
+            nextScrollTop = targetScrollTop;
+          }
+          if (nextScrollTop !== targetScrollTop) {
+            this.pendingPreviewScrollTop = targetScrollTop;
+            this.schedulePreviewSettle();
+          } else {
+            this.stopPreviewSettle();
+          }
+        }
+      } else {
+        this.stopPreviewSettle();
+      }
+      this.scrollSyncLock = true;
+      scrollContainer.scrollTop = nextScrollTop;
+      if (this.previewWrapper && this.previewWrapper !== scrollContainer) {
+        this.previewWrapper.scrollTop = nextScrollTop;
+      }
+      if (this.previewArea && this.previewArea !== scrollContainer) {
+        this.previewArea.scrollTop = nextScrollTop;
+      }
+      window.requestAnimationFrame(function () {
+        _this7.scrollSyncLock = false;
+      });
+    }
+  }, {
+    key: "syncPreviewByRatio",
+    value: function syncPreviewByRatio() {
+      var sourceScrollState = this.getSourceScrollState();
+      var targetMaxScroll = this.getPreviewScrollableHeight();
+      if (targetMaxScroll <= 0) {
+        this.setPreviewScrollTop(0, {
+          smooth: false
+        });
+        return;
+      }
+      this.setPreviewScrollTop(this.getRatioPreviewScrollTop(sourceScrollState.top, sourceScrollState.max, targetMaxScroll), {
+        smooth: false
+      });
+    }
+  }, {
+    key: "syncPreviewScroll",
+    value: function syncPreviewScroll() {
+      var force = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+      if (!this.previewArea || !this.previewWrapper || !this.isPreviewVisible() || this.scrollSyncLock) {
+        return;
+      }
+      var scrollContainer = this.getPreviewScrollContainer();
+      if (!scrollContainer) {
+        return;
+      }
+      var textareaElement = this.textarea.getInstance();
+      var sourceLineState = this.getSourceLineState();
+      var targetMaxScroll = this.getPreviewScrollableHeight();
+      if (targetMaxScroll <= 0) {
+        this.setPreviewScrollTop(0, {
+          smooth: false
+        });
+        return;
+      }
+      if (sourceLineState.sourceScrollTop <= 1) {
+        this.setPreviewScrollTop(0, {
+          smooth: false
+        });
+        return;
+      }
+      if (sourceLineState.sourceMaxScroll > 0 && sourceLineState.sourceScrollTop >= sourceLineState.sourceMaxScroll - 1) {
+        this.setPreviewScrollTop(targetMaxScroll, {
+          smooth: false
+        });
+        return;
+      }
+      if (!this.previewLineAnchors.length || force) {
+        this.rebuildPreviewLineAnchors();
+      }
+      var ratioTargetScrollTop = this.getRatioPreviewScrollTop(sourceLineState.sourceScrollTop, sourceLineState.sourceMaxScroll, targetMaxScroll);
+      var distanceToBottom = Math.max(0, sourceLineState.sourceMaxScroll - sourceLineState.sourceScrollTop);
+      var bottomSnapThreshold = Math.max(sourceLineState.lineHeight * 2, 32);
+      if (distanceToBottom <= bottomSnapThreshold) {
+        this.setPreviewScrollTop(targetMaxScroll, {
+          smooth: false
+        });
+        return;
+      }
+      if (this.previewPrefersRatioSync) {
+        this.setPreviewScrollTop(ratioTargetScrollTop, {
+          smooth: false
+        });
+        return;
+      }
+      var anchorMetrics = this.getPreviewAnchorMetrics(scrollContainer, sourceLineState.lineHeight);
+      var shouldUseRatioOnly = anchorMetrics.length !== this.previewLineAnchors.length || !this.arePreviewAnchorMetricsStable(anchorMetrics);
+      if (shouldUseRatioOnly) {
+        this.setPreviewScrollTop(ratioTargetScrollTop, {
+          smooth: false
+        });
+        return;
+      }
+      var anchorTarget = this.getAnchorTargetScrollTop(sourceLineState, anchorMetrics, targetMaxScroll);
+      var targetScrollTop = ratioTargetScrollTop;
+      if (anchorTarget && Number.isFinite(anchorTarget.targetScrollTop)) {
+        var anchorWeight = this.getAnchorWeight(anchorTarget, sourceLineState);
+        targetScrollTop = ratioTargetScrollTop * (1 - anchorWeight) + anchorTarget.targetScrollTop * anchorWeight;
+      }
+      var blendRange = Math.max(80, Math.min(textareaElement.clientHeight * 0.8, 240));
+      var distanceToTop = sourceLineState.sourceScrollTop;
+      if (distanceToTop < blendRange) {
+        var weight = distanceToTop / blendRange;
+        targetScrollTop = ratioTargetScrollTop * (1 - weight) + targetScrollTop * weight;
+      } else if (distanceToBottom < blendRange) {
+        var _weight = distanceToBottom / blendRange;
+        targetScrollTop = targetMaxScroll * (1 - _weight) + targetScrollTop * _weight;
+      }
+      if (!Number.isFinite(targetScrollTop)) {
+        this.syncPreviewByRatio();
+        return;
+      }
+      this.setPreviewScrollTop(targetScrollTop, {
+        smooth: true
+      });
+    }
+  }, {
+    key: "initToolbar",
+    value: function initToolbar() {
+      var _this8 = this;
+      // 注册快捷键
+      var registerShortcut = function registerShortcut(btn, shortcut, callback) {
+        var isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+
+        // 校验快捷键格式是否正确
+        var isValidShortcut = /^([a-zA-Z0-9]|F[1-9]|10|11|12|\+)+$/.test(shortcut);
+        if (!isValidShortcut) {
+          console.error("无效的快捷键格式");
+          return false;
+        }
+
+        // 处理大小写问题
+        shortcut = shortcut.toLowerCase();
+
+        // 检查是否为Mac系统，如果是，则将ctrl替换为cmd
+        if (isMac) {
+          shortcut = shortcut.replace("ctrl", "cmd");
+        }
+
+        // 创建keydown事件处理函数
+        var handleKeyDown = function handleKeyDown(event) {
+          if (!_this8.isFocused()) {
+            // 只有在textarea处于焦点状态时响应快捷键事件
+            return false;
+          }
+          var pressedKeys = [];
+          if (event.ctrlKey) {
+            pressedKeys.push("ctrl");
+          }
+          if (event.altKey) {
+            pressedKeys.push("alt");
+          }
+          if (event.shiftKey) {
+            pressedKeys.push("shift");
+          }
+
+          // 只在有修饰键按下的情况下响应字母和数字键
+          if (/[a-zA-Z0-9]/.test(event.key) && pressedKeys.length > 0) {
+            pressedKeys.push(event.key.toLowerCase());
+          }
+          var pressedShortcut = pressedKeys.join("+");
+          if (pressedShortcut === shortcut) {
+            event.preventDefault(); // 阻止浏览器默认行为
+            event.stopPropagation(); // 阻止事件冒泡
+            event.objectTarget = btn;
+            callback.call(_this8, event);
+          }
+        };
+
+        // 绑定keydown事件到document
+        document.addEventListener("keydown", handleKeyDown);
+        return true;
+      };
+
+      // 创建按钮
+      var createButton = function createButton() {
+        var attrs = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+        var btn = (0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.$C)("li", _objectSpread(_objectSpread({}, attrs), {}, {
+          title: attrs.name
+        }), ["icon", "command", "onMounted"]);
+        btn.classList.add("wmd-button");
+        var icon = $(attrs.icon);
+        if (icon.length) {
+          btn.appendChild(icon.get(0));
+        } else {
+          btn.innerHTML = attrs.icon;
+        }
+        // 检查是否存在shortcut属性
+        if (attrs.shortcut) {
+          if (registerShortcut(btn, attrs.shortcut, _this8.handleHotkey)) {
+            // 注册按键，成功才修改 title
+            btn.title = "".concat(attrs.name, " ").concat(attrs.shortcut.toUpperCase());
+          }
+        }
+        if ("command" in attrs) {
+          if (typeof attrs.command === "function") {
+            btn.addEventListener("click", function () {
+              attrs.command.call(_this8, {
+                target: btn
+              });
+            });
+          } else {
+            btn.setAttribute("onclick", attrs.command);
+          }
+        }
+        return btn;
+      };
+
+      // 创建分隔符
+      var createSplitter = function createSplitter() {
+        var num = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+        var attrs = arguments.length > 1 ? arguments[1] : undefined;
+        var el = (0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.$C)("li", _objectSpread({
+          id: (0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.sprintf)("wmd-spacer%d-aaeditor", num)
+        }, attrs));
+        el.classList.add("wmd-spacer");
+        el.classList.add((0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.sprintf)("wmd-spacer%d", num));
+        return el;
+      };
+      var getSpacerCount = function getSpacerCount() {
+        return $("#wmd-button-bar-aaeditor .wmd-spacer").length;
+      };
+      this.toolbar = $("#wmd-button-row-aaeditor");
+      this.buttons.forEach(function (btnCfg) {
+        var el,
+          isExists = false;
+        if ("id" in btnCfg) {
+          if (document.getElementById(btnCfg.id)) {
+            el = document.getElementById(btnCfg.id);
+            isExists = true;
+            if ("icon" in btnCfg) {
+              el.innerHTML = btnCfg.icon;
+            }
+          } else if ("name" in btnCfg) {
+            if (!("icon" in btnCfg)) {
+              btnCfg.icon = "<span>".concat(name, "</span>");
+            }
+            el = createButton(btnCfg);
+          } else {
+            el = createSplitter(getSpacerCount() + 1, btnCfg);
+          }
+        } else {
+          el = createSplitter(getSpacerCount() + 1, btnCfg);
+        }
+        var isInserted = false,
+          refNode;
+
+        /**
+         * 获取插入参考节点
+         *
+         * @param {string} refSel 参考节点或者参考节点选择器
+         * @param {*} parent
+         * @return {*|jQuery|HTMLElement}
+         */
+        var _getRefNode = function getRefNode(refSel, parent) {
+          if (!parent) parent = _this8.toolbar;
+          if ((0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.isString)(refSel)) {
+            if (refSel.indexOf("|") > -1) {
+              var selArr = refSel.split("|");
+              for (var i = 0; i < selArr.length; i++) {
+                var _el = _getRefNode(selArr[i], parent);
+                if (_el.length) return _el;
+              }
+            } else {
+              return $(refSel, parent);
+            }
+          }
+        };
+        if ("insertBefore" in btnCfg) {
+          refNode = _getRefNode(btnCfg.insertBefore, _this8.toolbar);
+          if (refNode) {
+            refNode.before(el);
+            isInserted = true;
+          }
+        } else if ("insertAfter" in btnCfg) {
+          refNode = _getRefNode(btnCfg.insertAfter, _this8.toolbar);
+          if (refNode) {
+            refNode.after(el);
+            isInserted = true;
+          }
+        } else if ("remove" in btnCfg && btnCfg.remove && el.parentNode) {
+          el.parentNode.removeChild(el);
+        }
+        if (!isInserted && !isExists) {
+          _this8.toolbar.append(el);
+        }
+        if (typeof btnCfg.onMounted === "function") {
+          btnCfg.onMounted.call(_this8, {
+            target: el
+          });
+        }
+      });
+    }
+  }, {
+    key: "handleHotkey",
+    value: function handleHotkey(_ref) {
+      var objectTarget = _ref.objectTarget;
+      objectTarget.click();
+    }
+  }, {
+    key: "handlePreviewEnd",
+    value: function handlePreviewEnd() {
+      var _this9 = this;
+      this.refreshPreviewElements();
+      this.stopPreviewSettle();
+      (0,_utils_tabs__WEBPACK_IMPORTED_MODULE_1__.initFenceTabs)(this.previewArea);
+      this.rebuildPreviewLineAnchors();
+      this.previewPrefersRatioSync = this.shouldPreferRatioPreviewSync();
+      this.schedulePreviewScrollSync(true);
+      this.clearPendingPreviewSyncTimers();
+      [120, 320].forEach(function (delay) {
+        var timerId = window.setTimeout(function () {
+          _this9.schedulePreviewScrollSync();
+        }, delay);
+        _this9.pendingPreviewSyncTimers.push(timerId);
+      });
+    }
+
+    /**
+     * 获取文本框文本
+     *
+     * @returns {string}
+     */
+  }, {
+    key: "getContent",
+    value: function getContent() {
+      return this.textarea.getContent();
+    }
+
+    /**
+     * 设置文本框文本（记录到 UndoStack）
+     *
+     * @param {string} text
+     */
+  }, {
+    key: "setContent",
+    value: function setContent(text) {
+      this.textarea.executeAndAddUndoStack("setContent", text);
+    }
+
+    /**
+     * 往光标虽在位置插入文本（记录到 UndoStack）
+     *
+     * @param {string} text
+     */
+  }, {
+    key: "insertText",
+    value: function insertText(text) {
+      this.textarea.executeAndAddUndoStack("insertText", text);
+    }
+
+    /**
+     * 替换文本框选中文本（记录到 UndoStack）
+     *
+     * @param {string} text
+     */
+  }, {
+    key: "replaceSelection",
+    value: function replaceSelection(text) {
+      if (this.getSelectedText()) {
+        this.textarea.executeAndAddUndoStack("replaceSelectionText", text);
+      } else {
+        this.textarea.executeAndAddUndoStack("insertText", text);
+      }
+    }
+
+    /**
+     * 获取选中文本
+     *
+     * @return {string}
+     */
+  }, {
+    key: "getSelectedText",
+    value: function getSelectedText() {
+      return this.textarea.getSelectedText();
+    }
+
+    /**
+     * 获取选中区域的起止位置
+     * @returns {{start: number, end: number}}
+     */
+  }, {
+    key: "getSelection",
+    value: function getSelection() {
+      return this.textarea.getSelection();
+    }
+
+    /**
+     * 设置选中区域的起止位置
+     * @param {number} start 起始位置
+     * @param {number} end 结束位置
+     */
+  }, {
+    key: "setSelection",
+    value: function setSelection(start, end) {
+      this.textarea.setSelection(start, end);
+    }
+
+    /**
+     * 判定是否聚焦到文本框了
+     *
+     * @returns {boolean}
+     */
+  }, {
+    key: "isFocused",
+    value: function isFocused() {
+      return this.textarea.isFocused;
+    }
+
+    /**
+     * 增加或移除选中文本的前后缀。
+     * @param {string} prefix - 前缀。
+     * @param {string} postfix - 后缀。
+     * @param {string} defaultText - 没有选中文本时插入到前缀和后缀之间的文本。
+     */
+  }, {
+    key: "wrapSelection",
+    value: function wrapSelection(prefix, postfix) {
+      var defaultText = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "";
+      var textarea = this.textarea;
+      var selection = this.getSelection();
+      var selectedText = this.getSelectedText();
+      if (selectedText) {
+        // 情况 1: 选中的文本已经是一个完整的包裹块
+        if (selectedText.startsWith(prefix) && selectedText.endsWith(postfix)) {
+          var _newText = selectedText.slice(prefix.length, selectedText.length - postfix.length);
+          textarea.executeAndAddUndoStack("replaceSelectionText", _newText);
+          // 更新光标，选中被解开包装的文本
+          textarea.setSelection(selection.start, selection.start + _newText.length);
+          return;
+        }
+        // 情况 2: 选中的文本是包裹块的“内容”部分
+        // 获取紧邻选中区域前后的文本
+        var textBefore = textarea.getTextInRange(0, selection.start);
+        var textAfter = textarea.getTextInRange(selection.end, textarea.getContent().length);
+        if (textBefore.endsWith(prefix) && textAfter.startsWith(postfix)) {
+          // 确定完整的块在整个文本中的起始和结束位置
+          var fullBlockStart = selection.start - prefix.length;
+          var fullBlockEnd = selection.end + postfix.length;
+          // 先将选择区域扩展为整个块
+          textarea.setSelection(fullBlockStart, fullBlockEnd);
+          // 然后用原始选择的文本（即无前后缀的内容）替换整个块
+          textarea.executeAndAddUndoStack("replaceSelectionText", selectedText);
+          // 更新光标，选中被解开包装的文本
+          textarea.setSelection(fullBlockStart, fullBlockStart + selectedText.length);
+          return;
+        }
+        // 情况 3: 以上都不是，执行包裹操作
+        var newText = prefix + selectedText + postfix;
+        textarea.executeAndAddUndoStack("replaceSelectionText", newText);
+        // 更新光标，选中被包裹的原始文本
+        textarea.setSelection(selection.start + prefix.length, selection.end + prefix.length);
+      } else {
+        // 没有选中文本时，插入带有默认文本的包裹块
+        var newPrefix = textarea.isAtLineStart() ? prefix : "\n" + prefix;
+        var newPostfix = textarea.isAtLineEnd() ? postfix : postfix + "\n";
+        var _newText2 = newPrefix + defaultText + newPostfix;
+        textarea.executeAndAddUndoStack("insertText", _newText2);
+
+        // 更新光标，选中插入的默认文本
+        var insertionStart = textarea.getSelection().start - _newText2.length;
+        textarea.setSelection(insertionStart + newPrefix.length, insertionStart + newPrefix.length + defaultText.length);
+      }
+    }
+
+    /**
+     * 区块增加前缀。
+     * @param {string} prefix - 前缀。
+     * @param {string} defaultText - 没有选中文本时插入到前缀后面的文本。
+     */
+  }, {
+    key: "blockPrefix",
+    value: function blockPrefix(prefix, defaultText) {
+      var textarea = this.textarea;
+      var realSelectionText = textarea.getSelectedText();
+      defaultText || (defaultText = "");
+      if (realSelectionText.length) {
+        var realSelectionArr = realSelectionText.split("\n");
+        console.log(realSelectionArr);
+        var newText = realSelectionArr.map(function (line, i) {
+          return prefix.replace("%n", i + 1) + line;
+        }).join("\n");
+        // 检查选中文本的第一行是否在行首，如果不是，在 newText 前添加换行符
+        if (!textarea.isAtLineStart()) {
+          newText = "\n" + newText;
+        }
+        textarea.executeAndAddUndoStack("replaceSelectionText", newText + "\n");
+      } else {
+        var newPrefix = prefix.replace("%n", 1),
+          _newText3 = newPrefix + defaultText + "\n",
+          startPosFix = 0;
+        if (!textarea.isAtLineStart()) {
+          _newText3 = "\n" + _newText3;
+          startPosFix = 1;
+        }
+        textarea.executeAndAddUndoStack("insertText", _newText3);
+        textarea.setSelection(textarea.getSelection().start - _newText3.length + newPrefix.length + startPosFix, textarea.getSelection().start);
+      }
+    }
+
+    /**
+     * 选中文本首行前缀处理。
+     * @param {string} prefix - 前缀。
+     * @param {string} defaultText - 没有选中文本时插入到前缀后面的文本。
+     */
+  }, {
+    key: "firstSelectionLinePrefix",
+    value: function firstSelectionLinePrefix(prefix, defaultText) {
+      var textarea = this.textarea;
+      var realSelectionText = textarea.getSelectedText();
+      if (realSelectionText.length) {
+        var realSelectionArr = realSelectionText.split("\n");
+        var firstLine = realSelectionArr[0];
+
+        // 判断选中的第一行是否以指定前缀开头
+        if (firstLine.startsWith(prefix)) {
+          // 去除前缀
+          firstLine = firstLine.substring(prefix.length);
+        } else {
+          var _textarea$getSelectio = textarea.getSelection(),
+            startPos = _textarea$getSelectio.start,
+            endPos = _textarea$getSelectio.end;
+          if (textarea.getTextInRange(startPos - prefix.length, startPos) === prefix) {
+            textarea.setSelection(startPos - prefix.length, endPos);
+          } else {
+            // 增加前缀
+            firstLine = prefix + firstLine;
+          }
+        }
+
+        // 重新组合文本
+        realSelectionArr[0] = firstLine;
+        var newText = realSelectionArr.join("\n");
+
+        // 检查选中文本的第一行是否在行首，如果不是，在 newText 前添加换行符
+        if (!textarea.isAtLineStart()) {
+          newText = "\n" + newText;
+        }
+        textarea.executeAndAddUndoStack("replaceSelectionText", newText);
+      } else {
+        var newPrefix = prefix.replace("%n", 1);
+        var _newText4,
+          startPosFix = 0;
+        if (textarea.isAtLineStart()) {
+          _newText4 = newPrefix + defaultText;
+        } else {
+          _newText4 = "\n" + newPrefix + defaultText;
+          startPosFix = 1;
+        }
+        textarea.executeAndAddUndoStack("insertText", _newText4);
+
+        // 设置光标位置
+        textarea.setSelection(textarea.getSelection().start - _newText4.length + newPrefix.length + startPosFix, textarea.getSelection().start);
+      }
+    }
+  }, {
+    key: "getInitialFormValues",
+    value: function getInitialFormValues() {
+      var fields = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+      var initialValues = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      var values = {};
+      fields.forEach(function (field) {
+        var _value;
+        if (!(field !== null && field !== void 0 && field.name)) {
+          return;
+        }
+        var value = initialValues[field.name];
+        if (value === undefined && "value" in field) {
+          value = field.value;
+        }
+        if (field.type === "checkbox") {
+          values[field.name] = Boolean(value);
+          return;
+        }
+        values[field.name] = (_value = value) !== null && _value !== void 0 ? _value : "";
+      });
+      return values;
+    }
+  }, {
+    key: "resolveFieldHidden",
+    value: function resolveFieldHidden() {
+      var field = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var values = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      if (typeof field.hidden === "function") {
+        return Boolean(field.hidden(values));
+      }
+      return Boolean(field.hidden);
+    }
+  }, {
+    key: "renderFormField",
+    value: function renderFormField() {
+      var field = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var rawValue = arguments.length > 1 ? arguments[1] : undefined;
+      if (!(field !== null && field !== void 0 && field.name)) {
+        return "";
+      }
+      var value = rawValue !== null && rawValue !== void 0 ? rawValue : "";
+      var fieldName = (0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.escapeAttribute)(field.name);
+      var fieldId = (0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.escapeAttribute)(field.id || "aa-modal-field-".concat(field.name.replace(/[^a-zA-Z0-9_-]/g, "-")));
+      var wrapperClasses = ["form-item"];
+      if (field.type === "textarea") {
+        wrapperClasses.push("for-textarea");
+      }
+      if (field.className) {
+        wrapperClasses.push(field.className);
+      }
+      var labelClasses = [];
+      if (field.labelClass) {
+        labelClasses.push(field.labelClass);
+      }
+      if (field.required) {
+        labelClasses.push("required");
+      }
+      var hiddenAttr = field.hidden ? ' hidden="true"' : "";
+      var requiredAttr = field.required ? " required" : "";
+      var placeholderAttr = field.placeholder ? " placeholder=\"".concat((0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.escapeAttribute)(field.placeholder), "\"") : "";
+      var minAttr = field.type === "number" && field.min !== undefined ? " min=\"".concat((0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.escapeAttribute)(field.min), "\"") : "";
+      var inputClassAttr = field.inputClass ? " class=\"".concat((0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.escapeAttribute)(field.inputClass), "\"") : "";
+      var label = field.label === false ? "" : "<label for=\"".concat(fieldId, "\"").concat(labelClasses.length ? " class=\"".concat((0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.escapeAttribute)(labelClasses.join(" ")), "\"") : "", ">").concat((0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.escapeHtml)(field.label || ""), "</label>");
+      if (field.type === "select") {
+        var options = (field.options || []).map(function (option) {
+          var _option$label;
+          var optionValue = (0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.isObject)(option) ? option.value : option;
+          var optionLabel = (0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.isObject)(option) ? (_option$label = option.label) !== null && _option$label !== void 0 ? _option$label : option.value : option;
+          var selectedAttr = String(optionValue) === String(value) ? " selected" : "";
+          return "<option value=\"".concat((0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.escapeAttribute)(optionValue), "\"").concat(selectedAttr, ">").concat((0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.escapeHtml)(optionLabel), "</option>");
+        }).join("");
+        return "<div class=\"".concat((0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.escapeAttribute)(wrapperClasses.join(" ")), "\" data-field-name=\"").concat(fieldName, "\"").concat(hiddenAttr, ">").concat(label, "<select id=\"").concat(fieldId, "\" name=\"").concat(fieldName, "\"").concat(requiredAttr).concat(inputClassAttr, ">").concat(options, "</select></div>");
+      }
+      if (field.type === "textarea") {
+        var rowsAttr = field.rows ? " rows=\"".concat((0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.escapeAttribute)(field.rows), "\"") : "";
+        return "<div class=\"".concat((0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.escapeAttribute)(wrapperClasses.join(" ")), "\" data-field-name=\"").concat(fieldName, "\"").concat(hiddenAttr, ">").concat(label, "<textarea id=\"").concat(fieldId, "\" name=\"").concat(fieldName, "\"").concat(requiredAttr).concat(placeholderAttr).concat(rowsAttr).concat(inputClassAttr, ">").concat((0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.escapeHtml)(value), "</textarea></div>");
+      }
+      if (field.type === "checkbox") {
+        var checkedAttr = value ? " checked" : "";
+        if (field["switch"]) {
+          return "<div class=\"".concat((0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.escapeAttribute)(wrapperClasses.join(" ")), "\" data-field-name=\"").concat(fieldName, "\"").concat(hiddenAttr, ">").concat(label, "<input type=\"checkbox\" id=\"").concat(fieldId, "\" name=\"").concat(fieldName, "\" switch").concat(checkedAttr).concat(requiredAttr).concat(inputClassAttr, "><label class=\"form-switcher\" for=\"").concat(fieldId, "\"></label></div>");
+        }
+        return "<div class=\"".concat((0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.escapeAttribute)(wrapperClasses.join(" ")), "\" data-field-name=\"").concat(fieldName, "\"").concat(hiddenAttr, ">").concat(label, "<input type=\"checkbox\" id=\"").concat(fieldId, "\" name=\"").concat(fieldName, "\"").concat(checkedAttr).concat(requiredAttr).concat(inputClassAttr, "></div>");
+      }
+      var inputType = field.type || "text";
+      var valueAttr = " value=\"".concat((0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.escapeAttribute)(value), "\"");
+      return "<div class=\"".concat((0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.escapeAttribute)(wrapperClasses.join(" ")), "\" data-field-name=\"").concat(fieldName, "\"").concat(hiddenAttr, ">").concat(label, "<input type=\"").concat((0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.escapeAttribute)(inputType), "\" id=\"").concat(fieldId, "\" name=\"").concat(fieldName, "\"").concat(valueAttr).concat(requiredAttr).concat(placeholderAttr).concat(minAttr).concat(inputClassAttr, "></div>");
+    }
+  }, {
+    key: "collectFormValues",
+    value: function collectFormValues(formElm) {
+      var values = {};
+      if (!formElm) {
+        return values;
+      }
+      var elements = Array.from(formElm.querySelectorAll("[name]"));
+      var processedNames = new Set();
+      elements.forEach(function (element) {
+        var name = element.name;
+        if (!name || processedNames.has(name)) {
+          return;
+        }
+        processedNames.add(name);
+        if (element instanceof HTMLInputElement && element.type === "checkbox") {
+          values[name] = element.checked;
+          return;
+        }
+        if (element instanceof HTMLInputElement && element.type === "number") {
+          values[name] = element.value === "" ? "" : Number(element.value);
+          return;
+        }
+        values[name] = element.value;
+      });
+      return values;
+    }
+  }, {
+    key: "animateRequiredField",
+    value: function animateRequiredField(element) {
+      if (!element) {
+        return;
+      }
+      element.classList.add("required-animate");
+      window.setTimeout(function () {
+        element.classList.remove("required-animate");
+      }, 800);
+    }
+  }, {
+    key: "validateForm",
+    value: function validateForm(formElm) {
+      var _this10 = this;
+      if (!formElm) {
+        return true;
+      }
+      var isValid = true;
+      var elements = Array.from(formElm.querySelectorAll("[name]"));
+      elements.forEach(function (element) {
+        if (!element.required || element.closest('.form-item[hidden="true"]')) {
+          return;
+        }
+        var isCheckbox = element instanceof HTMLInputElement && element.type === "checkbox";
+        var hasValue = isCheckbox ? element.checked : String(element.value || "").trim() !== "";
+        if (!hasValue) {
+          isValid = false;
+          _this10.animateRequiredField(element);
+        }
+      });
+      return isValid;
+    }
+  }, {
+    key: "syncFormFieldVisibility",
+    value: function syncFormFieldVisibility(modalElm) {
+      var _this11 = this;
+      var fields = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+      var values = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+      fields.forEach(function (field) {
+        if (!(field !== null && field !== void 0 && field.name)) {
+          return;
+        }
+        var wrapper = Array.from(modalElm.querySelectorAll(".form-item")).find(function (item) {
+          return item.dataset.fieldName === field.name;
+        });
+        if (!wrapper) {
+          return;
+        }
+        var isHidden = _this11.resolveFieldHidden(field, values);
+        wrapper.setAttribute("hidden", isHidden ? "true" : "false");
+        wrapper.classList.toggle("hidden", isHidden);
+      });
+    }
+  }, {
+    key: "openFormModal",
+    value: function openFormModal() {
+      var _this12 = this;
+      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var modalOptions = Object.assign({
+        title: "标题",
+        fields: [],
+        initialValues: {},
+        onSubmit: function onSubmit() {
+          return true;
+        },
+        onChange: function onChange() {},
+        validate: function validate() {
+          return true;
+        },
+        showFooter: true
+      }, options);
+      var initialValues = this.getInitialFormValues(modalOptions.fields, modalOptions.initialValues);
+      var innerHTML = modalOptions.fields.map(function (field) {
+        return _this12.renderFormField(_objectSpread(_objectSpread({}, field), {}, {
+          hidden: _this12.resolveFieldHidden(field, initialValues)
+        }), initialValues[field.name]);
+      }).join("");
+      this.openModal({
+        title: modalOptions.title,
+        innerHTML: innerHTML,
+        showFooter: modalOptions.showFooter,
+        checkEmptyOnConfirm: true,
+        handle: function handle(modalElm) {
+          _this12.syncFormFieldVisibility(modalElm, modalOptions.fields, initialValues);
+          modalOptions.onChange.call(_this12, modalElm, _objectSpread({}, initialValues));
+        },
+        change: function change(modalElm, values) {
+          _this12.syncFormFieldVisibility(modalElm, modalOptions.fields, values);
+          modalOptions.onChange.call(_this12, modalElm, values);
+        },
+        confirm: function confirm(modalElm, values) {
+          if (modalOptions.validate.call(_this12, modalElm, values) === false) {
+            return false;
+          }
+          return modalOptions.onSubmit.call(_this12, modalElm, values);
+        }
+      });
+    }
+
+    /**
+     * 打开模态框 (参考 Joe 主题)
+     * @param options
+     */
+  }, {
+    key: "openModal",
+    value: function openModal() {
+      var _this13 = this;
+      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var _modalOptions = {
+        title: "标题",
+        innerHTML: "内容",
+        showFooter: true,
+        checkEmptyOnConfirm: true,
+        change: function change(modal, params) {},
+        confirm: function confirm(modal, params) {
+          return true;
+        },
+        cancel: function cancel(event) {},
+        handle: function handle(modal) {},
+        callback: function callback(modal) {}
+      };
+      var modalOptions = Object.assign(_modalOptions, options);
+      var contentWrap = modalOptions.checkEmptyOnConfirm ? '<form class="params"></form>' : "";
+      if ($("#aa-modal").length < 1) {
+        $("#aa-wrapper").append("<div id=\"aa-modal\" class=\"aa-modal\">\n    <div class=\"aa-modal-frame\">\n    <div class=\"aa-modal-header\">\n        <div class=\"aa-modal-header-title\"></div><div class=\"aa-modal-header-close\"><i class=\"close-icon\"></i></div>\n</div>\n    <div class=\"aa-modal-body\">\n        ".concat(contentWrap, "\n    </div>\n    <div class=\"aa-modal-footer\">\n        <button type=\"button\" class=\"aa-modal-footer-button aa-modal-footer-cancel\">\u53D6\u6D88</button><button type=\"button\" class=\"aa-modal-footer-button aa-modal-footer-confirm\">\u786E\u5B9A</button>\n    </div>\n</div>\n</div>"));
+      }
+      $(".aa-modal-header-title").text(modalOptions.title);
+      if (modalOptions.checkEmptyOnConfirm) {
+        var _form = $(".aa-modal-body .params").empty();
+        if ((0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.isElement)(modalOptions.innerHTML)) {
+          _form.append(modalOptions.innerHTML);
+        } else {
+          _form.html(modalOptions.innerHTML);
+        }
+      } else {
+        var body = $(".aa-modal-body").empty();
+        if ((0,_utils_functions__WEBPACK_IMPORTED_MODULE_0__.isElement)(modalOptions.innerHTML)) {
+          body.append(modalOptions.innerHTML);
+        } else {
+          body.html(modalOptions.innerHTML);
+        }
+      }
+      var modalElm = $("#aa-modal").get(0);
+      modalOptions.showFooter ? $(".aa-modal-footer").show() : $(".aa-modal-footer").hide();
+      $("body").addClass("no-scroll");
+      modalOptions.handle.call(this, modalElm);
+      $(".aa-modal-footer-confirm").on("click", function () {
+        var params = {};
+        var flag = true;
+        if (modalOptions.checkEmptyOnConfirm) {
+          var formElm = $("#aa-modal .aa-modal-body .params").get(0);
+          params = _this13.collectFormValues(formElm);
+          flag = _this13.validateForm(formElm);
+        }
+        if (flag && modalOptions.confirm.call(_this13, modalElm, params)) {
+          $("#aa-modal").remove();
+          $("body").removeClass("no-scroll");
+          modalOptions.callback.call(_this13, modalElm);
+        }
+      });
+      $(".aa-modal-header-close").on("click", function (event) {
+        modalOptions.cancel.call(_this13, event);
+        $("#aa-modal").removeClass("active");
+        setTimeout(function () {
+          $("#aa-modal").remove();
+          $("body").removeClass("no-scroll");
+        }, 300);
+      });
+      $(".aa-modal-footer-cancel").on("click", function (event) {
+        $("#aa-modal").removeClass("active");
+        modalOptions.cancel.call(modalElm, event);
+        setTimeout(function () {
+          $("#aa-modal").remove();
+          $("body").removeClass("no-scroll");
+        }, 300);
+      });
+      var form = $(".params", modalElm);
+      $("input,select,textarea", form).on("change input", function () {
+        var params = _this13.collectFormValues(form.get(0));
+        modalOptions.change.call(_this13, modalElm, params);
+      });
+      $("#aa-modal").addClass("active");
+    }
+
+    /**
+     * 来自 Wordpress
+     * https://regex101.com/r/ja0b1p/1
+     * $0→code $2→tag $3→attr $5→text
+     * @param tag
+     * @returns {RegExp}
+     */
+  }, {
+    key: "getShortCodeRegex",
+    value: function getShortCodeRegex(tag) {
+      return new RegExp("\\[(\\[?)(" + tag + ")(?![\\w-])([^\\]\\/]*(?:\\/(?!\\])[^\\]\\/]*)*?)(?:(\\/)\\]|\\](?:([^\\[]*(?:\\[(?!\\/\\2\\])[^\\[]*)*)(\\[\\/\\2\\]))?)(\\]?)", "g");
+    }
+  }]);
+}();
+new XEditor("#text", "#wmd-preview-aaeditor");
+
+/***/ }),
+
+/***/ "./assets/src/utils/functions.js":
+/*!***************************************!*\
+  !*** ./assets/src/utils/functions.js ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   $A: () => (/* binding */ $A),
+/* harmony export */   $C: () => (/* binding */ $C),
+/* harmony export */   escapeAttribute: () => (/* binding */ escapeAttribute),
+/* harmony export */   escapeHtml: () => (/* binding */ escapeHtml),
+/* harmony export */   isElement: () => (/* binding */ isElement),
+/* harmony export */   isObject: () => (/* binding */ isObject),
+/* harmony export */   isString: () => (/* binding */ isString),
+/* harmony export */   sprintf: () => (/* binding */ sprintf)
+/* harmony export */ });
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+/**
+ * 格式化字符串
+ *
+ * @param {string} format 需要格式化额字符串
+ * @param {*} args 替换内容
+ * @returns {*}
+ */
+function sprintf(format) {
+  for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+    args[_key - 1] = arguments[_key];
+  }
+  var index = 0;
+  return format.replace(/%[sd]/g, function (match) {
+    if (index >= args.length) {
+      return match;
+    }
+    var arg = args[index++];
+    if (match === '%s') {
+      return String(arg);
+    } else if (match === '%d') {
+      if (typeof arg === 'number') {
+        return String(arg);
+      } else {
+        throw new Error("Argument ".concat(index, " is not a number."));
+      }
+    }
+    return match;
+  });
+}
+function escapeHtml() {
+  var value = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
+  return String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+function escapeAttribute() {
+  var value = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
+  return escapeHtml(value).replace(/`/g, "&#96;");
+}
+function $C(tag, attrs) {
+  var skipAttrs = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+  var el = document.createElement(tag);
+  return $A(el, attrs, skipAttrs);
+}
+function $A(el) {
+  var attrs = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  var skipAttrs = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+  var setAttr, setText, setHTML;
+  if ("attr" in el) {
+    setAttr = function setAttr(name, val) {
+      el.attr(name, "" + val);
+    };
+    setText = function setText(val) {
+      el.text(val);
+    };
+    setHTML = function setHTML(val) {
+      el.html(val);
+    };
+  } else {
+    setAttr = function setAttr(name, val) {
+      el.setAttribute(name, "" + val);
+    };
+    setText = function setText(val) {
+      el.innerText = val;
+    };
+    setHTML = function setHTML(val) {
+      el.innerHTML = val;
+    };
+  }
+  for (var p in attrs) {
+    if (!skipAttrs.includes(p)) {
+      // @ts-ignore
+      var attr = attrs[p];
+      if (typeof attr === "function") {
+        attr = attr.toString();
+      }
+      switch (p) {
+        case 'innerText':
+          setText(attr);
+          break;
+        case 'innerHTML':
+          setHTML(attr);
+          break;
+        case 'style':
+          if (_typeof(attr) === "object") {
+            var style = Object.entries(attr).map(function (en) {
+              return en.join(":");
+            }).join("; ");
+            setAttr('style', style);
+          } else {
+            setAttr('style', attr);
+          }
+          break;
+        default:
+          setAttr(p, attr);
+          break;
+      }
+    }
+  }
+  return el;
+}
+function isObject(obj) {
+  return Object.prototype.toString.call(obj) === '[object Object]';
+}
+function isString(str) {
+  return typeof str === "string";
+}
+function isElement(obj) {
+  return obj instanceof HTMLElement;
+}
+
+/***/ }),
+
+/***/ "./assets/src/utils/tabs.js":
+/*!**********************************!*\
+  !*** ./assets/src/utils/tabs.js ***!
+  \**********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   initFenceTabs: () => (/* binding */ initFenceTabs)
+/* harmony export */ });
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function splitClasses() {
+  var value = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
+  return String(value).split(/\s+/).map(function (item) {
+    return item.trim();
+  }).filter(Boolean);
+}
+function getDirectChildByClass(element, className) {
+  if (!(element instanceof Element)) {
+    return null;
+  }
+  return Array.from(element.children).find(function (child) {
+    return child.classList.contains(className);
+  }) || null;
+}
+function resolveTabs() {
+  var root = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
+  var tabs = [];
+  if (root instanceof Element && root.classList.contains("fence-tabs")) {
+    tabs.push(root);
+  }
+  if (typeof root.querySelectorAll === "function") {
+    tabs.push.apply(tabs, _toConsumableArray(root.querySelectorAll(".fence-tabs")));
+  }
+  return Array.from(new Set(tabs));
+}
+function applyStateClasses(element) {
+  var activeClasses = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+  var inactiveClasses = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+  var isActive = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+  if (!(element instanceof Element)) {
+    return;
+  }
+  activeClasses.forEach(function (className) {
+    element.classList.toggle(className, isActive);
+  });
+  inactiveClasses.forEach(function (className) {
+    element.classList.toggle(className, !isActive);
+  });
+}
+function initTabsInstance(tabs) {
+  var _window$matchMedia, _window;
+  if (!(tabs instanceof Element)) {
+    return;
+  }
+  var nav = getDirectChildByClass(tabs, "fence-tabs-nav");
+  var panelsWrapper = getDirectChildByClass(tabs, "fence-tabs-panels");
+  if (!nav || !panelsWrapper) {
+    return;
+  }
+  var buttons = Array.from(nav.querySelectorAll(".fence-tabs-tab"));
+  var panels = Array.from(panelsWrapper.querySelectorAll(".fence-tabs-panel"));
+  if (!buttons.length || buttons.length !== panels.length) {
+    return;
+  }
+  var activeClasses = splitClasses(tabs.dataset.tabActiveClasses);
+  var inactiveClasses = splitClasses(tabs.dataset.tabInactiveClasses);
+  var panelActiveClasses = ["fence-tabs-panel-active", "tab-panel-active"];
+  var panelInactiveClasses = ["fence-tabs-panel-inactive", "tab-panel-inactive"];
+  var reduceMotion = (_window$matchMedia = (_window = window).matchMedia) === null || _window$matchMedia === void 0 || (_window$matchMedia = _window$matchMedia.call(_window, "(prefers-reduced-motion: reduce)")) === null || _window$matchMedia === void 0 ? void 0 : _window$matchMedia.matches;
+  var activate = function activate(index) {
+    var focusButton = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+    var animatePanel = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+    var previousIndex = Number.parseInt(tabs.dataset.tabsActiveIndex || "", 10);
+    var shouldAnimate = animatePanel && !reduceMotion && previousIndex !== index && tabs.dataset.tabsReady === "true";
+    buttons.forEach(function (button, buttonIndex) {
+      var isActive = buttonIndex === index;
+      button.setAttribute("aria-selected", isActive ? "true" : "false");
+      button.setAttribute("tabindex", isActive ? "0" : "-1");
+      applyStateClasses(button, activeClasses, inactiveClasses, isActive);
+      if (focusButton && isActive) {
+        button.focus();
+      }
+    });
+    panels.forEach(function (panel, panelIndex) {
+      var isActive = panelIndex === index;
+      panel.classList.remove("fence-tabs-panel-no-animation");
+      panel.hidden = !isActive;
+      panel.setAttribute("aria-hidden", isActive ? "false" : "true");
+      applyStateClasses(panel, panelActiveClasses, panelInactiveClasses, isActive);
+      if (isActive && !shouldAnimate) {
+        panel.classList.add("fence-tabs-panel-no-animation");
+      }
+    });
+    tabs.dataset.tabsActiveIndex = String(index);
+  };
+  buttons.forEach(function (button, index) {
+    if (button.dataset.tabsBound === "true") {
+      return;
+    }
+    button.dataset.tabsBound = "true";
+    button.addEventListener("click", function () {
+      activate(index, false);
+    });
+  });
+  var activeIndex = Number.parseInt(tabs.dataset.tabsActiveIndex || "", 10);
+  if (Number.isNaN(activeIndex) || activeIndex < 0 || activeIndex >= buttons.length) {
+    activeIndex = buttons.findIndex(function (button) {
+      return button.getAttribute("aria-selected") === "true";
+    });
+  }
+  if (activeIndex < 0) {
+    activeIndex = 0;
+  }
+  activate(activeIndex, false, false);
+  tabs.dataset.tabsReady = "true";
+  tabs.dataset.tabsInitialized = "true";
+}
+function initFenceTabs() {
+  var root = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
+  resolveTabs(root).forEach(function (tabs) {
+    initTabsInstance(tabs);
+  });
+}
+
+/***/ }),
+
+/***/ "./assets/src/utils/textarea.js":
+/*!**************************************!*\
+  !*** ./assets/src/utils/textarea.js ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ TextAreaUtils)
+/* harmony export */ });
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
+function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
+function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+/**
+ * TextAreaUtils 类用于管理文本区域（Textarea）的操作和事件绑定。
+ */
+var TextAreaUtils = /*#__PURE__*/function () {
+  /**
+   * 创建一个 TextAreaUtils 的实例。
+   * @param {string} textareaSelector - 选择器，用于选择要管理的文本区域。
+   */
+  function TextAreaUtils(textareaSelector) {
+    _classCallCheck(this, TextAreaUtils);
+    this.textarea = document.querySelector(textareaSelector);
+    this.textarea.utils = this; // 将 TextAreaUtils 实例关联到 textarea 元素上
+    this.locked = false; // 文本区域是否被锁定
+    this.isFocused = false; // 默认未获取焦点
+    this.initFocusEvents(); // 初始化焦点事件
+  }
+
+  /**
+   * 运行命令并保存修改到 UndoStack。
+   * @param {(string)} operate - 要执行的操作，支持 'setContent', 'insertText', 'replaceSelectionText' 等。
+   * @param {...any} args - 操作所需的参数。
+   */
+  return _createClass(TextAreaUtils, [{
+    key: "executeAndAddUndoStack",
+    value: function executeAndAddUndoStack(operate) {
+      for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        args[_key - 1] = arguments[_key];
+      }
+      var resolvedOperate = this.resolveOperationName(operate);
+      var handler = this.getOperationHandlers()[resolvedOperate];
+      if (typeof handler !== 'function') {
+        console.warn("[TextAreaUtils] Unsupported operation: ".concat(operate));
+        return false;
+      }
+      var result = false;
+      var fn = function fn() {
+        result = handler.apply(void 0, args);
+        return result;
+      };
+      if (this.textarea.pagedown) {
+        this.textarea.pagedown.textOperation(fn);
+        return result;
+      } else {
+        return fn();
+      }
+    }
+  }, {
+    key: "getOperationHandlers",
+    value: function getOperationHandlers() {
+      var _this = this;
+      return {
+        setContent: function setContent() {
+          return _this.setContent.apply(_this, arguments);
+        },
+        insertText: function insertText() {
+          return _this.insertText.apply(_this, arguments);
+        },
+        replaceSelectionText: function replaceSelectionText() {
+          return _this.replaceSelectionText.apply(_this, arguments);
+        }
+      };
+    }
+  }, {
+    key: "resolveOperationName",
+    value: function resolveOperationName(operate) {
+      var aliases = {
+        replaceSelection: 'replaceSelectionText'
+      };
+      return aliases[operate] || operate;
+    }
+
+    /**
+     * 获取文本区域实例。
+     * @returns {HTMLElement} 返回文本区域的 DOM 元素。
+     */
+  }, {
+    key: "getInstance",
+    value: function getInstance() {
+      return this.textarea;
+    }
+
+    /**
+     * 绑定事件处理程序。
+     * @param {string} eventType - 要绑定的事件类型，例如 'input', 'focus', 'blur' 等。
+     * @param {Function} handler - 事件处理程序函数。
+     */
+  }, {
+    key: "on",
+    value: function on(eventType, handler) {
+      this.textarea.addEventListener(eventType, handler);
+    }
+
+    /**
+     * 解绑事件处理程序。
+     * @param {string} eventType - 要解绑的事件类型。
+     * @param {Function} handler - 要解绑的事件处理程序函数。
+     */
+  }, {
+    key: "off",
+    value: function off(eventType, handler) {
+      this.textarea.removeEventListener(eventType, handler);
+    }
+
+    /**
+     * 获取文本区域的内容。
+     * @returns {string} 返回文本区域的当前内容。
+     */
+  }, {
+    key: "getContent",
+    value: function getContent() {
+      return this.textarea.value;
+    }
+
+    /**
+     * 设置文本区域的内容。
+     * @param {string} content - 要设置的新内容。
+     */
+  }, {
+    key: "setContent",
+    value: function setContent(content) {
+      if (this.locked) return false;
+      this.textarea.value = content;
+      this.afterOperate(); // 触发 input 事件
+      return true;
+    }
+
+    /**
+     * 锁定文本区域，阻止内容修改
+     */
+  }, {
+    key: "lock",
+    value: function lock() {
+      this.locked = true;
+      this.textarea.setAttribute('readonly', 'readonly');
+    }
+
+    /**
+     * 取消锁定文本区域，允许内容修改
+     */
+  }, {
+    key: "unlock",
+    value: function unlock() {
+      this.locked = false;
+      this.textarea.removeAttribute('readonly');
+    }
+
+    /**
+     * 插入文本到当前光标的位置，成功返回真，否则返回假。
+     * @param {string} text - 要插入的文本。
+     * @returns {boolean} 如果插入操作成功，则返回 true；否则返回 false。
+     */
+  }, {
+    key: "insertText",
+    value: function insertText(text) {
+      if (this.locked) return false;
+      var startPos = this.textarea.selectionStart;
+      var endPos = this.textarea.selectionEnd;
+      var cursorPos = startPos + text.length;
+      return this.replaceRange(startPos, endPos, text, cursorPos, cursorPos);
+    }
+
+    /**
+     * 替换选中文本。
+     * @param {string} text - 用于替换选中文本的新文本。
+     * @returns {boolean} 如果替换操作成功，则返回 true；否则返回 false。
+     */
+  }, {
+    key: "replaceSelectionText",
+    value: function replaceSelectionText(text) {
+      if (this.locked) return false;
+      var startPos = this.textarea.selectionStart;
+      var endPos = this.textarea.selectionEnd;
+      return this.replaceRange(startPos, endPos, text, startPos, startPos + text.length);
+    }
+
+    /**
+     * 获取选中文本。
+     * @returns {string} 返回当前选中的文本。
+     */
+  }, {
+    key: "getSelectedText",
+    value: function getSelectedText() {
+      return this.textarea.value.substring(this.textarea.selectionStart, this.textarea.selectionEnd);
+    }
+
+    /**
+     * 获取当前选中文本的起始和结束位置。
+     * @returns {{start: number, end: number}} 返回包含选中文本起始和结束位置的对象。
+     */
+  }, {
+    key: "getSelection",
+    value: function getSelection() {
+      return {
+        start: this.textarea.selectionStart,
+        end: this.textarea.selectionEnd
+      };
+    }
+
+    /**
+     * 设置选中文本的起始和结束位置
+     * @param {number} start - 选区的开始位置。
+     * @param {number} end - 选区的结束位置。
+     * @returns {boolean} 如果设置选区成功，则返回 true；否则返回 false。
+     */
+  }, {
+    key: "setSelection",
+    value: function setSelection(start, end) {
+      if (this.locked) return false;
+      if (start >= 0 && end >= 0 && start <= this.textarea.value.length && end <= this.textarea.value.length) {
+        this.textarea.selectionStart = start;
+        this.textarea.selectionEnd = end;
+        return true;
+      }
+      return false;
+    }
+
+    /**
+     * 获取指定行号的文本。
+     * @param {number} lineNumber - 要获取的行号。
+     * @returns {string} 返回指定行号的文本，如果行号无效则返回空字符串。
+     */
+  }, {
+    key: "getLineText",
+    value: function getLineText(lineNumber) {
+      var text = this.textarea.value;
+      var lines = text.split('\n');
+      if (lineNumber >= 0 && lineNumber < lines.length) {
+        return lines[lineNumber];
+      }
+      return '';
+    }
+
+    /**
+     * 截取文本。
+     * @param {number} start - 起始位置。
+     * @param {number} end - 结束位置。
+     * @returns {string} 返回从起始位置到结束位置的文本。
+     */
+  }, {
+    key: "getTextInRange",
+    value: function getTextInRange(start, end) {
+      var text = this.textarea.value;
+      return text.substring(start, end);
+    }
+
+    /**
+     * 获取当前行的文本。
+     * @param {number} start - 开始位置，默认为行首，即 0。
+     * @param {number} end - 结束位置，默认为该行的长度。
+     * @returns {string} 返回从指定位置开始到结束位置的文本。
+     */
+  }, {
+    key: "getCurrentLineText",
+    value: function getCurrentLineText() {
+      var start = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+      var end = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.textarea.selectionStart;
+      var text = this.textarea.value;
+      var lineStart = start;
+      var lineEnd = end;
+      while (lineStart > 0 && text[lineStart - 1] !== '\n') {
+        lineStart--;
+      }
+      while (lineEnd < text.length && text[lineEnd] !== '\n') {
+        lineEnd++;
+      }
+      return text.substring(lineStart, lineEnd);
+    }
+
+    /**
+     * 替换当前行的文本。
+     * @param {string} newText - 用于替换当前行的新文本。
+     * @returns {boolean} 如果替换成功，则返回 true；否则返回 false。
+     */
+  }, {
+    key: "replaceCurrentLine",
+    value: function replaceCurrentLine(newText) {
+      if (this.locked) return false;
+      var startPos = this.textarea.selectionStart;
+      var endPos = this.textarea.selectionEnd;
+      var _this$getLineRange = this.getLineRange(startPos, endPos),
+        start = _this$getLineRange.start,
+        end = _this$getLineRange.end;
+      return this.replaceRange(start, end, newText, start, start + newText.length);
+    }
+
+    /**
+     * 获取光标位置的行号和列号。
+     * @returns {{line: number, column: number}} 返回包含光标所在行号和列号的对象。
+     */
+  }, {
+    key: "getCursorPosition",
+    value: function getCursorPosition() {
+      var startPos = this.textarea.selectionStart;
+      var text = this.textarea.value;
+      var lineCount = 1;
+      var columnCount = 1;
+      for (var i = 0; i < startPos; i++) {
+        if (text[i] === '\n') {
+          lineCount++;
+          columnCount = 1;
+        } else {
+          columnCount++;
+        }
+      }
+      return {
+        line: lineCount,
+        column: columnCount
+      };
+    }
+  }, {
+    key: "getLineRange",
+    value: function getLineRange() {
+      var start = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.textarea.selectionStart;
+      var end = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.textarea.selectionEnd;
+      var text = this.textarea.value;
+      var lineStart = start;
+      var lineEnd = end;
+      while (lineStart > 0 && text[lineStart - 1] !== '\n') {
+        lineStart--;
+      }
+      while (lineEnd < text.length && text[lineEnd] !== '\n') {
+        lineEnd++;
+      }
+      return {
+        start: lineStart,
+        end: lineEnd
+      };
+    }
+
+    /**
+     * 是否在行首。
+     * @returns {boolean} 如果光标在行首，则返回 true；否则返回 false。
+     */
+  }, {
+    key: "isAtLineStart",
+    value: function isAtLineStart() {
+      var startPos = this.textarea.selectionStart;
+      var text = this.textarea.value;
+      return startPos === 0 || text[startPos - 1] === '\n';
+    }
+
+    /**
+     * 是否在行尾。
+     * @returns {boolean} 如果光标在行尾，则返回 true；否则返回 false。
+     */
+  }, {
+    key: "isAtLineEnd",
+    value: function isAtLineEnd() {
+      var endPos = this.textarea.selectionEnd;
+      var text = this.textarea.value;
+      return endPos === text.length || text[endPos] === '\n';
+    }
+
+    /**
+     * 是否在文本开头。
+     * @returns {boolean} 如果光标在文本开头，则返回 true；否则返回 false。
+     */
+  }, {
+    key: "isAtStart",
+    value: function isAtStart() {
+      return this.textarea.selectionStart === 0;
+    }
+
+    /**
+     * 是否在文本结尾。
+     * @returns {boolean} 如果光标在文本结尾，则返回 true；否则返回 false。
+     */
+  }, {
+    key: "isAtEnd",
+    value: function isAtEnd() {
+      return this.textarea.selectionEnd === this.textarea.value.length;
+    }
+
+    // 初始化焦点事件
+  }, {
+    key: "initFocusEvents",
+    value: function initFocusEvents() {
+      var _this2 = this;
+      this.textarea.addEventListener('focus', function () {
+        _this2.isFocused = true;
+      });
+      this.textarea.addEventListener('blur', function () {
+        _this2.isFocused = false;
+      });
+    }
+
+    // 触发 input 事件
+  }, {
+    key: "afterOperate",
+    value: function afterOperate() {
+      $(this.textarea).trigger('input');
+      this.textarea.focus();
+    }
+  }, {
+    key: "replaceRange",
+    value: function replaceRange(start, end, text, selectionStart, selectionEnd) {
+      var currentText = this.textarea.value;
+      this.textarea.value = currentText.slice(0, start) + text + currentText.slice(end);
+      this.textarea.selectionStart = selectionStart;
+      this.textarea.selectionEnd = selectionEnd;
+      this.afterOperate(); // 触发 input 事件
+      return true;
+    }
+
+    /**
+     * 获取文本区域的滚动条位置。
+     * @returns {{top: number, left: number}} 返回包含滚动条垂直位置和水平位置的对象。
+     */
+  }, {
+    key: "getScrollPosition",
+    value: function getScrollPosition() {
+      return {
+        top: this.textarea.scrollTop,
+        left: this.textarea.scrollLeft
+      };
+    }
+
+    /**
+     * 设置文本区域的滚动条位置。
+     * @param {number} top - 垂直滚动位置。
+     * @param {number} left - 水平滚动位置。
+     */
+  }, {
+    key: "setScrollPosition",
+    value: function setScrollPosition(top, left) {
+      this.textarea.scrollTop = top;
+      this.textarea.scrollLeft = left;
+    }
+  }]);
+}();
+
+
+/***/ }),
+
+/***/ "./assets/src/editor/hljs.scss":
+/*!*************************************!*\
+  !*** ./assets/src/editor/hljs.scss ***!
+  \*************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./assets/src/content.scss":
+/*!*********************************!*\
+  !*** ./assets/src/content.scss ***!
+  \*********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./assets/src/config/config.scss":
+/*!***************************************!*\
+  !*** ./assets/src/config/config.scss ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./assets/src/main.scss":
+/*!******************************!*\
+  !*** ./assets/src/main.scss ***!
+  \******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./assets/src/front.scss":
+/*!*******************************!*\
+  !*** ./assets/src/front.scss ***!
+  \*******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./assets/src/front-content.scss":
+/*!***************************************!*\
+  !*** ./assets/src/front-content.scss ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./assets/src/front-fence.scss":
+/*!*************************************!*\
+  !*** ./assets/src/front-fence.scss ***!
+  \*************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./assets/src/front-tabs.scss":
+/*!************************************!*\
+  !*** ./assets/src/front-tabs.scss ***!
+  \************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ })
+
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = __webpack_modules__;
+/******/ 	
+/************************************************************************/
+/******/ 	/* webpack/runtime/chunk loaded */
+/******/ 	(() => {
+/******/ 		var deferred = [];
+/******/ 		__webpack_require__.O = (result, chunkIds, fn, priority) => {
+/******/ 			if(chunkIds) {
+/******/ 				priority = priority || 0;
+/******/ 				for(var i = deferred.length; i > 0 && deferred[i - 1][2] > priority; i--) deferred[i] = deferred[i - 1];
+/******/ 				deferred[i] = [chunkIds, fn, priority];
+/******/ 				return;
+/******/ 			}
+/******/ 			var notFulfilled = Infinity;
+/******/ 			for (var i = 0; i < deferred.length; i++) {
+/******/ 				var [chunkIds, fn, priority] = deferred[i];
+/******/ 				var fulfilled = true;
+/******/ 				for (var j = 0; j < chunkIds.length; j++) {
+/******/ 					if ((priority & 1 === 0 || notFulfilled >= priority) && Object.keys(__webpack_require__.O).every((key) => (__webpack_require__.O[key](chunkIds[j])))) {
+/******/ 						chunkIds.splice(j--, 1);
+/******/ 					} else {
+/******/ 						fulfilled = false;
+/******/ 						if(priority < notFulfilled) notFulfilled = priority;
+/******/ 					}
+/******/ 				}
+/******/ 				if(fulfilled) {
+/******/ 					deferred.splice(i--, 1)
+/******/ 					var r = fn();
+/******/ 					if (r !== undefined) result = r;
+/******/ 				}
+/******/ 			}
+/******/ 			return result;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__webpack_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__webpack_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/jsonp chunk loading */
+/******/ 	(() => {
+/******/ 		// no baseURI
+/******/ 		
+/******/ 		// object to store loaded and loading chunks
+/******/ 		// undefined = chunk not loaded, null = chunk preloaded/prefetched
+/******/ 		// [resolve, reject, Promise] = chunk loading, 0 = chunk loaded
+/******/ 		var installedChunks = {
+/******/ 			"/js/main": 0,
+/******/ 			"css/front-tabs": 0,
+/******/ 			"css/front-fence": 0,
+/******/ 			"css/front-content": 0,
+/******/ 			"css/front": 0,
+/******/ 			"css/main": 0,
+/******/ 			"css/config": 0,
+/******/ 			"css/content": 0,
+/******/ 			"css/hljs": 0
+/******/ 		};
+/******/ 		
+/******/ 		// no chunk on demand loading
+/******/ 		
+/******/ 		// no prefetching
+/******/ 		
+/******/ 		// no preloaded
+/******/ 		
+/******/ 		// no HMR
+/******/ 		
+/******/ 		// no HMR manifest
+/******/ 		
+/******/ 		__webpack_require__.O.j = (chunkId) => (installedChunks[chunkId] === 0);
+/******/ 		
+/******/ 		// install a JSONP callback for chunk loading
+/******/ 		var webpackJsonpCallback = (parentChunkLoadingFunction, data) => {
+/******/ 			var [chunkIds, moreModules, runtime] = data;
+/******/ 			// add "moreModules" to the modules object,
+/******/ 			// then flag all "chunkIds" as loaded and fire callback
+/******/ 			var moduleId, chunkId, i = 0;
+/******/ 			if(chunkIds.some((id) => (installedChunks[id] !== 0))) {
+/******/ 				for(moduleId in moreModules) {
+/******/ 					if(__webpack_require__.o(moreModules, moduleId)) {
+/******/ 						__webpack_require__.m[moduleId] = moreModules[moduleId];
+/******/ 					}
+/******/ 				}
+/******/ 				if(runtime) var result = runtime(__webpack_require__);
+/******/ 			}
+/******/ 			if(parentChunkLoadingFunction) parentChunkLoadingFunction(data);
+/******/ 			for(;i < chunkIds.length; i++) {
+/******/ 				chunkId = chunkIds[i];
+/******/ 				if(__webpack_require__.o(installedChunks, chunkId) && installedChunks[chunkId]) {
+/******/ 					installedChunks[chunkId][0]();
+/******/ 				}
+/******/ 				installedChunks[chunkId] = 0;
+/******/ 			}
+/******/ 			return __webpack_require__.O(result);
+/******/ 		}
+/******/ 		
+/******/ 		var chunkLoadingGlobal = self["webpackChunkaaeditor"] = self["webpackChunkaaeditor"] || [];
+/******/ 		chunkLoadingGlobal.forEach(webpackJsonpCallback.bind(null, 0));
+/******/ 		chunkLoadingGlobal.push = webpackJsonpCallback.bind(null, chunkLoadingGlobal.push.bind(chunkLoadingGlobal));
+/******/ 	})();
+/******/ 	
+/************************************************************************/
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module depends on other loaded chunks and execution need to be delayed
+/******/ 	__webpack_require__.O(undefined, ["css/front-tabs","css/front-fence","css/front-content","css/front","css/main","css/config","css/content","css/hljs"], () => (__webpack_require__("./assets/src/main.js")))
+/******/ 	__webpack_require__.O(undefined, ["css/front-tabs","css/front-fence","css/front-content","css/front","css/main","css/config","css/content","css/hljs"], () => (__webpack_require__("./assets/src/main.scss")))
+/******/ 	__webpack_require__.O(undefined, ["css/front-tabs","css/front-fence","css/front-content","css/front","css/main","css/config","css/content","css/hljs"], () => (__webpack_require__("./assets/src/front.scss")))
+/******/ 	__webpack_require__.O(undefined, ["css/front-tabs","css/front-fence","css/front-content","css/front","css/main","css/config","css/content","css/hljs"], () => (__webpack_require__("./assets/src/front-content.scss")))
+/******/ 	__webpack_require__.O(undefined, ["css/front-tabs","css/front-fence","css/front-content","css/front","css/main","css/config","css/content","css/hljs"], () => (__webpack_require__("./assets/src/front-fence.scss")))
+/******/ 	__webpack_require__.O(undefined, ["css/front-tabs","css/front-fence","css/front-content","css/front","css/main","css/config","css/content","css/hljs"], () => (__webpack_require__("./assets/src/front-tabs.scss")))
+/******/ 	__webpack_require__.O(undefined, ["css/front-tabs","css/front-fence","css/front-content","css/front","css/main","css/config","css/content","css/hljs"], () => (__webpack_require__("./assets/src/editor/hljs.scss")))
+/******/ 	__webpack_require__.O(undefined, ["css/front-tabs","css/front-fence","css/front-content","css/front","css/main","css/config","css/content","css/hljs"], () => (__webpack_require__("./assets/src/content.scss")))
+/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["css/front-tabs","css/front-fence","css/front-content","css/front","css/main","css/config","css/content","css/hljs"], () => (__webpack_require__("./assets/src/config/config.scss")))
+/******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
+/******/ 	
+/******/ })()
+;
