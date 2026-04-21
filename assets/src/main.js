@@ -8,7 +8,9 @@ import {
     sprintf,
 } from "./utils/functions";
 import {initFenceTabs} from "./utils/tabs";
+import {initFenceGrid, initFenceMasonry} from "./utils/fenceGallery";
 import TextAreaUtils from "./utils/textarea";
+import "./vendor/masonry.pkgd.min.js";
 
 class XEditor {
     constructor(sel, sel_preview) {
@@ -897,6 +899,8 @@ class XEditor {
     handlePreviewEnd() {
         this.refreshPreviewElements();
         this.stopPreviewSettle();
+        initFenceGrid(this.previewArea);
+        initFenceMasonry(this.previewArea);
         initFenceTabs(this.previewArea);
         this.rebuildPreviewLineAnchors();
         this.previewPrefersRatioSync = this.shouldPreferRatioPreviewSync();

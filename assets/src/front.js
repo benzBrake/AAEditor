@@ -1,9 +1,24 @@
 import DetailsAnimator from "./utils/DetailsAnimator";
 import {initFenceTabs} from "./utils/tabs";
+import {initFenceGrid, initFenceMasonry} from "./utils/fenceGallery";
 
-document.addEventListener("DOMContentLoaded", _ => {
-    document.querySelectorAll('.fence-details').forEach((el) => {
+function initFenceDetails(root = document) {
+    root.querySelectorAll(".fence-details").forEach((el) => {
+        if (el.dataset.detailsInitialized === "true") {
+            return;
+        }
+        el.dataset.detailsInitialized = "true";
         new DetailsAnimator(el);
     });
-    initFenceTabs(document);
+}
+
+function initFrontFeatures(root = document) {
+    initFenceDetails(root);
+    initFenceTabs(root);
+    initFenceGrid(root);
+    initFenceMasonry(root);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    initFrontFeatures(document);
 });

@@ -21,6 +21,7 @@ mix.setPublicPath("assets/dist")
     .js("assets/src/main.js", "assets/dist/js")
     .js("assets/src/front.js", "assets/dist/js")
     .copy("assets/src/hyperdown.js", "assets/dist/js")
+    .copy("assets/src/vendor/masonry.pkgd.min.js", "assets/dist/js")
     .js("assets/src/previewUtils.js", "assets/dist/js")
     .js("assets/src/config/config.js", "assets/dist/js");
 mix.sass("assets/src/main.scss", "assets/dist/css")

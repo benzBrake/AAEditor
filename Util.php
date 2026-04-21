@@ -340,6 +340,7 @@ class Util
     {
         self::collectManifest();
         ?>
+        <script src="<?php echo Util::pluginStatic('js', 'masonry.pkgd.min.js'); ?>"></script>
         <script src="<?php echo Util::pluginStatic('js', 'front.js'); ?>"></script>
         <?php
         if (Util::pluginOption('XEditorContentStyle', 'off') === 'on') {
@@ -1902,7 +1903,10 @@ JS);
     public static function processFencesBlock($text, $archive, $isExcerpt = false)
     {
         // 1. 预检查
-        if (strpos($text, 'fence-pass-comment') === false) {
+        $hasGridFence = strpos($text, 'fence-grid') !== false;
+        $hasPassFence = strpos($text, 'fence-pass-comment') !== false;
+        $hasMasonryFence = strpos($text, 'fence-masonry') !== false;
+        if (!$hasGridFence && !$hasPassFence && !$hasMasonryFence) {
             return $text;
         }
 
@@ -1917,8 +1921,22 @@ JS);
 
             // 创建 XPath 对象
             $xpath = new DOMXPath($dom);
-            $query = "//div[contains(concat(' ', normalize-space(@class), ' '), ' fence-pass-comment ')]";
-            $fencePassElements = $xpath->query($query);
+            $fencePassElements = $xpath->query("//div[contains(concat(' ', normalize-space(@class), ' '), ' fence-pass-comment ')]");
+
+            if ($hasGridFence) {
+                self::normalizeGridFenceContent($dom, $xpath);
+            }
+
+            if ($hasMasonryFence) {
+                self::normalizeMasonryFenceContent($dom, $xpath);
+            }
+
+            if (!$hasPassFence || $fencePassElements->length === 0) {
+                $modifiedHtml = $dom->saveHTML();
+                libxml_clear_errors();
+                return substr($modifiedHtml, 23);
+            }
+
             if ($fencePassElements->length === 0) {
                 return $text;
             }
@@ -2000,5 +2018,180 @@ JS);
             error_log('Error in processFencesBlock (Native DOM): ' . $e->getMessage());
             return $text;
         }
+    }
+
+    private static function normalizeMasonryFenceContent(DOMDocument $dom, DOMXPath $xpath): void
+    {
+        $masonryElements = $xpath->query("//div[contains(concat(' ', normalize-space(@class), ' '), ' fence-masonry ')]");
+        foreach ($masonryElements as $element) {
+            $contentNode = $xpath->query(".//*[contains(concat(' ', normalize-space(@class), ' '), ' fence-content ')]", $element)->item(0);
+            if (!$contentNode || $xpath->query(".//*[contains(concat(' ', normalize-space(@class), ' '), ' masonry-wrapper ')]", $contentNode)->length > 0) {
+                continue;
+            }
+
+            $items = self::extractMasonryItems($contentNode);
+            if (!$items) {
+                continue;
+            }
+
+            while ($contentNode->firstChild) {
+                $contentNode->removeChild($contentNode->firstChild);
+            }
+
+            $wrapper = $dom->createElement('div');
+            $wrapper->setAttribute('class', 'masonry-wrapper');
+
+            foreach ($items as $nodes) {
+                $item = $dom->createElement('div');
+                $item->setAttribute('class', 'masonry-item');
+
+                $inner = $dom->createElement('div');
+                $inner->setAttribute('class', 'masonry-item-inner');
+
+                foreach ($nodes as $node) {
+                    $inner->appendChild($dom->importNode($node, true));
+                }
+
+                $item->appendChild($inner);
+                $wrapper->appendChild($item);
+            }
+
+            $contentNode->appendChild($wrapper);
+        }
+    }
+
+    private static function normalizeGridFenceContent(DOMDocument $dom, DOMXPath $xpath): void
+    {
+        $gridElements = $xpath->query("//div[contains(concat(' ', normalize-space(@class), ' '), ' fence-grid ')]");
+        foreach ($gridElements as $element) {
+            $contentNode = $xpath->query(".//*[contains(concat(' ', normalize-space(@class), ' '), ' fence-content ')]", $element)->item(0);
+            if (!$contentNode) {
+                continue;
+            }
+
+            $replacementNodes = [];
+            $hasWrappedParagraph = false;
+
+            foreach (iterator_to_array($contentNode->childNodes) as $child) {
+                if ($child->nodeType === XML_TEXT_NODE && trim($child->textContent) === '') {
+                    continue;
+                }
+
+                if ($child->nodeType === XML_ELEMENT_NODE && strtolower($child->nodeName) === 'p') {
+                    $hasWrappedParagraph = true;
+                    foreach (iterator_to_array($child->childNodes) as $paragraphChild) {
+                        if ($paragraphChild->nodeType === XML_TEXT_NODE && trim($paragraphChild->textContent) === '') {
+                            continue;
+                        }
+                        if ($paragraphChild->nodeType === XML_ELEMENT_NODE && strtolower($paragraphChild->nodeName) === 'br') {
+                            continue;
+                        }
+                        $replacementNodes[] = $paragraphChild->cloneNode(true);
+                    }
+                    continue;
+                }
+
+                if ($child->nodeType === XML_ELEMENT_NODE && strtolower($child->nodeName) === 'br') {
+                    continue;
+                }
+
+                $replacementNodes[] = $child->cloneNode(true);
+            }
+
+            if (!$hasWrappedParagraph) {
+                continue;
+            }
+
+            while ($contentNode->firstChild) {
+                $contentNode->removeChild($contentNode->firstChild);
+            }
+
+            foreach ($replacementNodes as $node) {
+                $contentNode->appendChild($dom->importNode($node, true));
+            }
+        }
+    }
+
+    private static function extractMasonryItems($contentNode): array
+    {
+        $items = [];
+        $textBuffer = [];
+
+        foreach (iterator_to_array($contentNode->childNodes) as $child) {
+            if ($child->nodeType === XML_TEXT_NODE) {
+                if (trim($child->textContent) === '') {
+                    if (self::masonryNodesHaveContent($textBuffer)) {
+                        $items[] = $textBuffer;
+                    }
+                    $textBuffer = [];
+                    continue;
+                }
+
+                $textBuffer[] = $child->cloneNode(true);
+                continue;
+            }
+
+            if ($child->nodeType !== XML_ELEMENT_NODE) {
+                continue;
+            }
+
+            $tagName = strtolower($child->nodeName);
+            if ($tagName === 'br') {
+                if (self::masonryNodesHaveContent($textBuffer)) {
+                    $items[] = $textBuffer;
+                }
+                $textBuffer = [];
+                continue;
+            }
+
+            if ($tagName === 'p') {
+                if (self::masonryNodesHaveContent($textBuffer)) {
+                    $items[] = $textBuffer;
+                    $textBuffer = [];
+                }
+
+                $paragraphNodes = [];
+                foreach (iterator_to_array($child->childNodes) as $paragraphChild) {
+                    $paragraphNodes[] = $paragraphChild->cloneNode(true);
+                }
+
+                if (self::masonryNodesHaveContent($paragraphNodes)) {
+                    $items[] = $paragraphNodes;
+                }
+                continue;
+            }
+
+            if (self::masonryNodesHaveContent($textBuffer)) {
+                $items[] = $textBuffer;
+                $textBuffer = [];
+            }
+
+            if (trim($child->textContent) === '' && !$child->hasChildNodes()) {
+                continue;
+            }
+
+            $items[] = [$child->cloneNode(true)];
+        }
+
+        if (self::masonryNodesHaveContent($textBuffer)) {
+            $items[] = $textBuffer;
+        }
+
+        return $items;
+    }
+
+    private static function masonryNodesHaveContent(array $nodes): bool
+    {
+        foreach ($nodes as $node) {
+            if ($node->nodeType === XML_ELEMENT_NODE) {
+                return true;
+            }
+
+            if ($node->nodeType === XML_TEXT_NODE && trim($node->textContent) !== '') {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

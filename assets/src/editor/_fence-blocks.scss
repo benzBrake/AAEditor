@@ -119,6 +119,169 @@
     }
   }
 
+  &-grid,
+  &-masonry {
+    --gallery-gap: var(--gap, 0.5rem);
+    --gallery-radius: 6px;
+    --gallery-card-radius: 6px;
+    --gallery-border: rgb(208 215 222 / 0.85);
+    --gallery-shadow: 0 8px 18px rgb(15 23 42 / 0.05);
+    --gallery-card-shadow: 0 4px 12px rgb(15 23 42 / 0.06);
+    --gallery-card-shadow-hover: 0 8px 18px rgb(15 23 42 / 0.1);
+    --gallery-surface:
+      linear-gradient(180deg, rgb(255 255 255 / 0.96), rgb(248 250 252 / 0.94));
+    padding: 14px;
+    border: 1px solid var(--gallery-border);
+    border-radius: var(--gallery-radius);
+    background:
+      radial-gradient(circle at top left, rgb(255 255 255 / 0.95), transparent 34%),
+      linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+    box-shadow: var(--gallery-shadow);
+
+    .fence-title {
+      padding: 0 2px 12px;
+      background: transparent;
+      color: #475569;
+      font-size: 0.9em;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .fence-title::before {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='currentColor' d='M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5v-3Zm8 0A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5v-3ZM1 10.5A1.5 1.5 0 0 1 2.5 9h3A1.5 1.5 0 0 1 7 10.5v3A1.5 1.5 0 0 1 5.5 15h-3A1.5 1.5 0 0 1 1 13.5v-3Zm8 0A1.5 1.5 0 0 1 10.5 9h3a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 13.5v-3Z'/%3E%3C/svg%3E");
+      opacity: 0.78;
+    }
+  }
+
+  &-grid {
+    .fence-content {
+      padding: 0;
+      display: grid;
+      grid-template-columns: var(--columns, repeat(3, 1fr));
+      gap: var(--gallery-gap);
+      align-items: start;
+    }
+
+    .fence-content > * {
+      margin: 0;
+      overflow: hidden;
+      border: 1px solid rgb(226 232 240 / 0.95);
+      border-radius: var(--gallery-card-radius);
+      background: var(--gallery-surface);
+      box-shadow: var(--gallery-card-shadow);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .fence-content > .grid-item {
+      position: relative;
+      display: block;
+    }
+
+    .fence-content > .grid-item > .line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .fence-content > *:hover {
+      transform: translateY(-2px);
+      border-color: rgb(148 163 184 / 0.9);
+      box-shadow: var(--gallery-card-shadow-hover);
+    }
+
+    .fence-content > .grid-item > img,
+    .fence-content > .grid-item > a,
+    .fence-content > .grid-item > picture,
+    .fence-content > .grid-item > figure {
+      display: block;
+    }
+
+    .fence-content > .grid-item > img,
+    .fence-content > .grid-item > a > img,
+    .fence-content > .grid-item > picture img,
+    .fence-content > .grid-item > figure img,
+    .fence-content > img,
+    .fence-content > a > img,
+    .fence-content > picture img,
+    .fence-content > figure img {
+      display: block;
+      width: 100%;
+      margin: 0;
+      background: #fff;
+    }
+
+    .fence-content > a {
+      display: block;
+    }
+
+    .fence-content br {
+      display: none;
+    }
+
+    &[data-auto-fit="true"] .fence-content {
+      grid-template-columns: repeat(auto-fit, minmax(var(--min-width, 250px), 1fr));
+    }
+  }
+
+  .masonry-wrapper {
+    margin: 0;
+  }
+
+  .masonry-item {
+    transition: transform 0.2s ease;
+  }
+
+  .masonry-item:hover {
+    transform: translateY(-2px);
+  }
+
+  .masonry-item-inner {
+    position: relative;
+    overflow: hidden;
+    padding: 12px;
+    border: 1px solid rgb(226 232 240 / 0.95);
+    border-radius: var(--gallery-card-radius);
+    background: var(--gallery-surface);
+    box-shadow: var(--gallery-card-shadow);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  .masonry-item-inner > .line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .masonry-item:hover .masonry-item-inner {
+    border-color: rgb(148 163 184 / 0.9);
+    box-shadow: var(--gallery-card-shadow-hover);
+  }
+
+  .masonry-item-inner > *:first-child {
+    margin-top: 0;
+  }
+
+  .masonry-item-inner > *:last-child {
+    margin-bottom: 0;
+  }
+
+  .masonry-item-inner img {
+    display: block;
+    width: 100%;
+    margin: 0;
+      border-radius: var(--gallery-card-radius);
+    background: #fff;
+  }
+
   &-details {
     padding: 0;
     border-color: #d0d7de;

@@ -114,6 +114,306 @@ var DetailsAnimator = /*#__PURE__*/function () {
 
 /***/ }),
 
+/***/ "./assets/src/utils/fenceGallery.js":
+/*!******************************************!*\
+  !*** ./assets/src/utils/fenceGallery.js ***!
+  \******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   initFenceGrid: () => (/* binding */ initFenceGrid),
+/* harmony export */   initFenceMasonry: () => (/* binding */ initFenceMasonry)
+/* harmony export */ });
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function parseNumber(value, fallback) {
+  var parsed = Number.parseInt(String(value !== null && value !== void 0 ? value : ""), 10);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+function isIgnorableWhitespace(node) {
+  return (node === null || node === void 0 ? void 0 : node.nodeType) === Node.TEXT_NODE && node.textContent.trim() === "";
+}
+function isLineMarker(node) {
+  return (node === null || node === void 0 ? void 0 : node.nodeType) === Node.ELEMENT_NODE && node.classList.contains("line") && node.hasAttribute("data-start") && node.hasAttribute("data-end");
+}
+function gridItemHasContent(nodes) {
+  return nodes.some(function (node) {
+    if (isLineMarker(node)) {
+      return false;
+    }
+    if (node.nodeType === Node.TEXT_NODE) {
+      return node.textContent.trim() !== "";
+    }
+    return node.nodeType === Node.ELEMENT_NODE;
+  });
+}
+function createGridItems(nodes) {
+  var items = [];
+  var pendingMarkers = [];
+  var currentNodes = [];
+  var flush = function flush() {
+    if (!gridItemHasContent(currentNodes)) {
+      pendingMarkers = [];
+      currentNodes = [];
+      return;
+    }
+    var item = document.createElement("div");
+    item.className = "grid-item";
+    pendingMarkers.forEach(function (marker) {
+      return item.appendChild(marker);
+    });
+    currentNodes.forEach(function (node) {
+      return item.appendChild(node);
+    });
+    items.push(item);
+    pendingMarkers = [];
+    currentNodes = [];
+  };
+  nodes.forEach(function (node) {
+    if (isIgnorableWhitespace(node)) {
+      return;
+    }
+    if (node.nodeType === Node.ELEMENT_NODE && node.tagName === "BR") {
+      flush();
+      return;
+    }
+    if (isLineMarker(node)) {
+      if (gridItemHasContent(currentNodes)) {
+        flush();
+      }
+      pendingMarkers.push(node.cloneNode(true));
+      return;
+    }
+    currentNodes.push(node.cloneNode(true));
+  });
+  flush();
+  return items;
+}
+function normalizeGridFence() {
+  var root = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
+  if (!root || typeof root.querySelectorAll !== "function") {
+    return;
+  }
+  root.querySelectorAll(".fence-grid .fence-content").forEach(function (content) {
+    var children = Array.from(content.childNodes);
+    var hasWrappedParagraph = children.some(function (child) {
+      return child.nodeType === Node.ELEMENT_NODE && child.tagName === "P";
+    });
+    var hasDirectLineMarker = children.some(function (child) {
+      return isLineMarker(child);
+    });
+    if (!hasWrappedParagraph && !hasDirectLineMarker) {
+      return;
+    }
+    if (!hasWrappedParagraph && hasDirectLineMarker) {
+      var items = createGridItems(children);
+      if (items.length) {
+        content.replaceChildren.apply(content, _toConsumableArray(items));
+      }
+      return;
+    }
+    var fragment = document.createDocumentFragment();
+    var changed = false;
+    children.forEach(function (child) {
+      if (isIgnorableWhitespace(child)) {
+        return;
+      }
+      if (child.nodeType === Node.ELEMENT_NODE && child.tagName === "P") {
+        var _items = createGridItems(Array.from(child.childNodes));
+        _items.forEach(function (item) {
+          return fragment.appendChild(item);
+        });
+        changed = true;
+        return;
+      }
+      if (child.nodeType === Node.ELEMENT_NODE && child.tagName === "BR") {
+        changed = true;
+        return;
+      }
+      fragment.appendChild(child.cloneNode(true));
+    });
+    if (!changed) {
+      return;
+    }
+    content.replaceChildren(fragment);
+  });
+}
+function normalizeMasonryFence() {
+  var root = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
+  if (!root || typeof root.querySelectorAll !== "function") {
+    return;
+  }
+  root.querySelectorAll(".fence-masonry .fence-content").forEach(function (content) {
+    if (content.querySelector(":scope > .masonry-wrapper")) {
+      return;
+    }
+    var items = [];
+    var buffer = [];
+    var flushBuffer = function flushBuffer() {
+      var hasContent = buffer.some(function (node) {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          return true;
+        }
+        return node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== "";
+      });
+      if (hasContent) {
+        items.push(buffer);
+      }
+      buffer = [];
+    };
+    Array.from(content.childNodes).forEach(function (child) {
+      if (child.nodeType === Node.TEXT_NODE) {
+        if (child.textContent.trim() === "") {
+          flushBuffer();
+          return;
+        }
+        buffer.push(child.cloneNode(true));
+        return;
+      }
+      if (child.nodeType !== Node.ELEMENT_NODE) {
+        return;
+      }
+      if (child.tagName === "BR") {
+        flushBuffer();
+        return;
+      }
+      if (child.tagName === "P") {
+        flushBuffer();
+        var paragraphNodes = Array.from(child.childNodes).filter(function (node) {
+          return !isIgnorableWhitespace(node);
+        }).map(function (node) {
+          return node.cloneNode(true);
+        });
+        if (paragraphNodes.length) {
+          items.push(paragraphNodes);
+        }
+        return;
+      }
+      flushBuffer();
+      items.push([child.cloneNode(true)]);
+    });
+    flushBuffer();
+    if (!items.length) {
+      return;
+    }
+    var wrapper = document.createElement("div");
+    wrapper.className = "masonry-wrapper";
+    items.forEach(function (nodes) {
+      var item = document.createElement("div");
+      item.className = "masonry-item";
+      var inner = document.createElement("div");
+      inner.className = "masonry-item-inner";
+      nodes.forEach(function (node) {
+        return inner.appendChild(node);
+      });
+      item.appendChild(inner);
+      wrapper.appendChild(item);
+    });
+    content.replaceChildren(wrapper);
+  });
+}
+function initFenceGrid() {
+  var root = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
+  normalizeGridFence(root);
+  if (!root || typeof root.querySelectorAll !== "function") {
+    return;
+  }
+  root.querySelectorAll(".fence-grid").forEach(function (el) {
+    if (el.dataset.columns) {
+      el.style.setProperty("--columns", "repeat(".concat(el.dataset.columns, ", 1fr)"));
+    }
+    if (el.dataset.gap) {
+      el.style.setProperty("--gap", el.dataset.gap);
+    }
+    if (el.dataset.minWidth) {
+      el.style.setProperty("--min-width", el.dataset.minWidth);
+    }
+  });
+}
+function initFenceMasonry() {
+  var root = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
+  normalizeMasonryFence(root);
+  var MasonryCtor = window.Masonry;
+  if (typeof MasonryCtor !== "function" || !root || typeof root.querySelectorAll !== "function") {
+    return;
+  }
+  root.querySelectorAll(".fence-masonry .masonry-wrapper").forEach(function (wrapper) {
+    if (!(wrapper instanceof Element)) {
+      return;
+    }
+    var items = Array.from(wrapper.children).filter(function (child) {
+      return child.classList.contains("masonry-item");
+    });
+    if (!items.length) {
+      return;
+    }
+    var fence = wrapper.closest(".fence-masonry");
+    var gap = Math.max(parseNumber(fence === null || fence === void 0 ? void 0 : fence.dataset.gap, 16), 0);
+    var columns = Math.max(parseNumber(fence === null || fence === void 0 ? void 0 : fence.dataset.columns, 3), 1);
+    var layout = function layout() {
+      var containerWidth = wrapper.clientWidth;
+      if (!containerWidth) {
+        return;
+      }
+      var columnWidth = Math.max((containerWidth - gap * (columns - 1)) / columns, 0);
+      wrapper.style.setProperty("--masonry-gap", "".concat(gap, "px"));
+      wrapper.style.setProperty("--masonry-columns", String(columns));
+      items.forEach(function (item) {
+        item.style.width = "".concat(columnWidth, "px");
+        item.style.marginBottom = "".concat(gap, "px");
+      });
+      if (!wrapper._aaMasonry) {
+        wrapper._aaMasonry = new MasonryCtor(wrapper, {
+          itemSelector: ".masonry-item",
+          columnWidth: columnWidth,
+          gutter: gap,
+          percentPosition: false,
+          transitionDuration: 0
+        });
+        return;
+      }
+      wrapper._aaMasonry.options.columnWidth = columnWidth;
+      wrapper._aaMasonry.options.gutter = gap;
+      wrapper._aaMasonry.reloadItems();
+      wrapper._aaMasonry.layout();
+    };
+    if (wrapper.dataset.masonryInitialized !== "true") {
+      wrapper.dataset.masonryInitialized = "true";
+      if (typeof ResizeObserver === "function") {
+        var observer = new ResizeObserver(function () {
+          layout();
+        });
+        observer.observe(wrapper);
+        wrapper._aaMasonryResizeObserver = observer;
+      } else {
+        window.addEventListener("resize", layout);
+      }
+      wrapper.querySelectorAll("img").forEach(function (img) {
+        if (img.complete) {
+          return;
+        }
+        var refresh = function refresh() {
+          return layout();
+        };
+        img.addEventListener("load", refresh, {
+          once: true
+        });
+        img.addEventListener("error", refresh, {
+          once: true
+        });
+      });
+    }
+    layout();
+  });
+}
+
+/***/ }),
+
 /***/ "./assets/src/utils/tabs.js":
 /*!**********************************!*\
   !*** ./assets/src/utils/tabs.js ***!
@@ -311,13 +611,29 @@ var __webpack_exports__ = {};
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utils_DetailsAnimator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils/DetailsAnimator */ "./assets/src/utils/DetailsAnimator.js");
 /* harmony import */ var _utils_tabs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils/tabs */ "./assets/src/utils/tabs.js");
+/* harmony import */ var _utils_fenceGallery__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./utils/fenceGallery */ "./assets/src/utils/fenceGallery.js");
 
 
-document.addEventListener("DOMContentLoaded", function (_) {
-  document.querySelectorAll('.fence-details').forEach(function (el) {
+
+function initFenceDetails() {
+  var root = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
+  root.querySelectorAll(".fence-details").forEach(function (el) {
+    if (el.dataset.detailsInitialized === "true") {
+      return;
+    }
+    el.dataset.detailsInitialized = "true";
     new _utils_DetailsAnimator__WEBPACK_IMPORTED_MODULE_0__["default"](el);
   });
-  (0,_utils_tabs__WEBPACK_IMPORTED_MODULE_1__.initFenceTabs)(document);
+}
+function initFrontFeatures() {
+  var root = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
+  initFenceDetails(root);
+  (0,_utils_tabs__WEBPACK_IMPORTED_MODULE_1__.initFenceTabs)(root);
+  (0,_utils_fenceGallery__WEBPACK_IMPORTED_MODULE_2__.initFenceGrid)(root);
+  (0,_utils_fenceGallery__WEBPACK_IMPORTED_MODULE_2__.initFenceMasonry)(root);
+}
+document.addEventListener("DOMContentLoaded", function () {
+  initFrontFeatures(document);
 });
 })();
 
