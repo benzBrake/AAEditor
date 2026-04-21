@@ -2,7 +2,7 @@
 node_modules/
 
 # 构建产物
-assets/dist/
+# assets/dist/  # 已纳入版本控制，不应忽略
 pack/
 .npm-cache/
 *.map
