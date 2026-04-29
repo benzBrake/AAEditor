@@ -23,27 +23,10 @@ pre {
     word-break: normal;
     white-space: pre;
     padding: 1rem;
-
-    &.hljs {
-      padding: 2.5rem 1rem 1rem;
-    }
   }
 
   > code[class*="language-"] {
     background-color: transparent;
-
-    &:before {
-      content: '';
-      position: absolute;
-      left: 8px;
-      top: 10px;
-      height: 12px;
-      width: 12px;
-      border-radius: 50%;
-      z-index: 1;
-      background: #fc625d;
-      box-shadow: 20px 0 #fdbc40, 40px 0 #35cd4b;
-    }
   }
 
   .copy {
@@ -77,3 +60,5 @@ pre {
   line-height: 20px;
   background-color: #f9fafB;
 }
+
+@import "code-block-enhance";

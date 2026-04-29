@@ -326,17 +326,12 @@ pre.styled {
 }
 
 pre.styled > code {
-  padding-top: calc(
-    var(--aaeditor-pre-title-height, 0px) +
-    var(--aaeditor-pre-copy-size, 1.875rem) +
-    var(--aaeditor-pre-copy-offset, 0.375rem) +
-    0.5rem
-  );
+  padding-top: 1rem;
 }
 
 pre.styled .copy {
   position: absolute;
-  top: calc(var(--aaeditor-pre-copy-offset, 0.375rem) + var(--aaeditor-pre-title-height, 0px));
+  top: var(--aaeditor-pre-copy-offset, 0.375rem);
   right: 0.375rem;
   z-index: 1;
   display: inline-flex;
@@ -355,6 +350,14 @@ pre.styled .copy {
   appearance: none;
   -webkit-appearance: none;
   transition: transform 0.18s ease, color 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.24s ease;
+}
+
+pre.styled > .aaeditor-code-header .copy {
+  position: relative;
+  top: auto;
+  right: auto;
+  z-index: auto;
+  flex: 0 0 auto;
 }
 
 pre.styled .copy:hover {
@@ -438,6 +441,8 @@ pre.styled .copy[data-state="error"] {
     color: #fca5a5;
   }
 }
+
+@import "code-block-enhance";
 
 @media (prefers-reduced-motion: reduce) {
   pre.styled .copy,

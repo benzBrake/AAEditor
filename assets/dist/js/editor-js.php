@@ -390,6 +390,169 @@
             this.wrapSelection('::: pass:comment\n', '\n:::', '<?php _e("回复可见"); ?>');
         }
     }, {
+        id: 'wmd-grid-button-aaeditor',
+        name: '<?php _e("Grid 宫格"); ?>',
+        icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M3 3h8v8H3V3Zm10 0h8v8h-8V3ZM3 13h8v8H3v-8Zm10 0h8v8h-8v-8Z"></path></svg>',
+        insertBefore: '#wmd-masonry-button-aaeditor|#wmd-tabs-button-aaeditor|#wmd-custom-block-button-aaeditor|#wmd-spacer4-aaeditor',
+        command() {
+            const {textarea} = this;
+            const lastSelection = textarea.getSelection();
+            const selectedText = this.getSelectedText();
+
+            this.openFormModal({
+                title: '<?php _e("插入 Grid 宫格"); ?>',
+                initialValues: {
+                    title: '',
+                    columns: 3,
+                    gap: 16,
+                    autoFit: false,
+                    minWidth: '220px',
+                    content: selectedText || '![<?php _e("图片 1"); ?>](<?php _e("图片地址"); ?>)\n![<?php _e("图片 2"); ?>](<?php _e("图片地址"); ?>)\n![<?php _e("图片 3"); ?>](<?php _e("图片地址"); ?>)'
+                },
+                fields: [{
+                    name: 'title',
+                    type: 'text',
+                    label: '<?php _e("标题"); ?>',
+                    placeholder: '<?php _e("可选，不填写则显示默认标题"); ?>',
+                }, {
+                    name: 'columns',
+                    type: 'number',
+                    label: '<?php _e("列数"); ?>',
+                    min: 1,
+                    required: true,
+                    hidden: (values) => values.autoFit,
+                }, {
+                    name: 'gap',
+                    type: 'number',
+                    label: '<?php _e("间距"); ?>',
+                    min: 0,
+                    required: true,
+                }, {
+                    name: 'autoFit',
+                    type: 'checkbox',
+                    label: '<?php _e("自动适配列数"); ?>',
+                    labelClass: 'no-bg',
+                }, {
+                    name: 'minWidth',
+                    type: 'text',
+                    label: '<?php _e("最小宽度"); ?>',
+                    placeholder: '220px',
+                    hidden: (values) => !values.autoFit,
+                }, {
+                    name: 'content',
+                    type: 'textarea',
+                    label: '<?php _e("宫格内容"); ?>',
+                    placeholder: '<?php _e("每行一个项目，适合图片列表"); ?>',
+                    rows: 6,
+                }],
+                onSubmit(modal, values) {
+                    const attrs = [];
+                    const title = values.title ? ` ${values.title}` : '';
+                    const columns = Math.max(parseInt(values.columns, 10) || 3, 1);
+                    const gap = Math.max(parseInt(values.gap, 10) || 0, 0);
+                    const autoFit = values.autoFit;
+                    const minWidth = String(values.minWidth || '').trim();
+                    const content = values.content || '![<?php _e("图片 1"); ?>](<?php _e("图片地址"); ?>)\n![<?php _e("图片 2"); ?>](<?php _e("图片地址"); ?>)\n![<?php _e("图片 3"); ?>](<?php _e("图片地址"); ?>)';
+
+                    if (autoFit) {
+                        attrs.push('auto-fit: true');
+                        if (minWidth) {
+                            attrs.push(`min-width: ${minWidth}`);
+                        }
+                    } else {
+                        attrs.push(`columns: ${columns}`);
+                    }
+                    attrs.push(`gap: ${gap}px`);
+
+                    let prefix = `::: grid {${attrs.join(', ')}}${title}\n`;
+                    let postfix = '\n:::';
+
+                    if (!textarea.isAtLineStart()) {
+                        prefix = `\n${prefix}`;
+                    }
+                    if (!textarea.isAtLineEnd()) {
+                        postfix += '\n';
+                    }
+
+                    const template = prefix + content + postfix;
+                    this.textarea.setSelection(lastSelection.start, lastSelection.end);
+                    textarea.executeAndAddUndoStack('replaceSelectionText', template);
+
+                    const contentStart = lastSelection.start + prefix.length;
+                    this.textarea.setSelection(contentStart, contentStart + content.length);
+                    return true;
+                }
+            });
+        }
+    }, {
+        id: 'wmd-masonry-button-aaeditor',
+        name: '<?php _e("Masonry 瀑布流"); ?>',
+        icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M3 3h7v6H3V3Zm11 0h7v10h-7V3ZM3 11h7v10H3V11Zm11 4h7v6h-7v-6Z"></path></svg>',
+        insertBefore: '#wmd-tabs-button-aaeditor|#wmd-custom-block-button-aaeditor|#wmd-spacer4-aaeditor',
+        command() {
+            const {textarea} = this;
+            const lastSelection = textarea.getSelection();
+            const selectedText = this.getSelectedText();
+
+            this.openFormModal({
+                title: '<?php _e("插入 Masonry 瀑布流"); ?>',
+                initialValues: {
+                    title: '',
+                    columns: 3,
+                    gap: 16,
+                    content: selectedText || '![<?php _e("卡片 1"); ?>](<?php _e("图片地址"); ?>)\n\n![<?php _e("卡片 2"); ?>](<?php _e("图片地址"); ?>)\n\n<?php _e("这里编辑第三个卡片内容"); ?>'
+                },
+                fields: [{
+                    name: 'title',
+                    type: 'text',
+                    label: '<?php _e("标题"); ?>',
+                    placeholder: '<?php _e("可选，不填写则显示默认标题"); ?>',
+                }, {
+                    name: 'columns',
+                    type: 'number',
+                    label: '<?php _e("列数"); ?>',
+                    min: 1,
+                    required: true,
+                }, {
+                    name: 'gap',
+                    type: 'number',
+                    label: '<?php _e("间距"); ?>',
+                    min: 0,
+                    required: true,
+                }, {
+                    name: 'content',
+                    type: 'textarea',
+                    label: '<?php _e("瀑布流内容"); ?>',
+                    placeholder: '<?php _e("每个卡片之间留一个空行"); ?>',
+                    rows: 8,
+                }],
+                onSubmit(modal, values) {
+                    const title = values.title ? ` ${values.title}` : '';
+                    const columns = Math.max(parseInt(values.columns, 10) || 3, 1);
+                    const gap = Math.max(parseInt(values.gap, 10) || 0, 0);
+                    const content = values.content || '![<?php _e("卡片 1"); ?>](<?php _e("图片地址"); ?>)\n\n![<?php _e("卡片 2"); ?>](<?php _e("图片地址"); ?>)\n\n<?php _e("这里编辑第三个卡片内容"); ?>';
+
+                    let prefix = `::: masonry {columns: ${columns}, gap: ${gap}px}${title}\n`;
+                    let postfix = '\n:::';
+
+                    if (!textarea.isAtLineStart()) {
+                        prefix = `\n${prefix}`;
+                    }
+                    if (!textarea.isAtLineEnd()) {
+                        postfix += '\n';
+                    }
+
+                    const template = prefix + content + postfix;
+                    this.textarea.setSelection(lastSelection.start, lastSelection.end);
+                    textarea.executeAndAddUndoStack('replaceSelectionText', template);
+
+                    const contentStart = lastSelection.start + prefix.length;
+                    this.textarea.setSelection(contentStart, contentStart + content.length);
+                    return true;
+                }
+            });
+        }
+    }, {
         id: 'wmd-tabs-button-aaeditor',
         name: '<?php _e("Tabs 选项卡"); ?>',
         icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M4 5C2.89543 5 2 5.89543 2 7V17C2 18.1046 2.89543 19 4 19H20C21.1046 19 22 18.1046 22 17V7C22 5.89543 21.1046 5 20 5H4ZM4 7H8V10H4V7ZM10 7H14V10H10V7ZM16 7H20V10H16V7ZM4 12H20V17H4V12Z"></path></svg>',
@@ -537,103 +700,19 @@
             });
 
             $(event.target).replaceWith($('<li id="wmd-code-highlight-button-aaeditor" style="padding: 1px;">').append(select));
-            const copyIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><path d="M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z"></path></svg>';
-            const okIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 26 26"><path d="M22.566406 4.730469L20.773438 3.511719C20.277344 3.175781 19.597656 3.304688 19.265625 3.796875L10.476563 16.757813L6.4375 12.71875C6.015625 12.296875 5.328125 12.296875 4.90625 12.71875L3.371094 14.253906C2.949219 14.675781 2.949219 15.363281 3.371094 15.789063L9.582031 22C9.929688 22.347656 10.476563 22.613281 10.96875 22.613281C11.460938 22.613281 11.957031 22.304688 12.277344 21.839844L22.855469 6.234375C23.191406 5.742188 23.0625 5.066406 22.566406 4.730469Z" fill="currentColor" /></svg>';
-            const copyButtonTitle = '<?php _e("点击复制"); ?>';
-            const copySuccessTitle = '<?php _e("复制成功"); ?>';
-            const copyErrorTitle = '<?php _e("复制失败，请手动复制"); ?>';
-
-            function renderCopyButtonIcon() {
-                return `
-                    <span class="copy-icon copy-icon-default" aria-hidden="true">${copyIcon}</span>
-                    <span class="copy-icon copy-icon-success" aria-hidden="true">${okIcon}</span>
-                `;
-            }
-
-            function fallbackCopyText(text) {
-                const textarea = document.createElement('textarea');
-                textarea.value = text;
-                textarea.setAttribute('readonly', '');
-                textarea.setAttribute('aria-hidden', 'true');
-                Object.assign(textarea.style, {
-                    position: 'fixed',
-                    top: '0',
-                    left: '-9999px',
-                    opacity: '0',
-                    pointerEvents: 'none',
-                });
-                document.body.appendChild(textarea);
-                textarea.focus();
-                textarea.select();
-                textarea.setSelectionRange(0, textarea.value.length);
-
-                let copied = false;
-                try {
-                    copied = document.execCommand('copy');
-                } catch (error) {
-                }
-
-                textarea.remove();
-                return copied;
-            }
-
-            async function copyText(text) {
-                if (window.isSecureContext && navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
-                    try {
-                        await navigator.clipboard.writeText(text);
-                        return true;
-                    } catch (error) {
-                    }
-                }
-
-                return fallbackCopyText(text);
-            }
-
-            function setCopyState(copy, state) {
-                window.clearTimeout(copy._aaeditorCopyTimer);
-                copy.dataset.state = state;
-                copy.setAttribute('title', state === 'success' ? copySuccessTitle : state === 'error' ? copyErrorTitle : copyButtonTitle);
-
-                if (state === 'idle') {
-                    copy.removeAttribute('aria-busy');
-                    return;
-                }
-
-                copy._aaeditorCopyTimer = window.setTimeout(() => {
-                    copy.dataset.state = 'idle';
-                    copy.removeAttribute('aria-busy');
-                    copy.setAttribute('title', copyButtonTitle);
-                }, state === 'success' ? 1400 : 1800);
-            }
-
             $('body').on('XEditorPreviewEnd', () => {
-                $('#wmd-preview-aaeditor pre code:not([data-highlighted="yes"])').toArray().forEach(el => {
-                    const {hljs} = window;
-                    if (typeof hljs === "object" && "highlightElement" in hljs) {
-                        const copy = document.createElement('button');
-                        copy.type = 'button';
-                        let div = document.createElement('div');
-                        div.innerHTML = el.innerHTML;
-                        copy.dataset.text = div.innerText;
-                        copy.classList.add('copy');
-                        copy.dataset.state = 'idle';
-                        copy.innerHTML = renderCopyButtonIcon();
-                        copy.setAttribute('title', copyButtonTitle);
-                        copy.setAttribute('aria-label', copyButtonTitle);
-                        copy.addEventListener('click', async function () {
-                            if (copy.getAttribute('aria-busy') === 'true') {
-                                return;
-                            }
-
-                            copy.setAttribute('aria-busy', 'true');
-                            const copied = await copyText(this.dataset.text || '');
-                            setCopyState(copy, copied ? 'success' : 'error');
-                        });
-                        el.after(copy);
-                        hljs.highlightElement(el);
-                        el.parentNode.classList.add('styled');
+                window.AAEditorCodeBlocks?.enhanceCodeBlocks?.(
+                    document.getElementById('wmd-preview-aaeditor') || document,
+                    {
+                        messages: {
+                            copyButtonTitle: '<?php _e("点击复制"); ?>',
+                            copySuccessTitle: '<?php _e("复制成功"); ?>',
+                            copyErrorTitle: '<?php _e("复制失败，请手动复制"); ?>',
+                        }
                     }
-                });
+                );
+                window.XEditor?.rebuildPreviewLineAnchors?.();
+                window.XEditor?.schedulePreviewScrollSync?.(true);
             });
             let codeTheme = localStorage.getItem('editor-hljs-theme') || "off";
             if (Object.keys(styleJson).includes(codeTheme)) {
