@@ -140,6 +140,7 @@ npm run pack
 
 ## 相关链接
 
+- [语法说明](SYNTAX.md)
 - [使用说明](https://malleable-flare-263.notion.site/AAEditor-0a003324bf3a4a608d6d563ef3a9779e)
 - [更新日志](https://xiamp.net/archives/aaeditor-update-log.html)
 - [问题反馈](https://github.com/benzBrake/AAEditor/issues)
