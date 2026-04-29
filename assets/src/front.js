@@ -1,6 +1,7 @@
 import DetailsAnimator from "./utils/DetailsAnimator";
 import {initFenceTabs} from "./utils/tabs";
 import {initFenceGrid, initFenceMasonry} from "./utils/fenceGallery";
+import {enhanceCodeBlocks} from "./utils/codeBlocks";
 
 function initFenceDetails(root = document) {
     root.querySelectorAll(".fence-details").forEach((el) => {
@@ -17,8 +18,13 @@ function initFrontFeatures(root = document) {
     initFenceTabs(root);
     initFenceGrid(root);
     initFenceMasonry(root);
+    enhanceCodeBlocks(root, window.AAEditorCodeBlocksConfig || {});
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    initFrontFeatures(document);
+});
+
+document.addEventListener("pjax:complete", () => {
     initFrontFeatures(document);
 });

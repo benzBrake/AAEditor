@@ -1,3 +1,5 @@
+import {enhanceCodeBlocks, DEFAULT_CODE_BLOCK_MESSAGES} from "./utils/codeBlocks";
+
 window.XPreviewUtils = {
     htmlProcessors: [],
     init() {
@@ -14,6 +16,11 @@ window.XPreviewUtils = {
         });
 
         window.hljs = require("highlight.js/lib/common");
+        window.AAEditorCodeBlocks = {
+            ...(window.AAEditorCodeBlocks || {}),
+            DEFAULT_CODE_BLOCK_MESSAGES,
+            enhanceCodeBlocks,
+        };
     },
 
     getPreviewArea() {

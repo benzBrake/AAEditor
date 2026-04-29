@@ -768,20 +768,10 @@
             }
 
             parseCode(lines, parts, start) {
-                var blank, count, isEmpty, lang, rel, str;
-                [blank, lang] = parts;
-                lang = trim(lang);
+                var blank, count, isEmpty, meta, str;
+                [blank] = parts;
+                meta = this.parseCodeInfo(parts[1] || '');
                 count = blank.length;
-                if (!lang.match(/^[_a-z0-9-\+\#\:\.]+$/i)) {
-                    lang = null;
-                } else {
-                    parts = lang.split(':');
-                    if (parts.length > 1) {
-                        [lang, rel] = parts;
-                        lang = trim(lang);
-                        rel = trim(rel);
-                    }
-                }
                 isEmpty = true;
                 lines = lines.slice(1, -1).map(function (line) {
                     line = line.replace(new RegExp(`^[ ]{${count}}`), '');
@@ -794,8 +784,173 @@
                 if (isEmpty) {
                     return '';
                 } else {
-                    return '<pre><code' + (!!lang ? ` class=\"${lang}\"` : '') + (!!rel ? ` rel=\"${rel}\"` : '') + '>' + str + '</code></pre>';
+                    return '<pre class="aaeditor-code-block"' + this.buildCodeDataAttributes(meta) + '><code'
+                        + (!!meta.language ? ` class=\"language-${htmlspecialchars(meta.language)}\"` : '')
+                        + (!!meta.legacyRel ? ` rel=\"${htmlspecialchars(meta.legacyRel)}\"` : '')
+                        + '>' + str + '</code></pre>';
                 }
+            }
+
+            parseCodeInfo(info = '') {
+                info = trim(info);
+                let title = '';
+                let highlight = '';
+                let lineNumbers = false;
+                let lineNumbersStart = 1;
+                let legacyRel = '';
+
+                let matches;
+                if (!!(matches = info.match(/\s+\[([^\]]+)]\s*$/))) {
+                    title = trim(matches[1] || '');
+                    info = trim(info.slice(0, -matches[0].length));
+                }
+
+                if (!!(matches = info.match(/\s*\{([^}]+)}\s*$/))) {
+                    highlight = trim(matches[1] || '');
+                    info = trim(info.slice(0, -matches[0].length));
+                }
+
+                let head = info;
+                if (!!(matches = info.match(/^(\S+)/))) {
+                    head = trim(matches[1] || '');
+                }
+
+                let language = '';
+                if (head) {
+                    const parts = head.split(':', 2);
+                    language = this.normalizeCodeLanguage(parts[0] || '');
+                    if (parts.length > 1) {
+                        const suffix = trim(parts[1] || '');
+                        if (!!(matches = suffix.match(/^line-numbers(?:=(\d+))?$/i))) {
+                            lineNumbers = true;
+                            if (matches[1]) {
+                                lineNumbersStart = Math.max(parseInt(matches[1], 10) || 1, 1);
+                            }
+                        } else if (/^no-line-numbers$/i.test(suffix)) {
+                            lineNumbers = false;
+                            lineNumbersStart = 1;
+                        } else {
+                            legacyRel = suffix;
+                        }
+                    }
+                }
+
+                return {
+                    language,
+                    languageLabel: this.getCodeLanguageLabel(language),
+                    highlight,
+                    lineNumbers,
+                    lineNumbersStart,
+                    title,
+                    legacyRel,
+                };
+            }
+
+            normalizeCodeLanguage(language = '') {
+                const cleaned = String(language).trim().toLowerCase();
+                if (!cleaned || !/^[_a-z0-9\-+#.]+$/i.test(cleaned)) {
+                    return '';
+                }
+
+                const aliases = {
+                    bash: 'bash',
+                    csharp: 'cs',
+                    cs: 'cs',
+                    fsharp: 'fs',
+                    fs: 'fs',
+                    go: 'go',
+                    golang: 'go',
+                    javascript: 'javascript',
+                    js: 'javascript',
+                    jsx: 'jsx',
+                    markdown: 'markdown',
+                    md: 'markdown',
+                    powershell: 'powershell',
+                    ps1: 'powershell',
+                    py: 'python',
+                    python: 'python',
+                    rb: 'ruby',
+                    ruby: 'ruby',
+                    rs: 'rust',
+                    rust: 'rust',
+                    shell: 'bash',
+                    shellscript: 'bash',
+                    sh: 'bash',
+                    ts: 'typescript',
+                    tsx: 'tsx',
+                    typescript: 'typescript',
+                    yaml: 'yaml',
+                    yml: 'yaml',
+                };
+
+                return aliases[cleaned] || cleaned;
+            }
+
+            getCodeLanguageLabel(language = '') {
+                if (!language) {
+                    return '';
+                }
+
+                const labels = {
+                    bash: 'Bash',
+                    css: 'CSS',
+                    cs: 'C#',
+                    fs: 'F#',
+                    go: 'Go',
+                    html: 'HTML',
+                    javascript: 'JavaScript',
+                    json: 'JSON',
+                    jsx: 'JSX',
+                    markdown: 'Markdown',
+                    php: 'PHP',
+                    powershell: 'PowerShell',
+                    python: 'Python',
+                    ruby: 'Ruby',
+                    rust: 'Rust',
+                    sql: 'SQL',
+                    text: 'Text',
+                    tsx: 'TSX',
+                    typescript: 'TypeScript',
+                    vue: 'Vue',
+                    xml: 'XML',
+                    yaml: 'YAML',
+                };
+
+                if (labels[language]) {
+                    return labels[language];
+                }
+
+                return String(language)
+                    .split(/[-_.]+/)
+                    .filter(Boolean)
+                    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+                    .join(' ');
+            }
+
+            buildCodeDataAttributes(meta = {}) {
+                const attrs = {
+                    'data-aaeditor-code-block': 'true',
+                    'data-code-line-numbers': meta.lineNumbers ? 'true' : 'false',
+                    'data-code-line-numbers-start': String(meta.lineNumbersStart || 1),
+                };
+                if (meta.language) {
+                    attrs['data-code-language'] = meta.language;
+                }
+                if (meta.languageLabel) {
+                    attrs['data-code-language-label'] = meta.languageLabel;
+                }
+                if (meta.highlight) {
+                    attrs['data-code-highlight'] = meta.highlight;
+                }
+                if (meta.title) {
+                    attrs['data-code-title'] = meta.title;
+                }
+                if (meta.legacyRel) {
+                    attrs['data-code-rel'] = meta.legacyRel;
+                }
+                return Object.entries(attrs).reduce((htmlAttrs, [key, value]) => {
+                    return htmlAttrs + ` ${key}=\"${htmlspecialchars(value)}\"`;
+                }, '');
             }
 
             parseFenceInfo(info = '') {
