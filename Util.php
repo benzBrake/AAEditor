@@ -412,115 +412,13 @@ JS);
                   href="<?php echo Common::url(preg_replace("/(?<!\.min)\.css$/", ".min.css", $filename), Util::parseJSD('https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/')) ?>">
             <link rel="stylesheet" href="<?php echo Util::pluginStatic('css', 'hljs.css') ?>"/>
             <script>
-                (function () {
-                    const copyIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16"><path d="M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z"></path></svg>';
-                    const okIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 26 26"><path d="M22.566406 4.730469L20.773438 3.511719C20.277344 3.175781 19.597656 3.304688 19.265625 3.796875L10.476563 16.757813L6.4375 12.71875C6.015625 12.296875 5.328125 12.296875 4.90625 12.71875L3.371094 14.253906C2.949219 14.675781 2.949219 15.363281 3.371094 15.789063L9.582031 22C9.929688 22.347656 10.476563 22.613281 10.96875 22.613281C11.460938 22.613281 11.957031 22.304688 12.277344 21.839844L22.855469 6.234375C23.191406 5.742188 23.0625 5.066406 22.566406 4.730469Z" fill="currentColor" /></svg>';
-                    const copyButtonTitle = '<?php _e("点击复制"); ?>';
-                    const copySuccessTitle = '<?php _e("复制成功"); ?>';
-                    const copyErrorTitle = '<?php _e("复制失败，请手动复制"); ?>';
-
-                    function renderCopyButtonIcon() {
-                        return `
-                            <span class="copy-icon copy-icon-default" aria-hidden="true">${copyIcon}</span>
-                            <span class="copy-icon copy-icon-success" aria-hidden="true">${okIcon}</span>
-                        `;
+                window.AAEditorCodeBlocksConfig = Object.assign({}, window.AAEditorCodeBlocksConfig || {}, {
+                    messages: {
+                        copyButtonTitle: '<?php _e("点击复制"); ?>',
+                        copySuccessTitle: '<?php _e("复制成功"); ?>',
+                        copyErrorTitle: '<?php _e("复制失败，请手动复制"); ?>'
                     }
-
-                    function fallbackCopyText(text) {
-                        const textarea = document.createElement('textarea');
-                        textarea.value = text;
-                        textarea.setAttribute('readonly', '');
-                        textarea.setAttribute('aria-hidden', 'true');
-                        Object.assign(textarea.style, {
-                            position: 'fixed',
-                            top: '0',
-                            left: '-9999px',
-                            opacity: '0',
-                            pointerEvents: 'none',
-                        });
-                        document.body.appendChild(textarea);
-                        textarea.focus();
-                        textarea.select();
-                        textarea.setSelectionRange(0, textarea.value.length);
-
-                        let copied = false;
-                        try {
-                            copied = document.execCommand('copy');
-                        } catch (error) {
-                        }
-
-                        textarea.remove();
-                        return copied;
-                    }
-
-                    async function copyText(text) {
-                        if (window.isSecureContext && navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
-                            try {
-                                await navigator.clipboard.writeText(text);
-                                return true;
-                            } catch (error) {
-                            }
-                        }
-
-                        return fallbackCopyText(text);
-                    }
-
-                    function setCopyState(copy, state) {
-                        window.clearTimeout(copy._aaeditorCopyTimer);
-                        copy.dataset.state = state;
-                        copy.setAttribute('title', state === 'success' ? copySuccessTitle : state === 'error' ? copyErrorTitle : copyButtonTitle);
-
-                        if (state === 'idle') {
-                            copy.removeAttribute('aria-busy');
-                            return;
-                        }
-
-                        copy._aaeditorCopyTimer = window.setTimeout(() => {
-                            copy.dataset.state = 'idle';
-                            copy.removeAttribute('aria-busy');
-                            copy.setAttribute('title', copyButtonTitle);
-                        }, state === 'success' ? 1400 : 1800);
-                    }
-
-                    function initHighlighting() {
-                        document.querySelectorAll("pre:not(.styled) code").forEach(el => {
-                            const copy = document.createElement('button');
-                            copy.type = 'button';
-                            var div = document.createElement('div');
-                            div.innerHTML = el.innerHTML;
-                            copy.dataset.text = div.innerText;
-                            copy.classList.add('copy');
-                            copy.dataset.state = 'idle';
-                            copy.innerHTML = renderCopyButtonIcon();
-                            copy.setAttribute('title', copyButtonTitle);
-                            copy.setAttribute('aria-label', copyButtonTitle);
-                            copy.addEventListener('click', async function () {
-                                if (copy.getAttribute('aria-busy') === 'true') {
-                                    return;
-                                }
-
-                                copy.setAttribute('aria-busy', 'true');
-                                const copied = await copyText(this.dataset.text || '');
-                                setCopyState(copy, copied ? 'success' : 'error');
-                            });
-                            copy.addEventListener('keydown', function (event) {
-                                if (event.key !== 'Enter' && event.key !== ' ') {
-                                    return;
-                                }
-
-                                event.preventDefault();
-                                copy.click();
-                            });
-                            el.after(copy);
-                            hljs.highlightElement(el);
-                            el.parentNode.classList.add('styled');
-                        })
-                    }
-
-                    document.addEventListener("DOMContentLoaded", initHighlighting);
-                    document.addEventListener("pjax:complete", initHighlighting);
-                })()
-
+                });
             </script>
             <?php
         }
