@@ -469,6 +469,7 @@ function setCopyState(button, state, messages) {
 
     button.setAttribute("title", label);
     button.dataset.tooltip = label;
+    button.setAttribute("aria-label", label);
 
     if (state === "idle") {
         button.removeAttribute("aria-busy");
@@ -480,6 +481,7 @@ function setCopyState(button, state, messages) {
         button.removeAttribute("aria-busy");
         button.setAttribute("title", messages.copyButtonTitle);
         button.dataset.tooltip = messages.copyButtonTitle;
+        button.setAttribute("aria-label", messages.copyButtonTitle);
     }, state === "success" ? 1400 : 1800);
 }
 
