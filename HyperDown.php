@@ -1620,20 +1620,9 @@ class HyperDown
      */
     private function parseCode(array $lines, array $parts, int $start): string
     {
-        [$blank, $lang] = $parts;
-        $lang = trim($lang);
+        [$blank, $info] = $parts;
+        $meta = $this->parseCodeInfo((string) $info);
         $count = strlen($blank);
-
-        if (!preg_match("/^[_a-z0-9-\+\#\:\.]+$/i", $lang)) {
-            $lang = null;
-        } else {
-            $parts = explode(':', $lang);
-            if (count($parts) > 1) {
-                [$lang, $rel] = $parts;
-                $lang = trim($lang);
-                $rel = trim($rel);
-            }
-        }
 
         $isEmpty = true;
 
@@ -1648,9 +1637,182 @@ class HyperDown
         $str = implode("\n", $this->markLines($lines, $start + 1));
 
         return $isEmpty ? '' :
-            '<pre><code' . (!empty($lang) ? " class=\"{$lang}\"" : '')
-            . (!empty($rel) ? " rel=\"{$rel}\"" : '') . '>'
+            '<pre class="aaeditor-code-block"' . $this->buildCodeDataAttributes($meta) . '><code'
+            . (!empty($meta['language']) ? ' class="language-' . htmlspecialchars($meta['language']) . '"' : '')
+            . (!empty($meta['legacy_rel']) ? ' rel="' . htmlspecialchars($meta['legacy_rel']) . '"' : '') . '>'
             . $str . '</code></pre>';
+    }
+
+    private function parseCodeInfo(string $info): array
+    {
+        $info = trim($info);
+        $title = '';
+        $highlight = '';
+        $lineNumbers = false;
+        $lineNumbersStart = 1;
+        $legacyRel = '';
+
+        if (preg_match('/\s+\[([^\]]+)]\s*$/', $info, $matches)) {
+            $title = trim($matches[1]);
+            $info = trim(substr($info, 0, -strlen($matches[0])));
+        }
+
+        if (preg_match('/\s*\{([^}]+)}\s*$/', $info, $matches)) {
+            $highlight = trim($matches[1]);
+            $info = trim(substr($info, 0, -strlen($matches[0])));
+        }
+
+        $head = $info;
+        if (preg_match('/^(\S+)/', $info, $matches)) {
+            $head = trim($matches[1]);
+        }
+
+        $language = '';
+        if ($head !== '') {
+            $parts = explode(':', $head, 2);
+            $language = $this->normalizeCodeLanguage($parts[0]);
+
+            if (count($parts) > 1) {
+                $suffix = trim($parts[1]);
+                if (preg_match('/^line-numbers(?:=(\d+))?$/i', $suffix, $matches)) {
+                    $lineNumbers = true;
+                    if (!empty($matches[1])) {
+                        $lineNumbersStart = max((int)$matches[1], 1);
+                    }
+                } elseif (preg_match('/^no-line-numbers$/i', $suffix)) {
+                    $lineNumbers = false;
+                    $lineNumbersStart = 1;
+                } else {
+                    $legacyRel = $suffix;
+                }
+            }
+        }
+
+        return [
+            'language' => $language,
+            'language_label' => $this->getCodeLanguageLabel($language),
+            'highlight' => $highlight,
+            'line_numbers' => $lineNumbers,
+            'line_numbers_start' => $lineNumbersStart,
+            'title' => $title,
+            'legacy_rel' => $legacyRel,
+        ];
+    }
+
+    private function normalizeCodeLanguage(string $language): string
+    {
+        $language = strtolower(trim($language));
+        if ($language === '' || !preg_match('/^[_a-z0-9\-\+#\.]+$/i', $language)) {
+            return '';
+        }
+
+        $aliases = [
+            'bash' => 'bash',
+            'csharp' => 'cs',
+            'cs' => 'cs',
+            'fsharp' => 'fs',
+            'fs' => 'fs',
+            'go' => 'go',
+            'golang' => 'go',
+            'javascript' => 'javascript',
+            'js' => 'javascript',
+            'jsx' => 'jsx',
+            'markdown' => 'markdown',
+            'md' => 'markdown',
+            'powershell' => 'powershell',
+            'ps1' => 'powershell',
+            'py' => 'python',
+            'python' => 'python',
+            'rb' => 'ruby',
+            'ruby' => 'ruby',
+            'rs' => 'rust',
+            'rust' => 'rust',
+            'shell' => 'bash',
+            'shellscript' => 'bash',
+            'sh' => 'bash',
+            'ts' => 'typescript',
+            'tsx' => 'tsx',
+            'typescript' => 'typescript',
+            'yaml' => 'yaml',
+            'yml' => 'yaml',
+        ];
+
+        return $aliases[$language] ?? $language;
+    }
+
+    private function getCodeLanguageLabel(string $language): string
+    {
+        if ($language === '') {
+            return '';
+        }
+
+        $labels = [
+            'bash' => 'Bash',
+            'css' => 'CSS',
+            'cs' => 'C#',
+            'fs' => 'F#',
+            'go' => 'Go',
+            'html' => 'HTML',
+            'javascript' => 'JavaScript',
+            'json' => 'JSON',
+            'jsx' => 'JSX',
+            'markdown' => 'Markdown',
+            'php' => 'PHP',
+            'powershell' => 'PowerShell',
+            'python' => 'Python',
+            'ruby' => 'Ruby',
+            'rust' => 'Rust',
+            'sql' => 'SQL',
+            'text' => 'Text',
+            'tsx' => 'TSX',
+            'typescript' => 'TypeScript',
+            'vue' => 'Vue',
+            'xml' => 'XML',
+            'yaml' => 'YAML',
+        ];
+
+        if (isset($labels[$language])) {
+            return $labels[$language];
+        }
+
+        $parts = preg_split('/[-_.]+/', $language) ?: [];
+        $parts = array_filter(array_map(static function ($part) {
+            return ucfirst($part);
+        }, $parts));
+
+        return implode(' ', $parts);
+    }
+
+    private function buildCodeDataAttributes(array $meta): string
+    {
+        $attributes = [
+            'data-aaeditor-code-block' => 'true',
+            'data-code-line-numbers' => $meta['line_numbers'] ? 'true' : 'false',
+            'data-code-line-numbers-start' => (string)$meta['line_numbers_start'],
+        ];
+
+        if (!empty($meta['language'])) {
+            $attributes['data-code-language'] = $meta['language'];
+        }
+        if (!empty($meta['language_label'])) {
+            $attributes['data-code-language-label'] = $meta['language_label'];
+        }
+        if (!empty($meta['highlight'])) {
+            $attributes['data-code-highlight'] = $meta['highlight'];
+        }
+        if (!empty($meta['title'])) {
+            $attributes['data-code-title'] = $meta['title'];
+        }
+        if (!empty($meta['legacy_rel'])) {
+            $attributes['data-code-rel'] = $meta['legacy_rel'];
+        }
+
+        $html = '';
+        foreach ($attributes as $key => $value) {
+            $html .= ' ' . $key . '="' . htmlspecialchars((string)$value) . '"';
+        }
+
+        return $html;
     }
 
     /**
