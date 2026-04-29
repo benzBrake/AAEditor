@@ -16,6 +16,8 @@ const LANGUAGE_ALIASES = {
     jsx: "jsx",
     markdown: "markdown",
     md: "markdown",
+    mermaid: "mermaid",
+    mmd: "mermaid",
     powershell: "powershell",
     ps1: "powershell",
     py: "python",
@@ -46,6 +48,7 @@ const LANGUAGE_LABELS = {
     json: "JSON",
     jsx: "JSX",
     markdown: "Markdown",
+    mermaid: "Mermaid",
     php: "PHP",
     powershell: "PowerShell",
     python: "Python",
@@ -458,14 +461,14 @@ async function copyText(text) {
 function setCopyState(button, state, messages) {
     window.clearTimeout(button._aaeditorCopyTimer);
     button.dataset.state = state;
-    button.setAttribute(
-        "title",
-        state === "success"
-            ? messages.copySuccessTitle
-            : state === "error"
-                ? messages.copyErrorTitle
-                : messages.copyButtonTitle
-    );
+    const label = state === "success"
+        ? messages.copySuccessTitle
+        : state === "error"
+            ? messages.copyErrorTitle
+            : messages.copyButtonTitle;
+
+    button.setAttribute("title", label);
+    button.dataset.tooltip = label;
 
     if (state === "idle") {
         button.removeAttribute("aria-busy");
@@ -476,6 +479,7 @@ function setCopyState(button, state, messages) {
         button.dataset.state = "idle";
         button.removeAttribute("aria-busy");
         button.setAttribute("title", messages.copyButtonTitle);
+        button.dataset.tooltip = messages.copyButtonTitle;
     }, state === "success" ? 1400 : 1800);
 }
 
@@ -514,6 +518,7 @@ function ensureCopyButton(preElement, text, messages) {
 
     button.dataset.text = text;
     button.setAttribute("title", messages.copyButtonTitle);
+    button.dataset.tooltip = messages.copyButtonTitle;
     button.setAttribute("aria-label", messages.copyButtonTitle);
     setCopyState(button, "idle", messages);
 }
@@ -532,6 +537,7 @@ function readMeta(preElement, codeElement) {
     );
 
     return {
+        rawLanguage,
         language,
         languageLabel: preElement.dataset.codeLanguageLabel || getLanguageLabel(language),
         title: preElement.dataset.codeTitle || "",
@@ -579,6 +585,19 @@ function enhanceCodeBlock(codeElement, options = {}) {
     const messages = mergeMessages(options.messages);
 
     codeElement.textContent = processed.text;
+    if (
+        meta.language
+        && typeof hljs.getLanguage === "function"
+        && !hljs.getLanguage(meta.language)
+    ) {
+        preElement.dataset.codeLanguage = meta.language;
+        if (meta.languageLabel) {
+            preElement.dataset.codeLanguageLabel = meta.languageLabel;
+        }
+        codeElement.classList.remove(`language-${meta.rawLanguage}`);
+        codeElement.classList.remove(`language-${meta.language}`);
+        codeElement.classList.add("language-plaintext");
+    }
     hljs.highlightElement(codeElement);
 
     const highlightedLines = splitHighlightedHtmlIntoLines(codeElement.innerHTML);

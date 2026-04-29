@@ -208,6 +208,17 @@ class Plugin implements PluginInterface
         $form->addInput($edit);
 
         $edit = new Form\Element\Select(
+            'XMermaidSupport',
+            [
+                'on' => _t('开启（默认）'),
+                'off' => _t('关闭')
+            ], 'on',
+            _t('前台是否开启 Mermaid 渲染'),
+            _t('说明：关闭后前台不会加载 Mermaid 渲染脚本，Mermaid 代码块保持源码显示；后台编辑预览始终开启'));
+        $edit->setAttribute('class', 'x-item x-basic');
+        $form->addInput($edit);
+
+        $edit = new Form\Element\Select(
             'XLoadFontAwesome',
             [
                 'auto' => _t('自动（默认）'),

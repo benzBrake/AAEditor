@@ -701,8 +701,9 @@
 
             $(event.target).replaceWith($('<li id="wmd-code-highlight-button-aaeditor" style="padding: 1px;">').append(select));
             $('body').on('XEditorPreviewEnd', () => {
+                const previewRoot = document.getElementById('wmd-preview-aaeditor') || document;
                 window.AAEditorCodeBlocks?.enhanceCodeBlocks?.(
-                    document.getElementById('wmd-preview-aaeditor') || document,
+                    previewRoot,
                     {
                         messages: {
                             copyButtonTitle: '<?php _e("点击复制"); ?>',
@@ -711,8 +712,28 @@
                         }
                     }
                 );
-                window.XEditor?.rebuildPreviewLineAnchors?.();
-                window.XEditor?.schedulePreviewScrollSync?.(true);
+                Promise.resolve(window.AAEditorMermaidBlocks?.enhanceMermaidBlocks?.(
+                    previewRoot,
+                    {
+                        messages: {
+                            sourceTab: '<?php _e("源码"); ?>',
+                            previewTab: '<?php _e("预览"); ?>',
+                            copyButtonTitle: '<?php _e("复制源码"); ?>',
+                            copySuccessTitle: '<?php _e("复制成功"); ?>',
+                            copyErrorTitle: '<?php _e("复制失败，请手动复制"); ?>',
+                            zoomInTitle: '<?php _e("放大"); ?>',
+                            zoomOutTitle: '<?php _e("缩小"); ?>',
+                            resetViewTitle: '<?php _e("重置视图"); ?>',
+                            fullscreenTitle: '<?php _e("网页全屏"); ?>',
+                            exitFullscreenTitle: '<?php _e("退出网页全屏"); ?>',
+                            renderErrorTitle: '<?php _e("Mermaid 渲染失败"); ?>',
+                            renderUnavailableTitle: '<?php _e("Mermaid 渲染器未加载"); ?>',
+                        }
+                    }
+                )).finally(() => {
+                    window.XEditor?.rebuildPreviewLineAnchors?.();
+                    window.XEditor?.schedulePreviewScrollSync?.(true);
+                });
             });
             let codeTheme = localStorage.getItem('editor-hljs-theme') || "off";
             if (Object.keys(styleJson).includes(codeTheme)) {

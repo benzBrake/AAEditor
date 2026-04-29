@@ -25,6 +25,7 @@ tmp-playwright/
 
 # MCP 插件缓存
 .playwright-mcp/
+output/
 
 # 环境配置
 .env

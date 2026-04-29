@@ -343,6 +343,13 @@ class Util
         <script src="<?php echo Util::pluginStatic('js', 'masonry.pkgd.min.js'); ?>"></script>
         <script src="<?php echo Util::pluginStatic('js', 'front.js'); ?>"></script>
         <?php
+        if (Util::pluginOption('XMermaidSupport', 'on') === 'on') {
+            ?>
+            <link rel="stylesheet" href="<?php echo Util::pluginStatic('css', 'mermaid.css'); ?>">
+            <script src="<?php echo Util::pluginStatic('js', 'mermaid.min.js'); ?>"></script>
+            <script src="<?php echo Util::pluginStatic('js', 'mermaid.js'); ?>"></script>
+            <?php
+        }
         if (Util::pluginOption('XEditorContentStyle', 'off') === 'on') {
             ?>
             <link rel="stylesheet"
@@ -472,6 +479,7 @@ JS);
         if (Util::pluginOption('XEditorEnabled', 'on') === 'on') {
             ?>
             <link rel="stylesheet" href="<?php echo Util::pluginStatic('css', 'main.css'); ?>"/>
+            <link rel="stylesheet" href="<?php echo Util::pluginStatic('css', 'mermaid.css'); ?>"/>
             <script src="<?php echo Util::pluginStatic('js', 'hyperdown.js') ?>"></script>
             <script src="<?php $options->adminStaticUrl('js', 'pagedown.js'); ?>"></script>
             <?php if (!\TypechoPlugin\AAEditor\Plugin::isTypechoGe13()): ?>
@@ -479,6 +487,8 @@ JS);
             <?php endif; ?>
             <script src="<?php $options->adminStaticUrl('js', 'purify.js'); ?>"></script>
             <script src="<?php echo Util::pluginStatic('js', 'previewUtils.js'); ?>"></script>
+            <script src="<?php echo Util::pluginStatic('js', 'mermaid.min.js'); ?>"></script>
+            <script src="<?php echo Util::pluginStatic('js', 'mermaid.js'); ?>"></script>
             <script
                     src="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/html-to-md@0.8.5/dist/index.min.js'); ?>"></script>
             <link rel="stylesheet" type="text/css"
