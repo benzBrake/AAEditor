@@ -577,8 +577,8 @@
             const lastSelection = textarea.getSelection();
             const selectedText = this.getSelectedText();
             const defaultTitles = [
-                '<?php _e("概览"); ?>',
-                '<?php _e("详情"); ?>'
+                '<?php _e("标签1"); ?>',
+                '<?php _e("标签2"); ?>'
             ];
             const defaultContents = [
                 selectedText || '<?php _e("这里编辑第一个面板内容"); ?>',
@@ -586,7 +586,7 @@
             ];
 
             const createDefaultTab = (index) => ({
-                title: defaultTitles[index] || `<?php _e("选项"); ?> ${index + 1}`,
+                title: defaultTitles[index] || `<?php _e("标签"); ?>${index + 1}`,
                 content: defaultContents[index] || `<?php _e("这里编辑第"); ?> ${index + 1} <?php _e("个面板内容"); ?>`
             });
 
@@ -597,8 +597,8 @@
             const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 1280;
             const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 800;
             const anchorRect = editArea[0].getBoundingClientRect();
-            const defaultDockWidth = Math.min(Math.max(Math.min(anchorRect.width * 0.42, viewportWidth * 0.4), 360), 560);
-            const defaultDockHeight = Math.min(Math.max(Math.min(anchorRect.height * 0.72, viewportHeight * 0.76), 420), 720);
+            const defaultDockWidth = Math.min(Math.max(Math.min(anchorRect.width * 0.52, viewportWidth * 0.54), 440), 720);
+            const defaultDockHeight = Math.min(Math.max(Math.min(anchorRect.height * 0.8, viewportHeight * 0.82), 520), 820);
             const defaultDockX = Math.min(
                 Math.max(anchorRect.right - defaultDockWidth, 12),
                 Math.max(viewportWidth - defaultDockWidth - 12, 12)
@@ -622,7 +622,6 @@
                         <div class="aa-tabs-dock-heading">
                             <span class="aa-tabs-dock-eyebrow"><?php _e("Tabs Builder"); ?></span>
                             <strong><?php _e("整理 Tabs 内容"); ?></strong>
-                            <span class="aa-tabs-dock-subtitle"><?php _e("像真实 Tabs 一样切换当前面板，再逐个整理内容"); ?></span>
                         </div>
                         <span class="aa-tabs-dock-drag"><?php _e("拖动此处移动"); ?></span>
                         <button type="button" class="aa-tabs-dock-close" aria-label="<?php _e("关闭"); ?>">
@@ -649,7 +648,6 @@
                                 </button>
                             </div>
                             <div class="aa-tabs-dock-assist">
-                            <span class="aa-tabs-dock-size-hint"><?php _e("已 Teleport 到页面层，不受编辑器区域限制"); ?></span>
                             <span class="aa-tabs-dock-size-hint"><?php _e("Ctrl/Cmd + 左右方向键切换"); ?></span>
                         </div>
                     </div>
@@ -664,7 +662,7 @@
 
             const tabsNav = dock.find('.aa-tabs-dock-tabs');
             const panelWrap = dock.find('.aa-tabs-dock-panel-wrap');
-            const defaultTitleFor = (index) => defaultTitles[index] || `<?php _e("选项"); ?> ${index + 1}`;
+            const defaultTitleFor = (index) => defaultTitles[index] || `<?php _e("标签"); ?>${index + 1}`;
             const normalizeContent = (content) => String(content ?? '').replace(/\r\n/g, '\n').replace(/\s+$/, '');
             const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
             const getBounds = () => ({
@@ -673,9 +671,9 @@
             });
             const applyDockRect = () => {
                 const bounds = getBounds();
-                const minWidth = Math.min(320, Math.max(bounds.width - 24, 260));
+                const minWidth = Math.min(420, Math.max(bounds.width - 24, 280));
                 const maxWidth = Math.max(bounds.width - 24, minWidth);
-                const minHeight = Math.min(320, Math.max(bounds.height - 24, 260));
+                const minHeight = Math.min(420, Math.max(bounds.height - 24, 280));
                 const maxHeight = Math.max(bounds.height - 24, minHeight);
 
                 dockState.width = clamp(dockState.width, minWidth, maxWidth);
@@ -731,12 +729,6 @@
                 const currentTitle = String(currentTab.title || '').trim() || defaultTitleFor(dockState.activeIndex);
                 const panel = $(`
                     <section class="aa-tabs-dock-panel" data-index="${dockState.activeIndex}">
-                        <div class="aa-tabs-dock-panel-head">
-                            <div class="aa-tabs-dock-panel-copy">
-                                <span class="aa-tabs-dock-item-index"><?php _e("当前 Tab"); ?> ${dockState.activeIndex + 1}</span>
-                                <span class="aa-tabs-dock-panel-note"><?php _e("切换顶部 Tabs 可编辑不同面板"); ?></span>
-                            </div>
-                        </div>
                         <label class="aa-tabs-dock-label"><?php _e("标题"); ?></label>
                         <input type="text" class="aa-tabs-dock-input" placeholder="${defaultTitleFor(dockState.activeIndex)}" value="">
                         <label class="aa-tabs-dock-label"><?php _e("内容"); ?></label>
