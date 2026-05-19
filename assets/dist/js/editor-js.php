@@ -557,53 +557,355 @@
         name: '<?php _e("Tabs 选项卡"); ?>',
         icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M4 5C2.89543 5 2 5.89543 2 7V17C2 18.1046 2.89543 19 4 19H20C21.1046 19 22 18.1046 22 17V7C22 5.89543 21.1046 5 20 5H4ZM4 7H8V10H4V7ZM10 7H14V10H10V7ZM16 7H20V10H16V7ZM4 12H20V17H4V12Z"></path></svg>',
         insertBefore: '#wmd-custom-block-button-aaeditor|#wmd-spacer4-aaeditor',
-        command() {
+        command({target}) {
             const {textarea} = this;
+            const editArea = $('#text').closest('.edit-area');
+            const existingDock = $('#aa-tabs-dock');
+
+            if (!editArea.length) {
+                return;
+            }
+
+            if (existingDock.length) {
+                $(document).off('.aaTabsDock');
+                $(window).off('.aaTabsDock');
+                existingDock.remove();
+                $(target).removeAttr('active');
+                return;
+            }
+
             const lastSelection = textarea.getSelection();
             const selectedText = this.getSelectedText();
+            const defaultTitles = [
+                '<?php _e("概览"); ?>',
+                '<?php _e("详情"); ?>'
+            ];
+            const defaultContents = [
+                selectedText || '<?php _e("这里编辑第一个面板内容"); ?>',
+                '<?php _e("这里编辑第二个面板内容"); ?>'
+            ];
 
-            this.openFormModal({
-                title: '<?php _e("插入 Tabs"); ?>',
-                initialValues: {
-                    title1: '<?php _e("概览"); ?>',
-                    title2: '<?php _e("详情"); ?>',
-                },
-                fields: [{
-                    name: 'title1',
-                    type: 'text',
-                    label: '<?php _e("面板 1 标题"); ?>',
-                    required: true,
-                }, {
-                    name: 'title2',
-                    type: 'text',
-                    label: '<?php _e("面板 2 标题"); ?>',
-                    required: true,
-                }],
-                onSubmit(modal, values) {
-                    const title1 = values.title1 || '<?php _e("概览"); ?>';
-                    const title2 = values.title2 || '<?php _e("详情"); ?>';
-                    const content1 = selectedText || '<?php _e("这里编辑第一个面板内容"); ?>';
-                    const content2 = '<?php _e("这里编辑第二个面板内容"); ?>';
-                    let prefix = `::: tabs\n::: tab ${title1}\n`;
-                    const middle = `\n:::\n\n::: tab ${title2}\n`;
-                    let postfix = `\n:::\n:::`;
+            const createDefaultTab = (index) => ({
+                title: defaultTitles[index] || `<?php _e("选项"); ?> ${index + 1}`,
+                content: defaultContents[index] || `<?php _e("这里编辑第"); ?> ${index + 1} <?php _e("个面板内容"); ?>`
+            });
 
-                    if (!textarea.isAtLineStart()) {
-                        prefix = `\n${prefix}`;
+            const tabsState = [
+                createDefaultTab(0),
+                createDefaultTab(1)
+            ];
+            const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 1280;
+            const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 800;
+            const anchorRect = editArea[0].getBoundingClientRect();
+            const defaultDockWidth = Math.min(Math.max(Math.min(anchorRect.width * 0.42, viewportWidth * 0.4), 360), 560);
+            const defaultDockHeight = Math.min(Math.max(Math.min(anchorRect.height * 0.72, viewportHeight * 0.76), 420), 720);
+            const defaultDockX = Math.min(
+                Math.max(anchorRect.right - defaultDockWidth, 12),
+                Math.max(viewportWidth - defaultDockWidth - 12, 12)
+            );
+            const defaultDockY = Math.min(
+                Math.max(anchorRect.top + 12, 12),
+                Math.max(viewportHeight - defaultDockHeight - 12, 12)
+            );
+            const dockState = {
+                activeIndex: 0,
+                x: defaultDockX,
+                y: defaultDockY,
+                width: defaultDockWidth,
+                height: defaultDockHeight
+            };
+            let pointerSession = null;
+
+            const dock = $(`
+                <aside id="aa-tabs-dock" class="aa-tabs-dock" role="dialog" aria-modal="false" aria-label="<?php _e("插入 Tabs"); ?>">
+                    <div class="aa-tabs-dock-header">
+                        <div class="aa-tabs-dock-heading">
+                            <span class="aa-tabs-dock-eyebrow"><?php _e("Tabs Builder"); ?></span>
+                            <strong><?php _e("整理 Tabs 内容"); ?></strong>
+                            <span class="aa-tabs-dock-subtitle"><?php _e("像真实 Tabs 一样切换当前面板，再逐个整理内容"); ?></span>
+                        </div>
+                        <span class="aa-tabs-dock-drag"><?php _e("拖动此处移动"); ?></span>
+                        <button type="button" class="aa-tabs-dock-close" aria-label="<?php _e("关闭"); ?>">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="aa-tabs-dock-body">
+                        <div class="aa-tabs-dock-tip">
+                            <strong><?php _e("提示"); ?></strong>
+                            <span><?php _e("点击上方 Tabs 可切换当前面板；可回到正文复制内容后再粘贴回来；拖动标题栏可移动，右下角可调整大小。"); ?></span>
+                        </div>
+                        <div class="aa-tabs-dock-workspace">
+                            <div class="aa-tabs-dock-tabs" role="tablist" aria-label="<?php _e("Tabs 切换"); ?>"></div>
+                            <div class="aa-tabs-dock-panel-wrap"></div>
+                        </div>
+                        <div class="aa-tabs-dock-tools">
+                            <div class="aa-tabs-dock-tool-group">
+                                <button type="button" class="aa-tabs-dock-add">
+                                    <span aria-hidden="true">+</span>
+                                    <?php _e("新增 Tab"); ?>
+                                </button>
+                                <button type="button" class="aa-tabs-dock-remove">
+                                    <?php _e("删除当前 Tab"); ?>
+                                </button>
+                            </div>
+                            <div class="aa-tabs-dock-assist">
+                            <span class="aa-tabs-dock-size-hint"><?php _e("已 Teleport 到页面层，不受编辑器区域限制"); ?></span>
+                            <span class="aa-tabs-dock-size-hint"><?php _e("Ctrl/Cmd + 左右方向键切换"); ?></span>
+                        </div>
+                    </div>
+                    </div>
+                    <div class="aa-tabs-dock-footer">
+                        <button type="button" class="aa-tabs-dock-action is-muted" data-action="cancel"><?php _e("取消"); ?></button>
+                        <button type="button" class="aa-tabs-dock-action is-primary" data-action="confirm"><?php _e("确认插入"); ?></button>
+                    </div>
+                    <button type="button" class="aa-tabs-dock-resize" aria-label="<?php _e("调整大小"); ?>" tabindex="-1"></button>
+                </aside>
+            `);
+
+            const tabsNav = dock.find('.aa-tabs-dock-tabs');
+            const panelWrap = dock.find('.aa-tabs-dock-panel-wrap');
+            const defaultTitleFor = (index) => defaultTitles[index] || `<?php _e("选项"); ?> ${index + 1}`;
+            const normalizeContent = (content) => String(content ?? '').replace(/\r\n/g, '\n').replace(/\s+$/, '');
+            const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+            const getBounds = () => ({
+                width: window.innerWidth || document.documentElement.clientWidth,
+                height: window.innerHeight || document.documentElement.clientHeight
+            });
+            const applyDockRect = () => {
+                const bounds = getBounds();
+                const minWidth = Math.min(320, Math.max(bounds.width - 24, 260));
+                const maxWidth = Math.max(bounds.width - 24, minWidth);
+                const minHeight = Math.min(320, Math.max(bounds.height - 24, 260));
+                const maxHeight = Math.max(bounds.height - 24, minHeight);
+
+                dockState.width = clamp(dockState.width, minWidth, maxWidth);
+                dockState.height = clamp(dockState.height, minHeight, maxHeight);
+                dockState.x = clamp(dockState.x, 12, Math.max(bounds.width - dockState.width - 12, 12));
+                dockState.y = clamp(dockState.y, 12, Math.max(bounds.height - dockState.height - 12, 12));
+
+                dock.css({
+                    left: `${dockState.x}px`,
+                    top: `${dockState.y}px`,
+                    width: `${dockState.width}px`,
+                    height: `${dockState.height}px`
+                });
+            };
+            const closeDock = () => {
+                $(document).off('.aaTabsDock');
+                $(window).off('.aaTabsDock');
+                dock.remove();
+                $(target).removeAttr('active');
+            };
+
+            const renderTabs = () => {
+                dockState.activeIndex = clamp(
+                    dockState.activeIndex,
+                    0,
+                    Math.max(tabsState.length - 1, 0)
+                );
+                tabsNav.empty();
+                panelWrap.empty();
+
+                tabsState.forEach((tab, index) => {
+                    const title = String(tab.title || '').trim() || defaultTitleFor(index);
+                    const tabButton = $(`
+                        <button
+                            type="button"
+                            class="aa-tabs-dock-tab ${dockState.activeIndex === index ? 'is-active' : ''}"
+                            role="tab"
+                            aria-selected="${dockState.activeIndex === index ? 'true' : 'false'}"
+                            data-index="${index}">
+                            <span class="aa-tabs-dock-tab-index">${index + 1}</span>
+                            <span class="aa-tabs-dock-tab-title"></span>
+                        </button>
+                    `);
+                    tabButton.find('.aa-tabs-dock-tab-title').text(title);
+                    tabButton.on('click', () => {
+                        dockState.activeIndex = index;
+                        renderTabs();
+                    });
+                    tabsNav.append(tabButton);
+                });
+
+                const currentTab = tabsState[dockState.activeIndex];
+                const currentTitle = String(currentTab.title || '').trim() || defaultTitleFor(dockState.activeIndex);
+                const panel = $(`
+                    <section class="aa-tabs-dock-panel" data-index="${dockState.activeIndex}">
+                        <div class="aa-tabs-dock-panel-head">
+                            <div class="aa-tabs-dock-panel-copy">
+                                <span class="aa-tabs-dock-item-index"><?php _e("当前 Tab"); ?> ${dockState.activeIndex + 1}</span>
+                                <span class="aa-tabs-dock-panel-note"><?php _e("切换顶部 Tabs 可编辑不同面板"); ?></span>
+                            </div>
+                        </div>
+                        <label class="aa-tabs-dock-label"><?php _e("标题"); ?></label>
+                        <input type="text" class="aa-tabs-dock-input" placeholder="${defaultTitleFor(dockState.activeIndex)}" value="">
+                        <label class="aa-tabs-dock-label"><?php _e("内容"); ?></label>
+                        <textarea class="aa-tabs-dock-textarea" rows="8" placeholder="<?php _e("这里填写该 Tab 的内容，可从正文复制后粘贴回来"); ?>"></textarea>
+                    </section>
+                `);
+                const titleInput = panel.find('.aa-tabs-dock-input');
+                const contentInput = panel.find('.aa-tabs-dock-textarea');
+
+                titleInput.val(currentTab.title);
+                contentInput.val(currentTab.content);
+
+                titleInput.on('input', (event) => {
+                    tabsState[dockState.activeIndex].title = event.target.value;
+                    const activeTab = tabsNav.find(`.aa-tabs-dock-tab[data-index="${dockState.activeIndex}"] .aa-tabs-dock-tab-title`);
+                    if (activeTab.length) {
+                        activeTab.text(String(event.target.value || '').trim() || currentTitle);
                     }
-                    if (!textarea.isAtLineEnd()) {
-                        postfix += '\n';
-                    }
+                });
+                contentInput.on('input', (event) => {
+                    tabsState[dockState.activeIndex].content = event.target.value;
+                });
 
-                    const template = prefix + content1 + middle + content2 + postfix;
-                    this.textarea.setSelection(lastSelection.start, lastSelection.end);
-                    textarea.executeAndAddUndoStack('replaceSelectionText', template);
+                panelWrap.append(panel);
 
-                    const contentStart = lastSelection.start + prefix.length;
-                    this.textarea.setSelection(contentStart, contentStart + content1.length);
-                    return true;
+                dock.find('.aa-tabs-dock-remove').prop('disabled', tabsState.length <= 1);
+            };
+
+            const startPointerSession = (type, event) => {
+                const bounds = getBounds();
+                pointerSession = {
+                    type,
+                    startX: event.clientX,
+                    startY: event.clientY,
+                    originX: dockState.x,
+                    originY: dockState.y,
+                    originWidth: dockState.width,
+                    originHeight: dockState.height,
+                    boundsWidth: bounds.width,
+                    boundsHeight: bounds.height
+                };
+            };
+
+            dock.find('.aa-tabs-dock-header').on('pointerdown', (event) => {
+                if ($(event.target).closest('button').length) {
+                    return;
+                }
+                event.preventDefault();
+                startPointerSession('move', event);
+            });
+
+            dock.find('.aa-tabs-dock-resize').on('pointerdown', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                startPointerSession('resize', event);
+            });
+
+            $(document).on('pointermove.aaTabsDock', (event) => {
+                if (!pointerSession) {
+                    return;
+                }
+
+                const deltaX = event.clientX - pointerSession.startX;
+                const deltaY = event.clientY - pointerSession.startY;
+
+                if (pointerSession.type === 'move') {
+                    dockState.x = pointerSession.originX + deltaX;
+                    dockState.y = pointerSession.originY + deltaY;
+                } else {
+                    dockState.width = pointerSession.originWidth + deltaX;
+                    dockState.height = pointerSession.originHeight + deltaY;
+                }
+
+                applyDockRect();
+            });
+
+            $(document).on('pointerup.aaTabsDock pointercancel.aaTabsDock', () => {
+                pointerSession = null;
+            });
+
+            $(window).on('resize.aaTabsDock', () => {
+                applyDockRect();
+            });
+
+            const buildTemplate = () => {
+                let prefix = '::: tabs\n';
+                let postfix = '\n:::';
+
+                if (!textarea.isAtLineStart()) {
+                    prefix = `\n${prefix}`;
+                }
+                if (!textarea.isAtLineEnd()) {
+                    postfix += '\n';
+                }
+
+                const blocks = tabsState.map((tab, index) => {
+                    const title = String(tab.title || '').trim() || defaultTitleFor(index);
+                    const content = normalizeContent(tab.content);
+                    return `::: tab ${title}\n${content}\n:::`;
+                }).join('\n\n');
+
+                return {
+                    template: `${prefix}${blocks}${postfix}`,
+                    firstContent: normalizeContent(tabsState[0]?.content),
+                    prefixLength: prefix.length + `::: tab ${String(tabsState[0]?.title || '').trim() || defaultTitleFor(0)}\n`.length
+                };
+            };
+
+            dock.find('.aa-tabs-dock-add').on('click', () => {
+                tabsState.push(createDefaultTab(tabsState.length));
+                dockState.activeIndex = tabsState.length - 1;
+                renderTabs();
+                const addedTextarea = dock.find('.aa-tabs-dock-textarea').first();
+                if (addedTextarea.length) {
+                    addedTextarea.trigger('focus');
                 }
             });
+            dock.find('.aa-tabs-dock-remove').on('click', () => {
+                if (tabsState.length <= 1) {
+                    return;
+                }
+                tabsState.splice(dockState.activeIndex, 1);
+                if (dockState.activeIndex >= tabsState.length) {
+                    dockState.activeIndex = tabsState.length - 1;
+                }
+                renderTabs();
+            });
+
+            dock.find('.aa-tabs-dock-close, [data-action="cancel"]').on('click', () => {
+                closeDock();
+            });
+
+            dock.find('[data-action="confirm"]').on('click', () => {
+                const {template, firstContent, prefixLength} = buildTemplate();
+                this.textarea.setSelection(lastSelection.start, lastSelection.end);
+                textarea.executeAndAddUndoStack('replaceSelectionText', template);
+
+                const contentStart = lastSelection.start + prefixLength;
+                this.textarea.setSelection(contentStart, contentStart + firstContent.length);
+                closeDock();
+            });
+
+            $(document).on('keydown.aaTabsDock', (event) => {
+                if (event.key === 'Escape') {
+                    closeDock();
+                    return;
+                }
+                if ((event.ctrlKey || event.metaKey) && event.key === 'ArrowRight') {
+                    event.preventDefault();
+                    dockState.activeIndex = (dockState.activeIndex + 1) % tabsState.length;
+                    renderTabs();
+                    return;
+                }
+                if ((event.ctrlKey || event.metaKey) && event.key === 'ArrowLeft') {
+                    event.preventDefault();
+                    dockState.activeIndex =
+                        (dockState.activeIndex - 1 + tabsState.length) % tabsState.length;
+                    renderTabs();
+                }
+            });
+
+            renderTabs();
+            $('body').append(dock);
+            applyDockRect();
+            $(target).attr('active', 'true');
+            const firstEditable = dock.find('.aa-tabs-dock-textarea').first();
+            if (firstEditable.length) {
+                firstEditable.trigger('focus');
+            }
         }
     }, {
         id: 'wmd-custom-block-button-aaeditor',

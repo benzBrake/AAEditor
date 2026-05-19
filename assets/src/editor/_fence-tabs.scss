@@ -104,6 +104,10 @@
     &:last-child {
       margin-bottom: 0;
     }
+
+    &>br:last-child {
+      display: none;
+    }
   }
 
   .fence-tabs-panel.fence-tabs-panel-active,
