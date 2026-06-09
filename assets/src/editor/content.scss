@@ -382,8 +382,8 @@ pre.styled .copy[aria-busy="true"] {
 pre.styled .copy::after {
   content: attr(data-tooltip);
   position: absolute;
-  top: calc(100% + 0.45rem);
-  right: 0;
+  top: 50%;
+  right: calc(100% + 0.45rem);
   z-index: 6;
   max-width: 12rem;
   padding: 0.28rem 0.45rem;
@@ -395,7 +395,7 @@ pre.styled .copy::after {
   line-height: 1.2;
   opacity: 0;
   pointer-events: none;
-  transform: translateY(-0.2rem);
+  transform: translate(0.2rem, -50%);
   transition: opacity 0.16s ease, transform 0.16s ease;
   white-space: nowrap;
 }
@@ -403,7 +403,7 @@ pre.styled .copy::after {
 pre.styled .copy:hover::after,
 pre.styled .copy:focus-visible::after {
   opacity: 1;
-  transform: translateY(0);
+  transform: translate(0, -50%);
 }
 
 pre.styled .copy .copy-icon {
