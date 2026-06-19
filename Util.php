@@ -1665,7 +1665,12 @@ JS);
      */
     public static function pluginOption(string $key, $default = null)
     {
-        $value = Helper::options()->plugin('AAEditor')->$key;
+        try {
+            $value = Helper::options()->plugin('AAEditor')->$key;
+        } catch (Exception $e) {
+            return $default;
+        }
+
         return $value ?: $default;
     }
 
@@ -1729,16 +1734,19 @@ JS);
      */
     public static function listHljsCss(): array
     {
+        $cssFiles = [];
         $cssPath = Util::pluginDir('assets/dist/css/highlight.js');
         if (DIRECTORY_SEPARATOR === "\\") {
             $cssPath = str_replace("/", "\\", $cssPath);
         } else {
             $cssPath = str_replace("\\", "/", $cssPath);
         }
-        $files = array_filter(glob($cssPath . DIRECTORY_SEPARATOR . '*'), function ($path) {
+        $files = glob($cssPath . DIRECTORY_SEPARATOR . '*') ?: [];
+        $files = array_filter($files, function ($path) {
             return preg_match("/\.(css)$/i", $path);
         });
-        $base16 = array_filter(glob($cssPath . DIRECTORY_SEPARATOR . 'base16' . DIRECTORY_SEPARATOR . '*'), function ($path) {
+        $base16 = glob($cssPath . DIRECTORY_SEPARATOR . 'base16' . DIRECTORY_SEPARATOR . '*') ?: [];
+        $base16 = array_filter($base16, function ($path) {
             return preg_match("/\.(css)$/i", $path);
         });
         $files = array_merge($files, $base16);
