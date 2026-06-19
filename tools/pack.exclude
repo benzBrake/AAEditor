@@ -6,8 +6,6 @@
 LICENSE
 node_modules\*
 node_modules
-assets\dist
-assets\dist\*
 pack
 pack\*
 .npm-cache
