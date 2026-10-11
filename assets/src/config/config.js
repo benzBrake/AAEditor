@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const xContent = querySelector('.x-content', xConfig);
 
     // Move the form element
-    const form = xConfig.parentNode.querySelector('form');
+    const form = xConfig.parentNode.querySelector(':scope > form');
     form.parentNode.removeChild(form);
     xContent.appendChild(form);
 

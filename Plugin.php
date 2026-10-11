@@ -13,6 +13,8 @@ use Typecho\Widget\Helper\Form;
 use Typecho\Widget\Helper\Layout;
 use Utils\Helper;
 use Widget\Notice;
+use Widget\Security;
+use Widget\User;
 
 if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
@@ -67,12 +69,18 @@ class Plugin implements PluginInterface
         $notice = Notice::alloc();
         $request = new \Typecho\Widget\Request(Request::getInstance(), isset($request) ? new Config($request) : null);
         $response = new \Typecho\Widget\Response(Request::getInstance(), Response::getInstance());
+        $security = Security::alloc();
         $plugin = "AAEditor";
         $pluginDataRow = $db->fetchRow($db->select()->from('table.options')->where('name = ?', "plugin:$plugin"));
         $pluginData_backupRow = $db->fetchRow($db->select()->from('table.options')->where('name = ?', "plugin:{$plugin}Backup"));
         $pluginData = empty($pluginDataRow) ? null : $pluginDataRow['value'];
         $pluginData_backup = empty($pluginData_backupRow) ? null : $pluginData_backupRow['value'];
-        if (isset($request->type)) {
+        if (in_array($request->type, ['backup', 'restore', 'delete'], true)) {
+            User::alloc()->pass('administrator');
+            if (!$request->isPost()) {
+                throw new Exception(_t('备份操作仅支持 POST 请求'), 405);
+            }
+            $security->protect();
             if ($request->type == 'backup') {
                 if ($db->fetchRow($db->select()->from('table.options')->where('name = ?', "plugin:{$plugin}Backup"))) {
                     $updateQuery = $db->update('table.options')->rows(array('value' => $pluginData))->where('name = ?', "plugin:{$plugin}Backup");
@@ -109,8 +117,10 @@ class Plugin implements PluginInterface
         }
         $errorMessage = [];
         if (!$pluginData_backup) {
-            $errorMessage[] = _t(/** @lang text */ '检测到设置备份不存在，<a href="%s">点此</a>备份设置', Common::url('/options-plugin.php?config=AAEditor&type=backup', Helper::options()->adminUrl));
+            $errorMessage[] = _t('检测到设置备份不存在，<a href="#aaeditor-backup-backup" onclick="document.getElementById(\'aaeditor-backup-backup\').submit(); return false;">点此</a>备份设置');
         }
+        $backupAction = htmlspecialchars(Common::url('/options-plugin.php?config=AAEditor', Helper::options()->adminUrl), ENT_QUOTES, 'UTF-8');
+        $backupToken = htmlspecialchars($security->getToken($request->getRequestUrl()), ENT_QUOTES, 'UTF-8');
         Util::collectManifest();
         ?>
         <link rel="stylesheet" href="<?php echo Util::pluginStatic('css', 'config.css'); ?>">
@@ -132,12 +142,13 @@ class Plugin implements PluginInterface
                     <li class="item" data-class="x-warn"><?php _e("慎重修改"); ?></li>
                 </ul>
                 <div class="x-backup">
-                    <span class="backup"
-                          onclick="window.location.href='<?php Helper::options()->adminUrl('/options-plugin.php?config=AAEditor&type=backup') ?>'"><?php _e("备份设置"); ?></span>
-                    <span class="restore"
-                          onclick="window.location.href='<?php Helper::options()->adminUrl('/options-plugin.php?config=AAEditor&type=restore') ?>'"><?php _e("还原设置"); ?></span>
-                    <span class="delete"
-                          onclick="window.location.href='<?php Helper::options()->adminUrl('/options-plugin.php?config=AAEditor&type=delete') ?>'"><?php _e("删除备份"); ?></span>
+                    <?php foreach (['backup' => _t('备份设置'), 'restore' => _t('还原设置'), 'delete' => _t('删除备份')] as $type => $label): ?>
+                        <form id="aaeditor-backup-<?php echo $type; ?>" method="post" action="<?php echo $backupAction; ?>">
+                            <input type="hidden" name="type" value="<?php echo $type; ?>">
+                            <input type="hidden" name="_" value="<?php echo $backupToken; ?>">
+                            <span class="<?php echo $type; ?>" onclick="this.parentNode.submit();"><?php echo $label; ?></span>
+                        </form>
+                    <?php endforeach; ?>
                 </div>
             </div>
             <div class="x-content">
