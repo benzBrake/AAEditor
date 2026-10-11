@@ -1490,12 +1490,7 @@ JS);
 
         // 隐藏代码块
         $blocks = [];
-        $codeHolder = "<pre>__BLOCK__</pre>";
-        $codeHolderLen = strlen($codeHolder);
-        $text = preg_replace_callback('/(?:<pre>.*?<\/pre>|<code>.*?<\/code>)/ism', function ($match) use (&$blocks, $codeHolder) {
-            $blocks[] = $match[0];
-            return $codeHolder;
-        }, $text);
+        $text = self::protectCodeBlocks($text, $blocks);
 
         // Markdown 增强
         if (strpos($text, '[x]') !== false || strpos($text, '[ ]') !== false) {
@@ -1508,14 +1503,7 @@ JS);
         $text = self::processFencesBlock($text, $archive);
 
         // 还原代码块
-        if (count($blocks)) {
-            foreach ($blocks as $block) {
-                $pos = strpos($text, $codeHolder);
-                if ($pos !== false) {
-                    $text = substr_replace($text, $block, $pos, $codeHolderLen);
-                }
-            }
-        }
+        $text = strtr($text, $blocks);
 
         return $text;
     }
@@ -1528,12 +1516,7 @@ JS);
         if ($last) $text = $last;
         // 隐藏代码块
         $blocks = [];
-        $codeHolder = "<pre>__BLOCK__</pre>";
-        $codeHolderLen = strlen($codeHolder);
-        $text = preg_replace_callback('/(?:<pre>.*?<\/pre>|<code>.*?<\/code>)/ism', function ($match) use (&$blocks, $codeHolder) {
-            $blocks[] = $match[0];
-            return $codeHolder;
-        }, $text);
+        $text = self::protectCodeBlocks($text, $blocks);
 
         // Markdown 增强
         if (strpos($text, '[x]') !== false || strpos($text, '[ ]') !== false) {
@@ -1547,20 +1530,27 @@ JS);
         $text = self::processFencesBlock($text, $archive, true);
 
         // 还原代码块
-        if (count($blocks)) {
-            foreach ($blocks as $block) {
-                $pos = strpos($text, $codeHolder);
-                if ($pos !== false) {
-                    $text = substr_replace($text, $block, $pos, $codeHolderLen);
-                }
-            }
-        }
+        $text = strtr($text, $blocks);
 
         if (false !== strpos($text, '[hide')) {
             $pattern = "(?s)<pre[^<]*>.*?<\/pre>(*SKIP)(*F)|\[hide](.*?)\[\/hide]";
             $text = preg_replace("/$pattern/ism", '【内容回复可见】', $text);
         }
         return $text;
+    }
+
+    private static function protectCodeBlocks(string $text, array &$blocks): string
+    {
+        // 随机标识防止原文经 DOM 规范化后伪造占位符，再检查显式碰撞。
+        $decodedText = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        do {
+            $prefix = '__AAEDITOR_CODE_' . bin2hex(random_bytes(16)) . '_';
+        } while (strpos($text, $prefix) !== false || strpos($decodedText, $prefix) !== false);
+        return preg_replace_callback('/(?:<pre>.*?<\/pre>|<code>.*?<\/code>)/ism', function ($match) use (&$blocks, $prefix) {
+            $holder = '<pre>' . $prefix . count($blocks) . '__</pre>';
+            $blocks[$holder] = $match[0];
+            return $holder;
+        }, $text);
     }
 
     /**
