@@ -2194,7 +2194,7 @@ class HyperDown
             }
         }
 
-        $url = preg_replace("/[\"'<>\s]/", '', $url);
+        $url = preg_replace("/[\"'<>\s\\x00-\\x1f\\x7f]/", '', $url);
 
         if (preg_match("/^(mailto:)?[_a-z0-9-\.\+]+@[_\w-]+(?:\.[a-z]{2,})+$/i", $url, $matches)) {
             if (empty($matches[1])) {
@@ -2202,10 +2202,12 @@ class HyperDown
             }
         }
 
-        if (preg_match("/^\w+:/i", $url) && !preg_match("/^(https?|mailto):/i", $url)) {
-            return '#';
+        if (preg_match("/^[a-z][a-z0-9+.-]*:/i", $url) && !preg_match("/^(https?|mailto):/i", $url)) {
+            $url = '#';
         }
 
+        // URL 中的实体作为字面文本输出，防止 HTML 属性解码形成未经校验的协议。
+        $url = htmlspecialchars($url, ENT_QUOTES, 'UTF-8');
         return $parseTitle ? [$url, $title] : $url;
     }
 

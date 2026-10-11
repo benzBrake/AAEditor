@@ -1448,15 +1448,17 @@
                         url = url.substring(0, pos);
                     }
                 }
-                url = url.replace(/["'<>\s]/g, '');
+                url = url.replace(/["'<>\s\x00-\x1f\x7f]/g, '');
                 if (!!(matches = url.match(/^(mailto:)?[_a-z0-9-\.\+]+@[_\w-]+(?:\.[a-z]{2,})+$/i))) {
                     if (matches[1] == null) {
                         url = 'mailto:' + url;
                     }
                 }
-                if ((url.match(/^\w+:/i)) && !(url.match(/^(https?|mailto):/i))) {
-                    return '#';
+                if ((url.match(/^[a-z][a-z0-9+.-]*:/i)) && !(url.match(/^(https?|mailto):/i))) {
+                    url = '#';
                 }
+                // Keep entities literal so HTML attribute decoding cannot introduce a scheme.
+                url = htmlspecialchars(url);
                 if (parseTitle) {
                     return [url, title];
                 } else {
