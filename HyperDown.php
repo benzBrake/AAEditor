@@ -1085,12 +1085,17 @@ class HyperDown
 
     private function normalizeFenceRenderType(string $type): string
     {
-        return match ($type) {
-            'note' => 'info',
-            'tip' => 'success',
-            'danger', 'caution' => 'error',
-            default => $type,
-        };
+        switch ($type) {
+            case 'note':
+                return 'info';
+            case 'tip':
+                return 'success';
+            case 'danger':
+            case 'caution':
+                return 'error';
+            default:
+                return $type;
+        }
     }
 
     private function splitFenceClasses(?string $value): array

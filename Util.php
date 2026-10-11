@@ -376,7 +376,6 @@ class Util
                   href="<?php echo Util::parseJSD('https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css'); ?>">
             <?php
         } else if ($lfa === 'auto') {
-        } else if ($lfa === 'auto') {
             ?>
             <script>
                 (function () {
