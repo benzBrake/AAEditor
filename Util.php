@@ -1858,26 +1858,15 @@ JS);
 
             // 2. 处理 $isExcerpt = true 的情况
             if ($isExcerpt) {
-                $output = '';
                 foreach ($fencePassElements as $element) {
-                    // 获取 .fence-title
-                    $titleNode = $xpath->query(".//*[contains(concat(' ', normalize-space(@class), ' '), ' fence-title ')]", $element)->item(0);
-                    $title = $titleNode ? trim($titleNode->textContent) : '';
-                    // 获取 .fence-content
-                    $contentNode = $xpath->query(".//*[contains(concat(' ', normalize-space(@class), ' '), ' fence-content ')]", $element)->item(0);
-                    $content = $contentNode ? $dom->saveHTML($contentNode) : '';
-
-                    // 如果标题不是默认值 "PASS"，保留标题
-                    if ($title && strtoupper($title) !== 'PASS') {
-                        $output .= $title . "\n";
-                    }
-                    // 保留内容
-                    if ($content) {
-                        $output .= $content . "\n";
+                    // 摘要始终隐藏整个区块，避免嵌套内容或缺少内容容器时泄露正文。
+                    if ($element->parentNode) {
+                        $element->parentNode->replaceChild($dom->createTextNode('【内容回复可见】'), $element);
                     }
                 }
+                $modifiedHtml = $dom->saveHTML();
                 libxml_clear_errors();
-                return $output ?: $text; // 返回提取的内容，或原文如果无内容
+                return substr($modifiedHtml, 23);
             }
 
             // 3. 默认情况（$isExcerpt = false）
