@@ -261,8 +261,8 @@
                     escaped = htmlspecialchars(this.escapeBracket(matches[1]));
                     url = this.escapeBracket(matches[2]);
                     [url, title] = this.cleanUrl(url, true);
-                    title = title == null ? escaped : ` title=\"${title}\"`;
-                    return this.makeHolder(`<img src=\"${url}\" alt=\"${title}\" title=\"${title}\">`);
+                    title = title == null ? escaped : title;
+                    return this.makeHolder(`<img src=\"${url}\" alt=\"${escaped}\" title=\"${title}\">`);
                 });
                 text = text.replace(/!\[((?:[^\]]|\\\]|\\\[)*?)\]\[((?:[^\]]|\\\]|\\\[)+?)\]/g, (...matches) => {
                     var escaped, result;

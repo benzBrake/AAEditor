@@ -1,0 +1,12 @@
+[
+  {"name":"default title","markdown":"![description](image.png)","src":"image.png","alt":"description","title":"description"},
+  {"name":"ordinary title","markdown":"![description](image.png \"caption\")","src":"image.png","alt":"description","title":"caption"},
+  {"name":"empty title","markdown":"![description](image.png \"\")","src":"image.png","alt":"description","title":""},
+  {"name":"zero title","markdown":"![description](image.png \"0\")","src":"image.png","alt":"description","title":"0"},
+  {"name":"quotes in attributes","markdown":"![a \"double\" and 'single'](image.png \"a 'single' and \"double\" z\")","src":"image.png","alt":"a \"double\" and 'single'","title":"a 'single' and \"double\" z"},
+  {"name":"entity text stays literal","markdown":"![a &quot; &amp;](image.png \"x &quot; &apos; &#34; &amp; z\")","src":"image.png","alt":"a &quot; &amp;","title":"x &quot; &apos; &#34; &amp; z"},
+  {"name":"title event injection","markdown":"![alt](bad-image \"x onerror=window.__aaeditor_probe=1 z\")","src":"bad-image","alt":"alt","title":"x onerror=window.__aaeditor_probe=1 z"},
+  {"name":"quoted event injection","markdown":"![alt](bad-image \"x\" onerror=\"window.__aaeditor_probe=1 z\")","src":"bad-image","alt":"alt","title":"x\" onerror=\"window.__aaeditor_probe=1 z"},
+  {"name":"alt event injection","markdown":"![x\" onerror=\"probe](bad-image)","src":"bad-image","alt":"x\" onerror=\"probe","title":"x\" onerror=\"probe"},
+  {"name":"reference image","markdown":"![reference \"alt\" &quot;][picture]\n\n[picture]: image.png","src":"image.png","alt":"reference \"alt\" &quot;","title":"reference \"alt\" &quot;"}
+]
