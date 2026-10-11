@@ -1,12 +1,16 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { parseDOM } = require('htmlparser2');
 const cases = require('./image-attributes.json');
 
 const source = path.join(__dirname, '../assets/src/hyperdown.js');
 const deployed = path.join(__dirname, '../assets/dist/js/hyperdown.js');
 assert.strictEqual(fs.readFileSync(source, 'utf8'), fs.readFileSync(deployed, 'utf8'), 'deployed parser must match source');
+const hash = crypto.createHash('md5').update(fs.readFileSync(deployed, 'utf8')).digest('hex');
+const manifest = require('../assets/dist/mix-manifest.json');
+assert.strictEqual(manifest['/js/hyperdown.js'], `/js/hyperdown.js?id=${hash}`, 'deployed parser cache version');
 
 for (const file of [source, deployed]) {
     const Parser = require(file);
