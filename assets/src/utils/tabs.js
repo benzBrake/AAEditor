@@ -48,8 +48,12 @@ function initTabsInstance(tabs) {
         return;
     }
 
-    const buttons = Array.from(nav.querySelectorAll(".fence-tabs-tab"));
-    const panels = Array.from(panelsWrapper.querySelectorAll(".fence-tabs-panel"));
+    const buttons = Array.from(nav.children).filter((child) =>
+        child.classList.contains("fence-tabs-tab")
+    );
+    const panels = Array.from(panelsWrapper.children).filter((child) =>
+        child.classList.contains("fence-tabs-panel")
+    );
     if (!buttons.length || buttons.length !== panels.length) {
         return;
     }
