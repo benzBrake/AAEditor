@@ -19,11 +19,11 @@ use Widget\User;
 if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
 /**
- * 虾米皮皮乐的编辑器 <a href="https://malleable-flare-263.notion.site/AAEditor-0a003324bf3a4a608d6d563ef3a9779e" target="_blank" style="color: #fff; background-color: #f1404b; font-weight: bold; padding: 3px 5px; margin: 0 5px;">使用说明</span>
+ * 虾米皮皮乐的编辑器
  *
  * @package AAEditor
  * @author Ryan
- * @version 1.3.1.1
+ * @version 1.3.1.2
  * @since 1.2.0
  * @link https://doufu.ru
  *
