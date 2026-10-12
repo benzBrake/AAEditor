@@ -2108,10 +2108,6 @@ JS);
                 $textBuffer = [];
             }
 
-            if (trim($child->textContent) === '' && !$child->hasChildNodes()) {
-                continue;
-            }
-
             $items[] = [$child->cloneNode(true)];
         }
 
