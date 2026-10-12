@@ -6,6 +6,7 @@ use DOMDocument;
 use DOMXPath;
 use ReflectionClass;
 use Typecho\Common;
+use Typecho\Cookie;
 use Typecho\Db;
 use Typecho\Plugin;
 use Typecho\Plugin\Exception;
@@ -305,6 +306,8 @@ class Util
         Plugin::factory('\Widget\Base\Contents')->markdown = [__CLASS__, 'markdown'];
         Plugin::factory('\Widget\Base\Contents')->contentEx_99 = [__CLASS__, 'contentEx'];
         Plugin::factory('\Widget\Base\Contents')->excerptEx_99 = [__CLASS__, 'excerptEx'];
+
+        Plugin::factory('\Widget\Feedback')->finishComment = [__CLASS__, 'rememberCommentPermission'];
 
         // 增加路由
         Helper::addAction('editor', __NAMESPACE__ . '\Action');
@@ -1815,10 +1818,10 @@ JS);
             return $text;
         }
 
+        $previousLibxmlErrors = libxml_use_internal_errors(true);
         try {
             // 创建 DOMDocument 对象
             $dom = new DOMDocument();
-            libxml_use_internal_errors(true);
             if (!@$dom->loadHTML('<?xml encoding="UTF-8">' . $text, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD)) {
                 libxml_clear_errors();
                 return $text;
@@ -1864,13 +1867,18 @@ JS);
             $db = Db::get();
             $hasPermission = $user->pass('administrator', true);
             if (!$hasPermission) {
-                $mail = $user->hasLogin() ? $user->mail : $archive->remember('mail', true);
-                if (!empty($mail)) {
+                $commentId = $user->hasLogin() ? null : self::getRememberedCommentId((int) $archive->cid);
+                if ($user->hasLogin() || $commentId !== null) {
                     $select = $db->select()->from('table.comments')
                         ->where('cid = ?', $archive->cid)
-                        ->where('mail = ?', $mail)
+                        ->where('type = ?', 'comment')
                         ->where('status = ?', 'approved')
                         ->limit(1);
+                    if ($user->hasLogin()) {
+                        $select->where('authorId = ?', $user->uid);
+                    } else {
+                        $select->where('coid = ?', $commentId);
+                    }
                     if ($db->fetch($select)) {
                         $hasPermission = true;
                     }
@@ -1893,7 +1901,7 @@ JS);
                     $contentNode = $xpath->query(".//*[contains(concat(' ', normalize-space(@class), ' '), ' fence-content ')]", $element)->item(0);
                     if ($contentNode) {
                         $contentNode->setAttribute('class', $contentNode->getAttribute('class') . ' text-center');
-                        $replacementHtml = _t('此处内容已隐藏，<a href="%s">回复后(需要填写邮箱)</a>可见', $archive->permalink . '#comments');
+                        $replacementHtml = _t('此处内容已隐藏，<a href="%s">回复并审核通过后</a>可见', htmlspecialchars($archive->permalink . '#comments', ENT_QUOTES, 'UTF-8'));
                         while ($contentNode->firstChild) {
                             $contentNode->removeChild($contentNode->firstChild);
                         }
@@ -1908,10 +1916,44 @@ JS);
             $modifiedHtml = $dom->saveHTML();
             libxml_clear_errors();
             return substr($modifiedHtml, 23);
-        } catch (Exception $e) {
-            error_log('Error in processFencesBlock (Native DOM): ' . $e->getMessage());
-            return $text;
+        } finally {
+            libxml_clear_errors();
+            libxml_use_internal_errors($previousLibxmlErrors);
         }
+    }
+
+    public static function rememberCommentPermission($comment): void
+    {
+        $cid = (int) $comment->cid;
+        $coid = (int) $comment->coid;
+        if ($cid <= 0 || $coid <= 0) {
+            throw new Exception(_t('无法获取评论授权所需的文章或评论编号'));
+        }
+        $expires = time() + 30 * 86400;
+        $payload = $cid . ':' . $coid . ':' . $expires;
+        Cookie::set('__aaeditor_comment_' . $cid, $payload . ':' . self::signCommentPermission($payload), $expires);
+    }
+
+    private static function signCommentPermission(string $payload): string
+    {
+        $secret = Helper::options()->secret;
+        if (!is_string($secret) || $secret === '') {
+            throw new Exception(_t('缺少 Typecho 站点密钥，无法验证评论授权'));
+        }
+        return hash_hmac('sha256', 'aaeditor-pass-comment:' . $payload, $secret);
+    }
+
+    private static function getRememberedCommentId(int $cid): ?int
+    {
+        $token = Cookie::get('__aaeditor_comment_' . $cid);
+        if (!is_string($token) || !preg_match('/^([1-9][0-9]*):([1-9][0-9]*):([1-9][0-9]*):([a-f0-9]{64})$/D', $token, $parts)) {
+            return null;
+        }
+        if ($parts[1] !== (string) $cid || (int) $parts[3] <= time()) {
+            return null;
+        }
+        $payload = $parts[1] . ':' . $parts[2] . ':' . $parts[3];
+        return hash_equals(self::signCommentPermission($payload), $parts[4]) ? (int) $parts[2] : null;
     }
 
     private static function normalizeMasonryFenceContent(DOMDocument $dom, DOMXPath $xpath): void

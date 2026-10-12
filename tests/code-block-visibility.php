@@ -23,6 +23,14 @@ namespace Widget {
 }
 
 namespace Typecho {
+    class Cookie
+    {
+        public static function get($name)
+        {
+            return null;
+        }
+    }
+
     class Db
     {
         public static function get()
@@ -63,6 +71,7 @@ namespace {
     }
 
     $archive = new class {
+        public $cid = 1;
         public $permalink = 'https://example.test/post';
 
         public function remember($name, $return)
