@@ -62,7 +62,15 @@ namespace {
     function codeTexts($html)
     {
         $dom = new DOMDocument();
-        $dom->loadHTML('<?xml encoding="UTF-8">' . $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        $previousErrors = libxml_use_internal_errors(true);
+        try {
+            if (!$dom->loadHTML('<?xml encoding="UTF-8">' . $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD)) {
+                throw new RuntimeException('Failed to parse HTML fixture');
+            }
+        } finally {
+            libxml_clear_errors();
+            libxml_use_internal_errors($previousErrors);
+        }
         $texts = [];
         foreach ((new DOMXPath($dom))->query('//pre | //code') as $node) {
             $texts[] = $node->textContent;
@@ -82,6 +90,7 @@ namespace {
 
     $cases = [
         'markdown reproducer' => (new HyperDown())->makeHtml("::: pass:comment\n`SECRET_CODE`\n:::\n\nVisible `PUBLIC_CODE`"),
+        'attributed fenced code' => (new HyperDown())->makeHtml("::: pass:comment\n~~~text\nSECRET_CODE [x]\n~~~\n:::\n\n~~~text\nPUBLIC_CODE [ ]\n~~~"),
         'multiple hidden blocks' => '<p><code>PUBLIC_BEFORE</code></p><div class="fence-pass-comment"><div class="fence-content"><code>SECRET_ONE</code></div></div><p><code>PUBLIC_CODE</code></p><div class="fence-pass-comment"><div class="fence-content"><pre>SECRET_TWO</pre></div></div><p><code>PUBLIC_AFTER</code></p>',
         'nested hidden blocks' => '<div class="fence-pass-comment"><div class="fence-content"><code>SECRET_OUTER</code><div class="fence-pass-comment"><div class="fence-content"><code>SECRET_INNER</code></div></div></div></div><p><pre>PUBLIC_CODE</pre></p>',
         'literal placeholder collision' => '<pre>__BLOCK__</pre><pre>__AAEDITOR_CODE_0__</pre><pre>&#95;&#95;AAEDITOR_CODE__0__</pre><div class="fence-pass-comment"><div class="fence-content"><code>SECRET_CODE</code></div></div><p><code>PUBLIC_CODE</code></p>',
@@ -123,9 +132,15 @@ namespace {
         }
     }
 
-    $plain = '<p><code>[x] __BLOCK__</code></p><pre>[ ] PUBLIC_CODE</pre>';
-    if (Util::contentEx($plain, $archive, null) !== $plain || Util::excerptEx($plain, $archive, null) !== $plain) {
-        throw new RuntimeException('Failed unchanged public code');
+    foreach ([
+        '<p><code>[x] __BLOCK__</code></p><pre>[ ] PUBLIC_CODE</pre>',
+        '<pre class="aaeditor-code-block"><code class="language-text">[x] [ ] PUBLIC_CODE</code></pre>',
+        '<p><code title="example">[x] [ ] PUBLIC_CODE</code></p>',
+        (new HyperDown())->makeHtml("~~~text\n[x] [ ] PUBLIC_CODE\n~~~"),
+    ] as $plain) {
+        if (Util::contentEx($plain, $archive, null) !== $plain || Util::excerptEx($plain, $archive, null) !== $plain) {
+            throw new RuntimeException('Failed unchanged public code');
+        }
     }
 
     echo "code-block visibility tests passed\n";

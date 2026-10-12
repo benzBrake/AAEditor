@@ -942,10 +942,16 @@ JS);
                         // 修正白名单
                         converter.hook('makeHtml', function (html) {
                             // 不处理 pre/code
-                            var blocks = [];
-                            html = html.replace(/(?:<pre>.*?<\/pre>|<code>.*?<\/code>)/gims, function (match) {
-                                blocks.push(match);
-                                return `<pre>__BLOCK__</pre>`;
+                            const blocks = new Map();
+                            let prefix;
+                            do {
+                                const random = crypto.getRandomValues(new Uint32Array(4));
+                                prefix = '__AAEDITOR_CODE_' + Array.from(random, (value) => value.toString(16)).join('_') + '_';
+                            } while (html.includes(prefix));
+                            html = html.replace(/(?:<pre\b[^>]*>.*?<\/pre>|<code\b[^>]*>.*?<\/code>)/gims, function (match) {
+                                const holder = '<pre>' + prefix + blocks.size + '__</pre>';
+                                blocks.set(holder, match);
+                                return holder;
                             });
 
                             html = html.replace('<p><!--more--></p>', '<!--more-->');
@@ -976,8 +982,8 @@ JS);
                             }
 
                             // 还原 pre/code
-                            html = html.replace(/<pre>__BLOCK__<\/pre>/g, function () {
-                                return blocks.shift();
+                            html = html.replace(/<pre>__AAEDITOR_CODE_[a-f0-9_]+__<\/pre>/g, function (holder) {
+                                return blocks.has(holder) ? blocks.get(holder) : holder;
                             });
 
                             // 不注释塞不了 HTML
@@ -1549,7 +1555,7 @@ JS);
         do {
             $prefix = '__AAEDITOR_CODE_' . bin2hex(random_bytes(16)) . '_';
         } while (strpos($text, $prefix) !== false || strpos($decodedText, $prefix) !== false);
-        return preg_replace_callback('/(?:<pre>.*?<\/pre>|<code>.*?<\/code>)/ism', function ($match) use (&$blocks, $prefix) {
+        return preg_replace_callback('/(?:<pre\b[^>]*>.*?<\/pre>|<code\b[^>]*>.*?<\/code>)/ism', function ($match) use (&$blocks, $prefix) {
             $holder = '<pre>' . $prefix . count($blocks) . '__</pre>';
             $blocks[$holder] = $match[0];
             return $holder;
