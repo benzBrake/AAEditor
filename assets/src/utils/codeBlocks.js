@@ -117,7 +117,7 @@ function mergeMessages(messages = {}) {
     };
 }
 
-function parseLineSpec(spec = "") {
+function parseLineSpec(spec = "", lineCount = 0) {
     const lines = new Set();
     String(spec)
         .split(",")
@@ -131,9 +131,14 @@ function parseLineSpec(spec = "") {
                 if (Number.isNaN(start) || Number.isNaN(end)) {
                     return;
                 }
+                if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end)) {
+                    throw new RangeError("Code highlight line numbers must be safe integers");
+                }
                 if (start > end) {
                     [start, end] = [end, start];
                 }
+                start = Math.max(start, 1);
+                end = Math.min(end, lineCount);
                 for (let line = start; line <= end; line += 1) {
                     lines.add(line);
                 }
@@ -141,7 +146,10 @@ function parseLineSpec(spec = "") {
             }
 
             const lineNumber = Number.parseInt(segment, 10);
-            if (!Number.isNaN(lineNumber) && lineNumber > 0) {
+            if (!Number.isNaN(lineNumber) && !Number.isSafeInteger(lineNumber)) {
+                throw new RangeError("Code highlight line numbers must be safe integers");
+            }
+            if (!Number.isNaN(lineNumber) && lineNumber > 0 && lineNumber <= lineCount) {
                 lines.add(lineNumber);
             }
         });
@@ -294,7 +302,7 @@ function splitHighlightedHtmlIntoLines(html = "") {
 }
 
 function buildLineDescriptors(sourceLines, meta) {
-    const highlightedLines = parseLineSpec(meta.highlightSpec);
+    const highlightedLines = parseLineSpec(meta.highlightSpec, sourceLines.length);
     const descriptors = sourceLines.map((line, index) => {
         const stripped = stripLineAnnotation(line.rawText);
         return {
